@@ -7,6 +7,7 @@ import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity
 
 import GoldButton from "@/components/GoldButton";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
+import BlockPicker from "@/components/blocks/BlockPicker";
 import { BLOCK_TYPES, createDefaultBlock } from "@/components/blocks/blockTypes";
 
 
@@ -19,6 +20,7 @@ export default function EditorScreen() {
         { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)], image: null }
     ]);
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+    const [blockPickerVisible, setBlockPickerVisible] = useState(false);
 
     const currentSlide = slides[currentSlideIndex];
 
@@ -255,11 +257,17 @@ export default function EditorScreen() {
                     />
                 ))}
 
-                <GoldButton
-                    title="+ Add Text Block"
-                    onPress={() => addBlock(BLOCK_TYPES.TEXT)}
-                    style={styles.addButton}
-                />
+                <TouchableOpacity
+                    onPress={() => setBlockPickerVisible(true)}
+                    style={styles.addBlockButton}
+                >
+                    <Text style={styles.addBlockIcon}>✨</Text>
+                    <View style={styles.addBlockTextContainer}>
+                        <Text style={styles.addBlockTitle}>Add Content Block</Text>
+                        <Text style={styles.addBlockSubtitle}>Choose from text, quotes, timelines & more</Text>
+                    </View>
+                    <Text style={styles.addBlockArrow}>›</Text>
+                </TouchableOpacity>
 
                 <GoldButton
                     title="+ Add New Slide"
@@ -272,6 +280,13 @@ export default function EditorScreen() {
                     onPress={goToExport}
                 />
             </View>
+
+            {/* Block Picker Modal */}
+            <BlockPicker
+                visible={blockPickerVisible}
+                onClose={() => setBlockPickerVisible(false)}
+                onSelectBlock={(blockType) => addBlock(blockType)}
+            />
         </ScrollView>
     )
 }
@@ -473,5 +488,46 @@ const styles = StyleSheet.create({
         color: "#ef4444",
         fontSize: 18,
         fontWeight: "600",
+    },
+    addBlockButton: {
+        backgroundColor: colors.card,
+        borderRadius: 16,
+        padding: 18,
+        marginBottom: 12,
+        marginTop: 8,
+        borderWidth: 2,
+        borderColor: colors.gold,
+        flexDirection: 'row',
+        alignItems: 'center',
+        shadowColor: colors.gold,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 5,
+    },
+    addBlockIcon: {
+        fontSize: 28,
+        marginRight: 14,
+    },
+    addBlockTextContainer: {
+        flex: 1,
+    },
+    addBlockTitle: {
+        color: colors.gold,
+        fontSize: 16,
+        fontWeight: '700',
+        fontFamily: 'Inter_700Bold',
+        marginBottom: 3,
+    },
+    addBlockSubtitle: {
+        color: colors.textSecondary,
+        fontSize: 12,
+        fontFamily: 'Inter_400Regular',
+        lineHeight: 16,
+    },
+    addBlockArrow: {
+        color: colors.gold,
+        fontSize: 24,
+        fontWeight: '300',
     }
 })

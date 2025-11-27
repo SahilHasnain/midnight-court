@@ -80,7 +80,7 @@ export const BLOCK_METADATA = {
 // Create default block data based on type
 export const createDefaultBlock = (type) => {
     const blockId = `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     switch (type) {
         case BLOCK_TYPES.TEXT:
             return {
@@ -90,7 +90,7 @@ export const createDefaultBlock = (type) => {
                     points: ['']
                 }
             };
-        
+
         case BLOCK_TYPES.HIGHLIGHT:
             return {
                 id: blockId,
@@ -100,7 +100,7 @@ export const createDefaultBlock = (type) => {
                     style: 'background' // or 'underline'
                 }
             };
-        
+
         case BLOCK_TYPES.QUOTE:
             return {
                 id: blockId,
@@ -110,7 +110,7 @@ export const createDefaultBlock = (type) => {
                     citation: ''
                 }
             };
-        
+
         case BLOCK_TYPES.CALLOUT:
             return {
                 id: blockId,
@@ -121,7 +121,7 @@ export const createDefaultBlock = (type) => {
                     variant: 'info' // 'info', 'warning', 'critical'
                 }
             };
-        
+
         case BLOCK_TYPES.TWO_COLUMN:
             return {
                 id: blockId,
@@ -133,7 +133,7 @@ export const createDefaultBlock = (type) => {
                     rightPoints: ['']
                 }
             };
-        
+
         case BLOCK_TYPES.TIMELINE:
             return {
                 id: blockId,
@@ -144,7 +144,7 @@ export const createDefaultBlock = (type) => {
                     ]
                 }
             };
-        
+
         case BLOCK_TYPES.EVIDENCE:
             return {
                 id: blockId,
@@ -156,7 +156,7 @@ export const createDefaultBlock = (type) => {
                     image: null
                 }
             };
-        
+
         case BLOCK_TYPES.DIVIDER:
             return {
                 id: blockId,
@@ -165,7 +165,7 @@ export const createDefaultBlock = (type) => {
                     style: 'solid' // 'solid', 'dotted', 'gradient'
                 }
             };
-        
+
         case BLOCK_TYPES.SECTION_HEADER:
             return {
                 id: blockId,
@@ -174,7 +174,7 @@ export const createDefaultBlock = (type) => {
                     title: ''
                 }
             };
-        
+
         case BLOCK_TYPES.IMAGE_GRID:
             return {
                 id: blockId,
@@ -189,7 +189,7 @@ export const createDefaultBlock = (type) => {
                     layout: '2x2' // '2x2' or '2x3'
                 }
             };
-        
+
         default:
             return createDefaultBlock(BLOCK_TYPES.TEXT);
     }

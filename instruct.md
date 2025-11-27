@@ -1,177 +1,277 @@
-## ✅ APP NAME
+Yaar, **MAZA AA GAYA** context padhke! 🔥
 
-**Midnight Court**
-
-## ✅ CORE PURPOSE
-
-Build a **mobile-first React Native app** that allows law students to create **multi-slide presentations with images** and export them as a **professional PDF**, fully on mobile, without design skills.
+Bilkul sahi direction hai - app ko basic se **premium law-focused tool** banana hai, jisme editing easy ho but output **laptop-level professional** lage.
 
 ---
 
-# ✅ ULTIMATE OUTCOME
+# 🎯 **STRATEGIC PLAN - Chunk-wise Implementation**
 
-User should be able to:
-
-✅ Choose a law-focused template
-✅ Add multiple slides
-✅ Add/edit text
-✅ **Add an image to each slide** (optional but supported)
-✅ Auto-save progress locally
-✅ Export the entire presentation as a clean, professional **PDF with images + text**
-✅ Do all this **on a phone** in under 10 minutes
+Main tumhe **10 focused chunks** me kaam deta hun, har chunk **independently testable** hoga.
 
 ---
 
-# ✅ MUST-HAVE FEATURES (MVP)
+## 📋 **MASTER PLAN OVERVIEW**
 
-### ✅ 1) Templates
+### **Phase 1: Foundation Enhancement** (Chunks 1-3)
+- Visual Block Infrastructure
+- Block Picker UI
+- Block Data Models
 
-Templates list:
+### **Phase 2: Premium Visual Blocks** (Chunks 4-7)
+- Highlight & Quote Blocks
+- Two-Column Layout
+- Timeline & Evidence Blocks
+- Section Headers & Dividers
 
-* Title Slide
-* Case Summary
-* Judgement
-* Arguments vs Counter
-* Legal Precedent
-* Verdict & Conclusion
-
-Each template gives a default heading + subtitle.
-
----
-
-### ✅ 2) Multi-Slide Editor
-
-User can:
-
-* Add slide
-* Delete slide
-* Navigate slides
-* Edit heading
-* Edit subheading
-* Add bullet points
-* Delete bullet points
-
-Slides stored as an array:
-
-```js
-[
-  {
-    title: "",
-    subtitle: "",
-    points: [],
-    image: null
-  }
-]
-```
+### **Phase 3: Polish & Themes** (Chunks 8-10)
+- Theme Variations (3 premium themes)
+- Grid Image Layout
+- Final PDF Generation Enhancement
 
 ---
 
-### ✅ 3) **Image Support (CRITICAL)**
+## 🚀 **DETAILED CHUNK BREAKDOWN**
 
-Each slide must support **one image**:
+### **CHUNK 1: Block Infrastructure Setup** ⚙️
+**Goal**: Editor me multiple block types support karna
 
-Requirements:
+**Changes**:
+- Slide data structure update: `points[]` → `blocks[]`
+- Block types: `text`, `highlight`, `quote`, `callout`, `twoColumn`, `timeline`, `evidence`, `divider`, `sectionHeader`, `imageGrid`
+- Base block component architecture
 
-* Pick from gallery
-* Preview inside slide editor
-* Replace/remove image
-* Image should appear in final PDF
-* Maintain aspect ratio
-* Scaled properly (not stretched)
+**Files to modify**:
+- index.jsx - Data structure change
+- Create `components/blocks/` folder
 
----
-
-### ✅ 4) Local Auto-Save
-
-Use AsyncStorage to:
-
-* Save presentation on every change
-* Restore on app restart
-* List saved presentations in “My Presentations”
-
-No backend needed.
+**Output**: Multi-block foundation ready
 
 ---
 
-### ✅ 5) **PDF Export (With Images)**
+### **CHUNK 2: Block Picker UI** 🎨
+**Goal**: User ko visual blocks choose karne ka interface
 
-PDF must include:
+**Changes**:
+- Bottom sheet / Modal with block categories
+- Beautiful icons for each block type
+- "Add Block" button in editor
+- Block type selection animation
 
-* One slide per page
-* Dark theme background (#0B1120)
-* Gold accent (#CBA44A)
-* Heading (serif look)
-* Subheading
-* Bullet points
-* **Image centered at the top**
+**Files**:
+- `components/BlockPicker.jsx` (new)
+- index.jsx - Integration
 
-Layout priority:
-
-1. Image
-2. Heading
-3. Subtitle
-4. Points
-
-Images must export cleanly and not pixelate.
+**Output**: User can open block picker and see options
 
 ---
 
-# ✅ APP FLOW
+### **CHUNK 3: Text Highlight Block** ✨
+**Goal**: First premium block - gold highlighted text
 
-```
-/ (index.js — redirects only)
-/home
-/templates
-/editor   (multi-slide + images)
-/export   (PDF generation)
-/presentations (saved decks)
-```
+**Changes**:
+- Highlight block component
+- Input with preview
+- Gold underline/background options
+- PDF rendering with styled text
 
-`index.js` = NO UI. Redirect only.
+**Files**:
+- `components/blocks/HighlightBlock.jsx` (new)
+- index.jsx - HTML generation
 
----
-
-# ✅ TECH REQUIREMENTS
-
-* React Native + Expo
-* JavaScript (NO TypeScript)
-* Expo Router
-* AsyncStorage
-* PDF generation library compatible with images
-* Theming support for “Midnight Court” dark theme
+**Output**: User can add gold-highlighted important text
 
 ---
 
-# ✅ UI REQUIREMENTS
+### **CHUNK 4: Legal Quote Block** 📜
+**Goal**: Beautiful law quote with border
 
-**Theme: Midnight Court**
+**Changes**:
+- Quote block with citation
+- Gold bordered box
+- Italic serif font
+- PDF rendering with elegant styling
 
-* Background: #0B1120
-* Gold: #CBA44A
-* Text: White
-* Cards: #111827
+**Files**:
+- `components/blocks/QuoteBlock.jsx` (new)
+- Export template update
 
-Tone:
-
-* Professional
-* Elegant
-* Law-centric
-* Minimal
-
-Slide layout must always reserve space for an image, even if none is added.
+**Output**: Professional legal quotes with attribution
 
 ---
 
-# ✅ SUCCESS CRITERIA
+### **CHUNK 5: Callout Box (Important Point)** 📌
+**Goal**: Highlighted important argument box
 
-The MVP is complete when:
+**Changes**:
+- Bordered callout component
+- Icon + title + description
+- Different callout types (info, warning, critical)
+- Law-themed icons
 
-✅ User makes a 6-slide legal presentation
-✅ Adds at least one image
-✅ Saves automatically
-✅ Exports a clean PDF with images + text
-✅ Entire workflow happens on mobile
+**Files**:
+- `components/blocks/CalloutBlock.jsx` (new)
+- Export styling
 
-If this works → mission accomplished.
+**Output**: Eye-catching important point boxes
 
 ---
+
+### **CHUNK 6: Two-Column Layout** ⚔️
+**Goal**: Arguments vs Counter-Arguments side-by-side
+
+**Changes**:
+- Two-column block component
+- Left/Right labels
+- Point-by-point comparison
+- Mobile-friendly editing (stack vertically)
+- PDF renders side-by-side
+
+**Files**:
+- `components/blocks/TwoColumnBlock.jsx` (new)
+- Export CSS grid layout
+
+**Output**: Professional comparison view
+
+---
+
+### **CHUNK 7: Timeline Block** 📅
+**Goal**: Case progression timeline
+
+**Changes**:
+- Vertical timeline with dates
+- Events with descriptions
+- Gold connector lines
+- Timeline dot indicators
+
+**Files**:
+- `components/blocks/TimelineBlock.jsx` (new)
+- Export timeline CSS
+
+**Output**: Beautiful case history timeline
+
+---
+
+### **CHUNK 8: Evidence/Case Box** 🗂️
+**Goal**: Structured evidence presentation
+
+**Changes**:
+- Evidence card with:
+  - Evidence name/number
+  - Summary
+  - Optional image
+  - Citation
+- Professional card styling
+
+**Files**:
+- `components/blocks/EvidenceBlock.jsx` (new)
+- Export styling
+
+**Output**: Law-grade evidence presentation
+
+---
+
+### **CHUNK 9: Theme Variations** 🎨
+**Goal**: 3 premium color schemes
+
+**Changes**:
+- Theme selector in editor header
+- Themes:
+  1. **Midnight Court** (current - dark gold)
+  2. **Supreme Court** (white bg, deep blue, gold)
+  3. **Modern Barrister** (charcoal, cream, bronze)
+- Theme applied to all blocks
+- PDF generation respects theme
+
+**Files**:
+- `theme/themes.js` (new - multiple theme objects)
+- index.jsx - Theme state
+- Export HTML theme injection
+
+**Output**: User can switch between 3 professional themes
+
+---
+
+### **CHUNK 10: Section Header & Dividers** 🌟
+**Goal**: Professional slide separators
+
+**Changes**:
+- Section header slide (big title, no content)
+- Divider styles:
+  - Gold line with scale icon
+  - Dotted separator
+  - Gradient fade
+- Easy insertion between slides
+
+**Files**:
+- `components/blocks/SectionHeaderBlock.jsx` (new)
+- `components/blocks/DividerBlock.jsx` (new)
+- Export rendering
+
+**Output**: Clean section breaks
+
+---
+
+## 🎁 **BONUS CHUNKS** (Optional Advanced Features)
+
+### **CHUNK 11: Image Grid (2x2)** 🖼️
+- 2x2 or 2x3 image grid
+- Auto-sizing and alignment
+- Captions under each image
+
+### **CHUNK 12: Smart Templates** 🧠
+- Pre-filled block combinations
+- "Case Summary Template" = Title + Timeline + Evidence + Conclusion
+- One-click professional structure
+
+---
+
+## 🔥 **RECOMMENDED START ORDER**
+
+Main suggest karunga ye sequence:
+
+1. **Chunk 1** (Infrastructure) - Foundation
+2. **Chunk 2** (Block Picker) - UI ready
+3. **Chunk 3** (Highlight) - First wow block
+4. **Chunk 6** (Two-Column) - **Biggest impact** for arguments
+5. **Chunk 7** (Timeline) - **Law-specific, unique**
+6. **Chunk 4** (Quote) - Quick win, looks premium
+5. **Chunk 9** (Themes) - **Maximum visual variety**
+8. **Chunk 8** (Evidence) - Advanced structure
+9. **Chunk 5** (Callout) - Polish
+10. **Chunk 10** (Dividers) - Final touch
+
+---
+
+## 💝 **EMOTIONAL IMPACT PRIORITY**
+
+Agar **sabse jyada impress** karna hai, ye 3 blocks **must-have**:
+
+1. ⭐ **Two-Column Layout** - Arguments clear dikhenge
+2. ⭐ **Timeline** - Case progression visually stunning
+3. ⭐ **Theme Variations** - Personalization + premium feel
+
+Ye teen cheezein ho gayi to **laptop-level presentation** feel hoga.
+
+---
+
+## 🛠️ **IMPLEMENTATION STYLE**
+
+Har chunk me main:
+- ✅ Complete code dunga
+- ✅ Styling ready karunga
+- ✅ Export template update karunga
+- ✅ Tu test kar lega individually
+
+---
+
+# 🎯 **FINAL QUESTION**
+
+**Kahan se shuru karein?**
+
+Options:
+1. **Chunk 1** (Foundation) - Systematic approach
+2. **Chunk 6** (Two-Column) - Biggest wow factor first
+3. **Chunk 7** (Timeline) - Most unique feature first
+4. **Chunk 9** (Themes) - Visual variety instantly
+
+**Bata de, main code likh ke deta hun! 🚀**

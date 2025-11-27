@@ -1,11 +1,11 @@
 import GoldButton from "@/components/GoldButton";
 import { colors } from "@/theme/colors";
+import { renderBlockToHTML } from "@/utils/blockRenderer";
 import * as Print from 'expo-print';
 import { router, useLocalSearchParams } from "expo-router";
 import * as Sharing from 'expo-sharing';
 import { useState } from "react";
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { renderBlockToHTML } from "@/utils/blockRenderer";
 
 export default function ExportScreen() {
     const { slides: slidesParam } = useLocalSearchParams();
