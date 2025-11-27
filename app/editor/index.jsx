@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import GoldButton from "@/components/GoldButton";
-import BlockRenderer from "@/components/blocks/BlockRenderer";
 import BlockPicker from "@/components/blocks/BlockPicker";
+import BlockRenderer from "@/components/blocks/BlockRenderer";
 import { BLOCK_TYPES, createDefaultBlock } from "@/components/blocks/blockTypes";
 
 

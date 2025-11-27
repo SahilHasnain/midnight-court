@@ -17,7 +17,7 @@ export default function BlockPicker({ visible, onClose, onSelectBlock }) {
     const renderBlockCard = ([blockType, metadata]) => {
         // Only show TEXT block for now, others coming soon
         const isAvailable = blockType === BLOCK_TYPES.TEXT;
-        
+
         return (
             <TouchableOpacity
                 key={blockType}
