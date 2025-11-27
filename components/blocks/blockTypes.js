@@ -1,8 +1,7 @@
 // Block type definitions for Midnight Court presentation builder
 
 export const BLOCK_TYPES = {
-    TEXT: 'text',                    // Simple bullet points (existing)
-    HIGHLIGHT: 'highlight',          // Gold highlighted important text
+    TEXT: 'text',                    // Simple bullet points with highlight option
     QUOTE: 'quote',                  // Legal quote with citation
     CALLOUT: 'callout',              // Important point box with icon
     TWO_COLUMN: 'twoColumn',         // Arguments vs Counter layout
@@ -18,14 +17,8 @@ export const BLOCK_METADATA = {
     [BLOCK_TYPES.TEXT]: {
         name: 'Text Points',
         icon: '📝',
-        description: 'Simple bullet points',
+        description: 'Bullet points with highlight option',
         category: 'basic'
-    },
-    [BLOCK_TYPES.HIGHLIGHT]: {
-        name: 'Highlight',
-        icon: '✨',
-        description: 'Gold highlighted text',
-        category: 'emphasis'
     },
     [BLOCK_TYPES.QUOTE]: {
         name: 'Legal Quote',
@@ -87,17 +80,7 @@ export const createDefaultBlock = (type) => {
                 id: blockId,
                 type: BLOCK_TYPES.TEXT,
                 data: {
-                    points: ['']
-                }
-            };
-
-        case BLOCK_TYPES.HIGHLIGHT:
-            return {
-                id: blockId,
-                type: BLOCK_TYPES.HIGHLIGHT,
-                data: {
-                    text: '',
-                    style: 'background' // or 'underline'
+                    points: [{ text: '', highlighted: false, highlightStyle: 'background' }]
                 }
             };
 

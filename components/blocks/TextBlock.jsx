@@ -6,12 +6,31 @@ export default function TextBlock({ block, onUpdate, onDelete }) {
 
     const updatePoint = (index, text) => {
         const newPoints = [...points];
-        newPoints[index] = text;
+        newPoints[index] = { ...newPoints[index], text };
+        onUpdate({ ...block, data: { ...block.data, points: newPoints } });
+    };
+
+    const toggleHighlight = (index) => {
+        const newPoints = [...points];
+        newPoints[index] = { 
+            ...newPoints[index], 
+            highlighted: !newPoints[index].highlighted 
+        };
+        onUpdate({ ...block, data: { ...block.data, points: newPoints } });
+    };
+
+    const toggleHighlightStyle = (index) => {
+        const newPoints = [...points];
+        const currentStyle = newPoints[index].highlightStyle || 'background';
+        newPoints[index] = { 
+            ...newPoints[index], 
+            highlightStyle: currentStyle === 'background' ? 'underline' : 'background'
+        };
         onUpdate({ ...block, data: { ...block.data, points: newPoints } });
     };
 
     const addPoint = () => {
-        const newPoints = [...points, ''];
+        const newPoints = [...points, { text: '', highlighted: false, highlightStyle: 'background' }];
         onUpdate({ ...block, data: { ...block.data, points: newPoints } });
     };
 
@@ -33,26 +52,60 @@ export default function TextBlock({ block, onUpdate, onDelete }) {
                 )}
             </View>
 
-            {points.map((point, i) => (
-                <View key={i} style={styles.pointRow}>
-                    <TextInput
-                        value={point}
-                        onChangeText={(text) => updatePoint(i, text)}
-                        placeholder={`Point ${i + 1}`}
-                        placeholderTextColor={colors.textSecondary}
-                        style={styles.pointInput}
-                        multiline
-                    />
-                    {points.length > 1 && (
-                        <TouchableOpacity
-                            onPress={() => deletePoint(i)}
-                            style={styles.deletePointButton}
-                        >
-                            <Text style={styles.deletePointText}>✕</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
-            ))}
+            {points.map((point, i) => {
+                const pointData = typeof point === 'string' ? { text: point, highlighted: false, highlightStyle: 'background' } : point;
+                const { text, highlighted, highlightStyle = 'background' } = pointData;
+
+                return (
+                    <View key={i} style={styles.pointContainer}>
+                        <View style={styles.pointRow}>
+                            <TextInput
+                                value={text}
+                                onChangeText={(newText) => updatePoint(i, newText)}
+                                placeholder={`Point ${i + 1}`}
+                                placeholderTextColor={colors.textSecondary}
+                                style={styles.pointInput}
+                                multiline
+                            />
+                            <TouchableOpacity
+                                onPress={() => toggleHighlight(i)}
+                                style={[styles.highlightButton, highlighted && styles.highlightButtonActive]}
+                            >
+                                <Text style={styles.highlightButtonText}>✨</Text>
+                            </TouchableOpacity>
+                            {points.length > 1 && (
+                                <TouchableOpacity
+                                    onPress={() => deletePoint(i)}
+                                    style={styles.deletePointButton}
+                                >
+                                    <Text style={styles.deletePointText}>✕</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                        
+                        {highlighted && (
+                            <View style={styles.highlightControls}>
+                                <TouchableOpacity 
+                                    onPress={() => toggleHighlightStyle(i)}
+                                    style={styles.styleToggle}
+                                >
+                                    <Text style={styles.styleToggleText}>
+                                        {highlightStyle === 'background' ? '🎨 Background' : '📏 Underline'}
+                                    </Text>
+                                </TouchableOpacity>
+                                {text && (
+                                    <Text style={[
+                                        styles.preview,
+                                        highlightStyle === 'background' ? styles.goldBackground : styles.goldUnderline
+                                    ]}>
+                                        {text}
+                                    </Text>
+                                )}
+                            </View>
+                        )}
+                    </View>
+                );
+            })}
 
             <TouchableOpacity onPress={addPoint} style={styles.addPointButton}>
                 <Text style={styles.addPointText}>+ Add Point</Text>
@@ -92,10 +145,12 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         fontFamily: "Inter_600SemiBold",
     },
+    pointContainer: {
+        marginBottom: 12,
+    },
     pointRow: {
         flexDirection: "row",
         alignItems: "flex-start",
-        marginBottom: 12,
         gap: 8,
     },
     pointInput: {
@@ -109,6 +164,23 @@ const styles = StyleSheet.create({
         fontSize: 15,
         minHeight: 50,
         fontFamily: "Inter_400Regular",
+    },
+    highlightButton: {
+        backgroundColor: colors.background,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+        borderRadius: 12,
+        width: 50,
+        height: 50,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    highlightButtonActive: {
+        backgroundColor: colors.gold,
+        borderColor: colors.gold,
+    },
+    highlightButtonText: {
+        fontSize: 20,
     },
     deletePointButton: {
         backgroundColor: colors.background,
@@ -125,6 +197,42 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "600",
     },
+    highlightControls: {
+        marginTop: 8,
+        marginLeft: 4,
+        gap: 8,
+    },
+    styleToggle: {
+        backgroundColor: colors.gold,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        alignSelf: 'flex-start',
+    },
+    styleToggleText: {
+        color: colors.background,
+        fontSize: 12,
+        fontWeight: "600",
+        fontFamily: "Inter_600SemiBold",
+    },
+    preview: {
+        fontSize: 15,
+        fontWeight: "700",
+        fontFamily: "Inter_700Bold",
+        color: colors.ivory,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+    },
+    goldBackground: {
+        backgroundColor: colors.gold,
+        color: colors.background,
+        borderRadius: 6,
+    },
+    goldUnderline: {
+        textDecorationLine: 'underline',
+        textDecorationColor: colors.gold,
+        textDecorationStyle: 'solid',
+    },
     addPointButton: {
         backgroundColor: colors.background,
         borderWidth: 1,
@@ -132,6 +240,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingVertical: 10,
         alignItems: 'center',
+        marginTop: 4,
     },
     addPointText: {
         color: colors.gold,

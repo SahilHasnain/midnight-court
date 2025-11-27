@@ -15,9 +15,6 @@ export default function BlockRenderer({ block, onUpdate, onDelete }) {
             return <TextBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
 
         // Future block types will be added here as we implement them
-        // case BLOCK_TYPES.HIGHLIGHT:
-        //     return <HighlightBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
-
         // case BLOCK_TYPES.QUOTE:
         //     return <QuoteBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
 
