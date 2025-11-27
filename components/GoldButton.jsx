@@ -23,5 +23,6 @@ const styles = StyleSheet.create({
         color: colors.background,
         fontSize: 16,
         fontWeight: "600",
+        fontFamily: "Inter_600SemiBold",
     }
 })
