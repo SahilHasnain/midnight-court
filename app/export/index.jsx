@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import * as Sharing from 'expo-sharing';
 import { useState } from "react";
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { renderBlockToHTML } from "@/utils/blockRenderer";
 
 export default function ExportScreen() {
     const { slides: slidesParam } = useLocalSearchParams();
@@ -183,13 +184,7 @@ export default function ExportScreen() {
             <div class="gold-line"></div>
             <h2>${slide.subtitle || ''}</h2>
             
-            ${slide.points && slide.points.length > 0 ? `
-                <div class="points">
-                    ${slide.points.map(point => `
-                        <div class="point">${point}</div>
-                    `).join('')}
-                </div>
-            ` : ''}
+            ${slide.blocks && slide.blocks.length > 0 ? slide.blocks.map(block => renderBlockToHTML(block)).join('') : ''}
             
             <div class="footer">
                 <div class="footer-text">MIDNIGHT COURT</div>
@@ -276,11 +271,20 @@ export default function ExportScreen() {
                             <Text style={styles.previewSubtitle}>{slide.subtitle}</Text>
                         )}
 
-                        {slide.points && slide.points.length > 0 && (
+                        {slide.blocks && slide.blocks.length > 0 && (
                             <View style={styles.pointsContainer}>
-                                {slide.points.map((point, i) => (
-                                    <Text key={i} style={styles.previewPoint}>⚖ {point}</Text>
-                                ))}
+                                {slide.blocks.map((block) => {
+                                    // For now, only render text blocks in preview
+                                    // Will add more block types in future chunks
+                                    if (block.type === 'text' && block.data.points) {
+                                        return block.data.points
+                                            .filter(p => p && p.trim().length > 0)
+                                            .map((point, i) => (
+                                                <Text key={`${block.id}_${i}`} style={styles.previewPoint}>⚖ {point}</Text>
+                                            ));
+                                    }
+                                    return null;
+                                })}
                             </View>
                         )}
                     </View>

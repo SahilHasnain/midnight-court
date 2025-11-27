@@ -6,15 +6,17 @@ import { useEffect, useState } from "react";
 import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import GoldButton from "@/components/GoldButton";
+import BlockRenderer from "@/components/blocks/BlockRenderer";
+import { BLOCK_TYPES, createDefaultBlock } from "@/components/blocks/blockTypes";
 
 
 
 export default function EditorScreen() {
     const { template } = useLocalSearchParams();
 
-    // Multi-slide state
+    // Multi-slide state (now using blocks instead of points)
     const [slides, setSlides] = useState([
-        { title: "", subtitle: "", points: [""], image: null }
+        { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)], image: null }
     ]);
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
@@ -40,6 +42,7 @@ export default function EditorScreen() {
             updateSlide("title", "Title Slide");
             updateSlide("subtitle", "Topic");
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [template])
 
     // Auto-save slides to AsyncStorage
@@ -91,25 +94,27 @@ export default function EditorScreen() {
         setSlides(newSlides);
     }
 
-    const updatePoint = (i, text) => {
-        const newPoints = [...currentSlide.points];
-        newPoints[i] = text;
-        updateSlide("points", newPoints);
+    const updateBlock = (blockId, updatedBlock) => {
+        const newBlocks = currentSlide.blocks.map(block =>
+            block.id === blockId ? updatedBlock : block
+        );
+        updateSlide("blocks", newBlocks);
     }
 
-    const addPoint = () => {
-        updateSlide("points", [...currentSlide.points, ""]);
+    const addBlock = (blockType = BLOCK_TYPES.TEXT) => {
+        const newBlock = createDefaultBlock(blockType);
+        updateSlide("blocks", [...currentSlide.blocks, newBlock]);
     }
 
-    const deletePoint = (index) => {
-        if (currentSlide.points.length > 1) {
-            const newPoints = currentSlide.points.filter((_, i) => i !== index);
-            updateSlide("points", newPoints);
+    const deleteBlock = (blockId) => {
+        if (currentSlide.blocks.length > 1) {
+            const newBlocks = currentSlide.blocks.filter(block => block.id !== blockId);
+            updateSlide("blocks", newBlocks);
         }
     }
 
     const addSlide = () => {
-        setSlides([...slides, { title: "", subtitle: "", points: [""], image: null }]);
+        setSlides([...slides, { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)], image: null }]);
         setCurrentSlideIndex(slides.length);
     }
 
@@ -156,7 +161,7 @@ export default function EditorScreen() {
                 slides: JSON.stringify(slides.map(s => ({
                     title: s.title,
                     subtitle: s.subtitle,
-                    points: s.points.filter(p => p.trim().length > 0),
+                    blocks: s.blocks,
                     image: s.image
                 })))
             }
@@ -239,31 +244,20 @@ export default function EditorScreen() {
                     </TouchableOpacity>
                 )}
 
-                <Text style={styles.label}>Key Points</Text>
-                {currentSlide.points.map((p, i) => (
-                    <View key={i} style={styles.pointRow}>
-                        <TextInput
-                            value={p}
-                            onChangeText={(t) => updatePoint(i, t)}
-                            placeholder={`Point ${i + 1}`}
-                            placeholderTextColor={colors.textSecondary}
-                            style={styles.pointInput}
-                            multiline
-                        />
-                        {currentSlide.points.length > 1 && (
-                            <TouchableOpacity
-                                onPress={() => deletePoint(i)}
-                                style={styles.deletePointButton}
-                            >
-                                <Text style={styles.deletePointText}>✕</Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
+                {/* Content Blocks */}
+                <Text style={styles.label}>Content Blocks</Text>
+                {currentSlide.blocks.map((block) => (
+                    <BlockRenderer
+                        key={block.id}
+                        block={block}
+                        onUpdate={(updatedBlock) => updateBlock(block.id, updatedBlock)}
+                        onDelete={currentSlide.blocks.length > 1 ? () => deleteBlock(block.id) : null}
+                    />
                 ))}
 
                 <GoldButton
-                    title="+ Add Point"
-                    onPress={addPoint}
+                    title="+ Add Text Block"
+                    onPress={() => addBlock(BLOCK_TYPES.TEXT)}
                     style={styles.addButton}
                 />
 
