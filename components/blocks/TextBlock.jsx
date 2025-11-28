@@ -1,36 +1,63 @@
 import { colors } from "@/theme/colors";
+import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+
+// Parse markdown-style text: *gold*, ~red~, _blue_
+const parseFormattedText = (text) => {
+    if (!text) return null;
+
+    const parts = [];
+    let currentIndex = 0;
+
+    // Regex to match *gold*, ~red~, _blue_
+    const regex = /(\*[^*]+\*|~[^~]+~|_[^_]+_)/g;
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+        // Add text before the match
+        if (match.index > currentIndex) {
+            parts.push({
+                text: text.substring(currentIndex, match.index),
+                color: colors.ivory
+            });
+        }
+
+        // Add the matched formatted text
+        const matched = match[0];
+        if (matched.startsWith('*') && matched.endsWith('*')) {
+            parts.push({ text: matched.slice(1, -1), color: colors.gold });
+        } else if (matched.startsWith('~') && matched.endsWith('~')) {
+            parts.push({ text: matched.slice(1, -1), color: '#ef4444' }); // red
+        } else if (matched.startsWith('_') && matched.endsWith('_')) {
+            parts.push({ text: matched.slice(1, -1), color: '#3b82f6' }); // blue
+        }
+
+        currentIndex = match.index + matched.length;
+    }
+
+    // Add remaining text
+    if (currentIndex < text.length) {
+        parts.push({
+            text: text.substring(currentIndex),
+            color: colors.ivory
+        });
+    }
+
+    return parts.length > 0 ? parts : [{ text, color: colors.ivory }];
+};
 
 export default function TextBlock({ block, onUpdate, onDelete }) {
     const { points } = block.data;
+    const [showPreview, setShowPreview] = useState(false);
 
     const updatePoint = (index, text) => {
         const newPoints = [...points];
-        newPoints[index] = { ...newPoints[index], text };
-        onUpdate({ ...block, data: { ...block.data, points: newPoints } });
-    };
-
-    const toggleHighlight = (index) => {
-        const newPoints = [...points];
-        newPoints[index] = { 
-            ...newPoints[index], 
-            highlighted: !newPoints[index].highlighted 
-        };
-        onUpdate({ ...block, data: { ...block.data, points: newPoints } });
-    };
-
-    const toggleHighlightStyle = (index) => {
-        const newPoints = [...points];
-        const currentStyle = newPoints[index].highlightStyle || 'background';
-        newPoints[index] = { 
-            ...newPoints[index], 
-            highlightStyle: currentStyle === 'background' ? 'underline' : 'background'
-        };
+        newPoints[index] = text;
         onUpdate({ ...block, data: { ...block.data, points: newPoints } });
     };
 
     const addPoint = () => {
-        const newPoints = [...points, { text: '', highlighted: false, highlightStyle: 'background' }];
+        const newPoints = [...points, ''];
         onUpdate({ ...block, data: { ...block.data, points: newPoints } });
     };
 
@@ -44,35 +71,58 @@ export default function TextBlock({ block, onUpdate, onDelete }) {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.label}>📝 Key Points</Text>
-                {onDelete && (
-                    <TouchableOpacity onPress={onDelete} style={styles.deleteBlock}>
-                        <Text style={styles.deleteBlockText}>✕ Remove Block</Text>
+                <View>
+                    <Text style={styles.label}>📝 Key Points</Text>
+                    <Text style={styles.hint}>*gold* ~red~ _blue_</Text>
+                </View>
+                <View style={styles.headerButtons}>
+                    <TouchableOpacity
+                        onPress={() => setShowPreview(!showPreview)}
+                        style={styles.previewToggle}
+                    >
+                        <Text style={styles.previewToggleText}>
+                            {showPreview ? '✏️ Edit' : '👁️ Preview'}
+                        </Text>
                     </TouchableOpacity>
-                )}
+                    {onDelete && (
+                        <TouchableOpacity onPress={onDelete} style={styles.deleteBlock}>
+                            <Text style={styles.deleteBlockText}>✕</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
 
-            {points.map((point, i) => {
-                const pointData = typeof point === 'string' ? { text: point, highlighted: false, highlightStyle: 'background' } : point;
-                const { text, highlighted, highlightStyle = 'background' } = pointData;
-
-                return (
-                    <View key={i} style={styles.pointContainer}>
-                        <View style={styles.pointRow}>
+            {showPreview ? (
+                <View style={styles.previewContainer}>
+                    {points.map((point, i) => {
+                        if (!point || !point.trim()) return null;
+                        const parts = parseFormattedText(point);
+                        return (
+                            <View key={i} style={styles.previewPoint}>
+                                <Text style={styles.bullet}>•</Text>
+                                <Text style={styles.previewText}>
+                                    {parts.map((part, idx) => (
+                                        <Text key={idx} style={{ color: part.color, fontWeight: '500' }}>
+                                            {part.text}
+                                        </Text>
+                                    ))}
+                                </Text>
+                            </View>
+                        );
+                    })}
+                </View>
+            ) : (
+                <>
+                    {points.map((point, i) => (
+                        <View key={i} style={styles.pointRow}>
                             <TextInput
-                                value={text}
-                                onChangeText={(newText) => updatePoint(i, newText)}
-                                placeholder={`Point ${i + 1}`}
+                                value={point}
+                                onChangeText={(text) => updatePoint(i, text)}
+                                placeholder={`Point ${i + 1} - Use *gold* ~red~ _blue_`}
                                 placeholderTextColor={colors.textSecondary}
                                 style={styles.pointInput}
                                 multiline
                             />
-                            <TouchableOpacity
-                                onPress={() => toggleHighlight(i)}
-                                style={[styles.highlightButton, highlighted && styles.highlightButtonActive]}
-                            >
-                                <Text style={styles.highlightButtonText}>✨</Text>
-                            </TouchableOpacity>
                             {points.length > 1 && (
                                 <TouchableOpacity
                                     onPress={() => deletePoint(i)}
@@ -82,34 +132,15 @@ export default function TextBlock({ block, onUpdate, onDelete }) {
                                 </TouchableOpacity>
                             )}
                         </View>
-                        
-                        {highlighted && (
-                            <View style={styles.highlightControls}>
-                                <TouchableOpacity 
-                                    onPress={() => toggleHighlightStyle(i)}
-                                    style={styles.styleToggle}
-                                >
-                                    <Text style={styles.styleToggleText}>
-                                        {highlightStyle === 'background' ? '🎨 Background' : '📏 Underline'}
-                                    </Text>
-                                </TouchableOpacity>
-                                {text && (
-                                    <Text style={[
-                                        styles.preview,
-                                        highlightStyle === 'background' ? styles.goldBackground : styles.goldUnderline
-                                    ]}>
-                                        {text}
-                                    </Text>
-                                )}
-                            </View>
-                        )}
-                    </View>
-                );
-            })}
+                    ))}
+                </>
+            )}
 
-            <TouchableOpacity onPress={addPoint} style={styles.addPointButton}>
-                <Text style={styles.addPointText}>+ Add Point</Text>
-            </TouchableOpacity>
+            {!showPreview && (
+                <TouchableOpacity onPress={addPoint} style={styles.addPointButton}>
+                    <Text style={styles.addPointText}>+ Add Point</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 }
@@ -126,7 +157,7 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         marginBottom: 12,
     },
     label: {
@@ -135,22 +166,45 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         fontFamily: "Inter_600SemiBold",
     },
-    deleteBlock: {
-        paddingVertical: 4,
-        paddingHorizontal: 8,
+    hint: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        fontFamily: "Inter_400Regular",
+        marginTop: 2,
     },
-    deleteBlockText: {
-        color: "#ef4444",
+    headerButtons: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    previewToggle: {
+        backgroundColor: colors.gold,
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+    },
+    previewToggleText: {
+        color: colors.background,
         fontSize: 12,
         fontWeight: "600",
         fontFamily: "Inter_600SemiBold",
     },
-    pointContainer: {
-        marginBottom: 12,
+    deleteBlock: {
+        backgroundColor: colors.background,
+        borderWidth: 1,
+        borderColor: "#ef4444",
+        borderRadius: 8,
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+    },
+    deleteBlockText: {
+        color: "#ef4444",
+        fontSize: 14,
+        fontWeight: "600",
     },
     pointRow: {
         flexDirection: "row",
         alignItems: "flex-start",
+        marginBottom: 12,
         gap: 8,
     },
     pointInput: {
@@ -164,23 +218,6 @@ const styles = StyleSheet.create({
         fontSize: 15,
         minHeight: 50,
         fontFamily: "Inter_400Regular",
-    },
-    highlightButton: {
-        backgroundColor: colors.background,
-        borderWidth: 1,
-        borderColor: colors.borderGold,
-        borderRadius: 12,
-        width: 50,
-        height: 50,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    highlightButtonActive: {
-        backgroundColor: colors.gold,
-        borderColor: colors.gold,
-    },
-    highlightButtonText: {
-        fontSize: 20,
     },
     deletePointButton: {
         backgroundColor: colors.background,
@@ -197,41 +234,28 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "600",
     },
-    highlightControls: {
-        marginTop: 8,
-        marginLeft: 4,
+    previewContainer: {
+        backgroundColor: colors.background,
+        padding: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+    },
+    previewPoint: {
+        flexDirection: 'row',
+        marginBottom: 8,
         gap: 8,
     },
-    styleToggle: {
-        backgroundColor: colors.gold,
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 6,
-        alignSelf: 'flex-start',
+    bullet: {
+        color: colors.gold,
+        fontSize: 16,
+        fontWeight: '700',
     },
-    styleToggleText: {
-        color: colors.background,
-        fontSize: 12,
-        fontWeight: "600",
-        fontFamily: "Inter_600SemiBold",
-    },
-    preview: {
+    previewText: {
+        flex: 1,
         fontSize: 15,
-        fontWeight: "700",
-        fontFamily: "Inter_700Bold",
-        color: colors.ivory,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-    },
-    goldBackground: {
-        backgroundColor: colors.gold,
-        color: colors.background,
-        borderRadius: 6,
-    },
-    goldUnderline: {
-        textDecorationLine: 'underline',
-        textDecorationColor: colors.gold,
-        textDecorationStyle: 'solid',
+        fontFamily: "Inter_500Medium",
+        lineHeight: 22,
     },
     addPointButton: {
         backgroundColor: colors.background,
@@ -240,7 +264,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingVertical: 10,
         alignItems: 'center',
-        marginTop: 4,
     },
     addPointText: {
         color: colors.gold,

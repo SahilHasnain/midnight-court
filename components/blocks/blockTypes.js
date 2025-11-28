@@ -2,6 +2,7 @@
 
 export const BLOCK_TYPES = {
     TEXT: 'text',                    // Simple bullet points with highlight option
+    PARAGRAPH: 'paragraph',          // Plain paragraph text
     QUOTE: 'quote',                  // Legal quote with citation
     CALLOUT: 'callout',              // Important point box with icon
     TWO_COLUMN: 'twoColumn',         // Arguments vs Counter layout
@@ -18,6 +19,12 @@ export const BLOCK_METADATA = {
         name: 'Text Points',
         icon: '📝',
         description: 'Bullet points with highlight option',
+        category: 'basic'
+    },
+    [BLOCK_TYPES.PARAGRAPH]: {
+        name: 'Paragraph',
+        icon: '📄',
+        description: 'Plain paragraph text',
         category: 'basic'
     },
     [BLOCK_TYPES.QUOTE]: {
@@ -80,7 +87,16 @@ export const createDefaultBlock = (type) => {
                 id: blockId,
                 type: BLOCK_TYPES.TEXT,
                 data: {
-                    points: [{ text: '', highlighted: false, highlightStyle: 'background' }]
+                    points: ['']
+                }
+            };
+
+        case BLOCK_TYPES.PARAGRAPH:
+            return {
+                id: blockId,
+                type: BLOCK_TYPES.PARAGRAPH,
+                data: {
+                    text: ''
                 }
             };
 

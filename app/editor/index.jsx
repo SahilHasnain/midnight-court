@@ -10,6 +10,45 @@ import BlockPicker from "@/components/blocks/BlockPicker";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import { BLOCK_TYPES, createDefaultBlock } from "@/components/blocks/blockTypes";
 
+// Parse markdown-style text: *gold*, ~red~, _blue_
+const parseFormattedText = (text) => {
+    if (!text) return null;
+
+    const parts = [];
+    let currentIndex = 0;
+
+    const regex = /(\*[^*]+\*|~[^~]+~|_[^_]+_)/g;
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+        if (match.index > currentIndex) {
+            parts.push({
+                text: text.substring(currentIndex, match.index),
+                color: null // will use default color
+            });
+        }
+
+        const matched = match[0];
+        if (matched.startsWith('*') && matched.endsWith('*')) {
+            parts.push({ text: matched.slice(1, -1), color: colors.gold });
+        } else if (matched.startsWith('~') && matched.endsWith('~')) {
+            parts.push({ text: matched.slice(1, -1), color: '#ef4444' });
+        } else if (matched.startsWith('_') && matched.endsWith('_')) {
+            parts.push({ text: matched.slice(1, -1), color: '#3b82f6' });
+        }
+
+        currentIndex = match.index + matched.length;
+    }
+
+    if (currentIndex < text.length) {
+        parts.push({
+            text: text.substring(currentIndex),
+            color: null
+        });
+    }
+
+    return parts.length > 0 ? parts : [{ text, color: null }];
+};
 
 
 export default function EditorScreen() {
@@ -21,6 +60,8 @@ export default function EditorScreen() {
     ]);
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
     const [blockPickerVisible, setBlockPickerVisible] = useState(false);
+    const [showHeadingPreview, setShowHeadingPreview] = useState(false);
+    const [showSubtitlePreview, setShowSubtitlePreview] = useState(false);
 
     const currentSlide = slides[currentSlideIndex];
 
@@ -71,6 +112,13 @@ export default function EditorScreen() {
     useEffect(() => {
         const loadPresentation = async () => {
             try {
+                // DEV MODE: Auto-clear AsyncStorage on app start during development
+                if (__DEV__) {
+                    console.log('🧹 DEV MODE: Clearing AsyncStorage for fresh start');
+                    await AsyncStorage.clear();
+                    return; // Don't load old data
+                }
+
                 const saved = await AsyncStorage.getItem('current_presentation');
                 if (saved) {
                     const data = JSON.parse(saved);
@@ -212,23 +260,77 @@ export default function EditorScreen() {
 
             {/* Main Editor */}
             <View style={styles.editorContent}>
-                <Text style={styles.label}>Heading</Text>
-                <TextInput
-                    value={currentSlide.title}
-                    onChangeText={(text) => updateSlide("title", text)}
-                    placeholder="Enter your heading"
-                    placeholderTextColor={colors.textSecondary}
-                    style={styles.input}
-                />
+                {/* Heading Section */}
+                <View style={styles.sectionContainer}>
+                    <View style={styles.sectionHeader}>
+                        <View>
+                            <Text style={styles.label}>Heading</Text>
+                            <Text style={styles.hint}>Always displays in gold</Text>
+                        </View>
+                        <TouchableOpacity
+                            onPress={() => setShowHeadingPreview(!showHeadingPreview)}
+                            style={styles.previewToggleSmall}
+                        >
+                            <Text style={styles.previewToggleSmallText}>
+                                {showHeadingPreview ? '✏️' : '👁️'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
 
-                <Text style={styles.label}>Subtitle</Text>
-                <TextInput
-                    value={currentSlide.subtitle}
-                    onChangeText={(text) => updateSlide("subtitle", text)}
-                    placeholder="Enter subtitle"
-                    placeholderTextColor={colors.textSecondary}
-                    style={styles.input}
-                />
+                    {showHeadingPreview ? (
+                        <View style={styles.headingPreview}>
+                            <Text style={styles.headingPreviewText}>
+                                {currentSlide.title || 'Preview: Your heading will appear here'}
+                            </Text>
+                        </View>
+                    ) : (
+                        <TextInput
+                            value={currentSlide.title}
+                            onChangeText={(text) => updateSlide("title", text)}
+                            placeholder="Enter heading"
+                            placeholderTextColor={colors.textSecondary}
+                            style={styles.headingInput}
+                        />
+                    )}
+                </View>
+
+                {/* Subtitle Section */}
+                <View style={styles.sectionContainer}>
+                    <View style={styles.sectionHeader}>
+                        <View>
+                            <Text style={styles.label}>Subtitle</Text>
+                            <Text style={styles.hint}>Optional: Use *gold* ~red~ _blue_ for emphasis</Text>
+                        </View>
+                        <TouchableOpacity
+                            onPress={() => setShowSubtitlePreview(!showSubtitlePreview)}
+                            style={styles.previewToggleSmall}
+                        >
+                            <Text style={styles.previewToggleSmallText}>
+                                {showSubtitlePreview ? '✏️' : '👁️'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {showSubtitlePreview ? (
+                        <View style={styles.subtitlePreview}>
+                            <Text style={styles.subtitlePreviewText}>
+                                {parseFormattedText(currentSlide.subtitle).map((part, idx) => (
+                                    <Text key={idx} style={{ color: part.color || colors.textSecondary, fontWeight: '500' }}>
+                                        {part.text}
+                                    </Text>
+                                ))}
+                            </Text>
+                        </View>
+                    ) : (
+                        <TextInput
+                            value={currentSlide.subtitle}
+                            onChangeText={(text) => updateSlide("subtitle", text)}
+                            placeholder="Enter subtitle"
+                            placeholderTextColor={colors.textSecondary}
+                            style={styles.input}
+                        />
+                    )}
+                </View>
 
                 {/* Image Section */}
                 <Text style={styles.label}>Image (Optional)</Text>
@@ -350,9 +452,73 @@ const styles = StyleSheet.create({
         color: colors.gold,
         fontSize: 14,
         fontWeight: "600",
-        marginBottom: 8,
-        marginTop: 16,
         fontFamily: "Inter_600SemiBold",
+        marginBottom: 4,
+    },
+    hint: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        fontFamily: "Inter_400Regular",
+        marginTop: 2,
+    },
+    sectionContainer: {
+        marginBottom: 20,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 8,
+    },
+    previewToggleSmall: {
+        backgroundColor: colors.gold,
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        borderRadius: 6,
+    },
+    previewToggleSmallText: {
+        fontSize: 14,
+    },
+    headingInput: {
+        backgroundColor: colors.card,
+        padding: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+        color: colors.textPrimary,
+        fontSize: 20,
+        fontWeight: "700",
+        fontFamily: "Inter_700Bold",
+        minHeight: 60,
+    },
+    headingPreview: {
+        backgroundColor: colors.card,
+        padding: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+        minHeight: 60,
+        justifyContent: 'center',
+    },
+    headingPreviewText: {
+        fontSize: 20,
+        fontFamily: "Inter_700Bold",
+        lineHeight: 28,
+        color: colors.gold,
+    },
+    subtitlePreview: {
+        backgroundColor: colors.card,
+        padding: 14,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+        minHeight: 50,
+        justifyContent: 'center',
+    },
+    subtitlePreviewText: {
+        fontSize: 15,
+        fontFamily: "Inter_500Medium",
+        lineHeight: 22,
     },
     input: {
         backgroundColor: colors.card,

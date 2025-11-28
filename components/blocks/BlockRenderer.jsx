@@ -1,3 +1,4 @@
+import ParagraphBlock from "./ParagraphBlock";
 import TextBlock from "./TextBlock";
 import { BLOCK_TYPES } from "./blockTypes";
 
@@ -13,6 +14,9 @@ export default function BlockRenderer({ block, onUpdate, onDelete }) {
     switch (block.type) {
         case BLOCK_TYPES.TEXT:
             return <TextBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
+
+        case BLOCK_TYPES.PARAGRAPH:
+            return <ParagraphBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
 
         // Future block types will be added here as we implement them
         // case BLOCK_TYPES.QUOTE:
