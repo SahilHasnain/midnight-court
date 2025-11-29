@@ -12,7 +12,6 @@ export const getDummySlides = () => {
         {
             title: "Case Summary",
             subtitle: "Sharma vs. State of Maharashtra",
-            image: null,
             blocks: [
                 {
                     id: `section_${Date.now()}_0`,
@@ -55,6 +54,16 @@ export const getDummySlides = () => {
                         quote: "No person shall be deprived of his life or personal liberty except according to procedure established by law.",
                         citation: "Article 21, Constitution of India"
                     }
+                },
+                {
+                    id: `image_${Date.now()}_3a`,
+                    type: BLOCK_TYPES.IMAGE,
+                    data: {
+                        uri: null, // Users will upload their own images
+                        caption: "*Supreme Court* of India - Constitutional Bench",
+                        layout: "center",
+                        size: "medium"
+                    }
                 }
             ]
         },
@@ -63,7 +72,6 @@ export const getDummySlides = () => {
         {
             title: "Arguments Presented",
             subtitle: "Petitioner vs State - Side by Side",
-            image: null,
             blocks: [
                 {
                     id: `section_${Date.now()}_2a`,
@@ -123,7 +131,6 @@ export const getDummySlides = () => {
         {
             title: "State's Response",
             subtitle: "Counter-Arguments & Justification",
-            image: null,
             blocks: [
                 {
                     id: `callout_${Date.now()}_8`,
@@ -184,7 +191,6 @@ export const getDummySlides = () => {
         {
             title: "Judgement & Relief",
             subtitle: "Final Decision by Honorable Court",
-            image: null,
             blocks: [
                 {
                     id: `section_${Date.now()}_4a`,
@@ -234,6 +240,191 @@ export const getDummySlides = () => {
                     data: {
                         quote: "Liberty is the most precious of all rights. When the State acts arbitrarily, courts must intervene decisively to protect individual freedoms.",
                         citation: "Hon'ble Justice Sharma, High Court of Maharashtra (2024)"
+                    }
+                }
+            ]
+        },
+
+        // Slide 5: Evidence Analysis with Images
+        {
+            title: "Documentary Evidence",
+            subtitle: "Visual Analysis & Exhibits",
+            blocks: [
+                {
+                    id: `section_${Date.now()}_5a`,
+                    type: BLOCK_TYPES.SECTION_HEADER,
+                    data: {
+                        title: "Physical Evidence Presented"
+                    }
+                },
+                {
+                    id: `paragraph_${Date.now()}_5b`,
+                    type: BLOCK_TYPES.PARAGRAPH,
+                    data: {
+                        text: "The following documentary evidence was submitted to the court, demonstrating clear violations of *procedural safeguards* and ~arbitrary detention~ practices."
+                    }
+                },
+                {
+                    id: `image_${Date.now()}_5c`,
+                    type: BLOCK_TYPES.IMAGE,
+                    data: {
+                        uri: null,
+                        caption: "Exhibit A: *Detention Order* - Unsigned and undated document",
+                        layout: "center",
+                        size: "large"
+                    }
+                },
+                {
+                    id: `evidence_${Date.now()}_5d`,
+                    type: BLOCK_TYPES.EVIDENCE,
+                    data: {
+                        evidenceName: "Exhibit B - Station Diary Entry",
+                        summary: "Official police records showing *delayed FIR registration* and ~missing timestamps~ for mandatory magistrate presentation.",
+                        citation: "Police Station Records, January 2024"
+                    }
+                },
+                {
+                    id: `image_${Date.now()}_5e`,
+                    type: BLOCK_TYPES.IMAGE,
+                    data: {
+                        uri: null,
+                        caption: "Station diary entry highlighting _procedural lapses_",
+                        layout: "floatLeft",
+                        size: "small"
+                    }
+                },
+                {
+                    id: `text_${Date.now()}_5f`,
+                    type: BLOCK_TYPES.TEXT,
+                    data: {
+                        points: [
+                            "*Entry timestamp* shows 72-hour delay",
+                            "~Missing magistrate signature~ on detention order",
+                            "No record of _family notification_",
+                            "Medical examination delayed beyond legal limit"
+                        ]
+                    }
+                }
+            ]
+        },
+
+        // Slide 6: Comparative Case Law with Images
+        {
+            title: "Legal Precedents",
+            subtitle: "Landmark Judgments on Personal Liberty",
+            blocks: [
+                {
+                    id: `callout_${Date.now()}_6a`,
+                    type: BLOCK_TYPES.CALLOUT,
+                    data: {
+                        title: "Supreme Court Precedents",
+                        description: "Multiple landmark cases have established strict timelines for detention and magistrate presentation.",
+                        variant: "info"
+                    }
+                },
+                {
+                    id: `image_${Date.now()}_6b`,
+                    type: BLOCK_TYPES.IMAGE,
+                    data: {
+                        uri: null,
+                        caption: "*D.K. Basu vs State of West Bengal* (1997) - Established custodial safeguards",
+                        layout: "floatRight",
+                        size: "small"
+                    }
+                },
+                {
+                    id: `paragraph_${Date.now()}_6b1`,
+                    type: BLOCK_TYPES.PARAGRAPH,
+                    data: {
+                        text: "The landmark judgment in *D.K. Basu* established comprehensive guidelines for arrests and detentions. The court mandated strict timelines and procedural safeguards to prevent _custodial abuse_ and protect constitutional rights under Article 21."
+                    }
+                },
+                {
+                    id: `twocolumn_${Date.now()}_6c`,
+                    type: BLOCK_TYPES.TWO_COLUMN,
+                    data: {
+                        leftTitle: "D.K. Basu Guidelines (1997)",
+                        rightTitle: "Current Case Compliance",
+                        leftPoints: [
+                            "*Arrest memo* must be prepared immediately",
+                            "Family/friend to be _informed_ within 24 hours",
+                            "Magistrate presentation *mandatory* within 24 hours",
+                            "Medical examination of arrested person"
+                        ],
+                        rightPoints: [
+                            "~No arrest memo~ found in records",
+                            "~Family not informed~ for 48 hours",
+                            "Presented after *72 hours* - clear violation",
+                            "~Medical exam delayed~ by 2 days"
+                        ]
+                    }
+                },
+                {
+                    id: `divider_${Date.now()}_6d`,
+                    type: BLOCK_TYPES.DIVIDER,
+                    data: {
+                        style: "gradient"
+                    }
+                },
+                {
+                    id: `quote_${Date.now()}_6e`,
+                    type: BLOCK_TYPES.QUOTE,
+                    data: {
+                        quote: "The rights enshrined in Article 21 are not mere paper tigers. They must be zealously protected by courts through concrete guidelines.",
+                        citation: "Supreme Court in D.K. Basu vs State of West Bengal (1997)"
+                    }
+                }
+            ]
+        },
+
+        // Slide 7: Impact Assessment with Visual Data
+        {
+            title: "Impact & Recommendations",
+            subtitle: "Systemic Changes Required",
+            blocks: [
+                {
+                    id: `section_${Date.now()}_7a`,
+                    type: BLOCK_TYPES.SECTION_HEADER,
+                    data: {
+                        title: "Broader Implications"
+                    }
+                },
+                {
+                    id: `image_${Date.now()}_7b`,
+                    type: BLOCK_TYPES.IMAGE,
+                    data: {
+                        uri: null,
+                        caption: "Statistical analysis: *Detention violations* across Maharashtra (~2023-2024~)",
+                        layout: "floatRight",
+                        size: "medium"
+                    }
+                },
+                {
+                    id: `paragraph_${Date.now()}_7c`,
+                    type: BLOCK_TYPES.PARAGRAPH,
+                    data: {
+                        text: "This case highlights *systemic issues* in detention procedures across the state. The statistical data reveals a concerning pattern of ~procedural violations~ in multiple police stations. The court's decision sets a precedent for _stricter enforcement_ of constitutional safeguards and mandatory compliance with CRPC provisions."
+                    }
+                },
+                {
+                    id: `text_${Date.now()}_7d`,
+                    type: BLOCK_TYPES.TEXT,
+                    data: {
+                        points: [
+                            "*Mandatory training* for police officers on CRPC Section 57",
+                            "Digital tracking system for _detention timelines_",
+                            "~Penalties~ for officers violating 24-hour rule",
+                            "Monthly audit of station diaries by judicial magistrates"
+                        ]
+                    }
+                },
+                {
+                    id: `callout_${Date.now()}_7e`,
+                    type: BLOCK_TYPES.CALLOUT,
+                    data: {
+                        title: "Court's Final Direction",
+                        description: "State government ordered to implement automated detention tracking system within 6 months to prevent future violations.",
+                        variant: "critical"
                     }
                 }
             ]

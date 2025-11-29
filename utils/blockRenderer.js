@@ -53,6 +53,9 @@ export const renderBlockToHTML = (block) => {
         case BLOCK_TYPES.DIVIDER:
             return renderDividerBlock(block);
 
+        case BLOCK_TYPES.IMAGE:
+            return renderImageBlock(block);
+
         // Future block types will be added here
 
         default:
@@ -290,6 +293,88 @@ const renderDividerBlock = (block) => {
         default:
             return `<div style="height: 2px; background-color: #CBA44A; margin: 24px 0;"></div>`;
     }
+};
+
+const renderImageBlock = (block) => {
+    const { uri, caption, layout, size } = block.data;
+
+    if (!uri) return '';
+
+    // Size configuration for float layouts
+    const getSizeStyle = (size, layout) => {
+        // Float layouts use fixed widths for proper wrapping
+        if (layout === 'floatLeft' || layout === 'floatRight') {
+            switch (size) {
+                case 'small':
+                    return 'width: 250px;';
+                case 'medium':
+                    return 'width: 350px;';
+                case 'large':
+                    return 'width: 450px;';
+                default:
+                    return 'width: 350px;';
+            }
+        }
+
+        // Full width layouts use percentage
+        switch (size) {
+            case 'small':
+                return 'width: 60%; max-width: 400px;';
+            case 'medium':
+                return 'width: 80%; max-width: 600px;';
+            case 'large':
+                return 'width: 100%; max-width: 800px;';
+            default:
+                return 'width: 80%; max-width: 600px;';
+        }
+    };
+
+    // Layout/alignment with float support
+    const getLayoutStyle = (layout) => {
+        switch (layout) {
+            case 'floatLeft':
+                return 'float: left; margin: 0 20px 20px 0;';
+            case 'floatRight':
+                return 'float: right; margin: 0 0 20px 20px;';
+            case 'center':
+            default:
+                return 'margin-left: auto; margin-right: auto; display: block;';
+        }
+    };
+
+    const sizeStyle = getSizeStyle(size, layout);
+    const layoutStyle = getLayoutStyle(layout);
+    const formattedCaption = caption ? parseMarkdownToHTML(caption) : '';
+
+    const captionHTML = caption
+        ? `<div style="text-align: center; color: #9CA3AF; font-size: 12px; font-style: italic; margin-top: 6px; line-height: 1.4;">${formattedCaption}</div>`
+        : '';
+
+    // For float layouts, wrap in a container that can float
+    if (layout === 'floatLeft' || layout === 'floatRight') {
+        return `
+            <div class="image-block-float" style="${layoutStyle}">
+                <img 
+                    src="${uri}" 
+                    style="${sizeStyle} border-radius: 8px; border: 1px solid rgba(203, 164, 74, 0.3); display: block; height: auto;"
+                    alt="${caption || 'Slide image'}"
+                />
+                ${captionHTML}
+            </div>
+        `;
+    }
+
+    // Full width layouts (center)
+    return `
+        <div class="image-block" style="margin: 20px 0; display: flex; flex-direction: column;">
+            <img 
+                src="${uri}" 
+                style="${sizeStyle} ${layoutStyle} border-radius: 8px; border: 1px solid rgba(203, 164, 74, 0.3); height: auto;"
+                alt="${caption || 'Slide image'}"
+            />
+            ${captionHTML}
+        </div>
+    `;
 };
 
 // Add more block renderers as we implement them

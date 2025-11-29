@@ -24,7 +24,8 @@ export default function BlockPicker({ visible, onClose, onSelectBlock }) {
             blockType === BLOCK_TYPES.TIMELINE ||
             blockType === BLOCK_TYPES.EVIDENCE ||
             blockType === BLOCK_TYPES.SECTION_HEADER ||
-            blockType === BLOCK_TYPES.DIVIDER;
+            blockType === BLOCK_TYPES.DIVIDER ||
+            blockType === BLOCK_TYPES.IMAGE;
 
         return (
             <TouchableOpacity

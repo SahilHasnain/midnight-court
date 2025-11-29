@@ -1,6 +1,7 @@
 import CalloutBlock from "./CalloutBlock";
 import DividerBlock from "./DividerBlock";
 import EvidenceBlock from "./EvidenceBlock";
+import ImageBlock from "./ImageBlock";
 import ParagraphBlock from "./ParagraphBlock";
 import QuoteBlock from "./QuoteBlock";
 import SectionHeaderBlock from "./SectionHeaderBlock";
@@ -45,6 +46,9 @@ export default function BlockRenderer({ block, onUpdate, onDelete }) {
 
         case BLOCK_TYPES.DIVIDER:
             return <DividerBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
+
+        case BLOCK_TYPES.IMAGE:
+            return <ImageBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
 
         // Future block types will be added here as we implement them
 

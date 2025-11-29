@@ -1,9 +1,8 @@
 import { colors } from "@/theme/colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import GoldButton from "@/components/GoldButton";
 import BlockPicker from "@/components/blocks/BlockPicker";
@@ -57,7 +56,7 @@ export default function EditorScreen() {
 
     // Multi-slide state (now using blocks instead of points)
     const [slides, setSlides] = useState([
-        { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)], image: null }
+        { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)] }
     ]);
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
     const [blockPickerVisible, setBlockPickerVisible] = useState(false);
@@ -159,7 +158,7 @@ export default function EditorScreen() {
                 console.log('🧪 TEST MODE ENABLED: Loaded professional dummy data');
             } else {
                 // Disable test mode - reset to empty
-                setSlides([{ title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)], image: null }]);
+                setSlides([{ title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)] }]);
                 setCurrentSlideIndex(0);
                 console.log('🧹 TEST MODE DISABLED: Reset to empty slide');
             }
@@ -187,7 +186,7 @@ export default function EditorScreen() {
     }
 
     const addSlide = () => {
-        setSlides([...slides, { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)], image: null }]);
+        setSlides([...slides, { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)] }]);
         setCurrentSlideIndex(slides.length);
     }
 
@@ -203,30 +202,6 @@ export default function EditorScreen() {
         }
     }
 
-    const pickImage = async () => {
-        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-        if (permissionResult.granted === false) {
-            Alert.alert("Permission Required", "Please allow access to your photos to add images.");
-            return;
-        }
-
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [16, 9],
-            quality: 0.8,
-        });
-
-        if (!result.canceled) {
-            updateSlide("image", result.assets[0].uri);
-        }
-    }
-
-    const removeImage = () => {
-        updateSlide("image", null);
-    }
-
     const goToExport = () => {
         router.push({
             pathname: "/export",
@@ -234,11 +209,10 @@ export default function EditorScreen() {
                 slides: JSON.stringify(slides.map(s => ({
                     title: s.title,
                     subtitle: s.subtitle,
-                    blocks: s.blocks,
-                    image: s.image
+                    blocks: s.blocks
                 })))
             }
-        })
+        });
     }
 
     return (
@@ -361,22 +335,6 @@ export default function EditorScreen() {
                         />
                     )}
                 </View>
-
-                {/* Image Section */}
-                <Text style={styles.label}>Image (Optional)</Text>
-                {currentSlide.image ? (
-                    <View style={styles.imageContainer}>
-                        <Image source={{ uri: currentSlide.image }} style={styles.imagePreview} />
-                        <TouchableOpacity onPress={removeImage} style={styles.removeImageButton}>
-                            <Text style={styles.removeImageText}>✕ Remove</Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    <TouchableOpacity onPress={pickImage} style={styles.imagePlaceholder}>
-                        <Text style={styles.imagePlaceholderIcon}>📸</Text>
-                        <Text style={styles.imagePlaceholderText}>Tap to add image</Text>
-                    </TouchableOpacity>
-                )}
 
                 {/* Content Blocks */}
                 <Text style={styles.label}>Content Blocks</Text>

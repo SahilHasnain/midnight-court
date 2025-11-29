@@ -10,6 +10,7 @@ export const BLOCK_TYPES = {
     EVIDENCE: 'evidence',            // Evidence card with details
     DIVIDER: 'divider',              // Visual separator
     SECTION_HEADER: 'sectionHeader', // Big title section break
+    IMAGE: 'image',                  // Single image with caption
     IMAGE_GRID: 'imageGrid',         // 2x2 or 2x3 image grid
 };
 
@@ -68,6 +69,12 @@ export const BLOCK_METADATA = {
         icon: '🌟',
         description: 'Big section title',
         category: 'basic'
+    },
+    [BLOCK_TYPES.IMAGE]: {
+        name: 'Image',
+        icon: '📷',
+        description: 'Image with caption',
+        category: 'layout'
     },
     [BLOCK_TYPES.IMAGE_GRID]: {
         name: 'Image Grid',
@@ -171,6 +178,18 @@ export const createDefaultBlock = (type) => {
                 type: BLOCK_TYPES.SECTION_HEADER,
                 data: {
                     title: ''
+                }
+            };
+
+        case BLOCK_TYPES.IMAGE:
+            return {
+                id: blockId,
+                type: BLOCK_TYPES.IMAGE,
+                data: {
+                    uri: null,
+                    caption: '',
+                    layout: 'center', // 'center', 'floatLeft', 'floatRight'
+                    size: 'medium' // 'small', 'medium', 'large'
                 }
             };
 

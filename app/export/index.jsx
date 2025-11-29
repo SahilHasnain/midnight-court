@@ -30,14 +30,24 @@ export default function ExportScreen() {
     };
 
     const generateHTML = async () => {
-        // Convert all images to base64
+        // Convert all images to base64 (including ImageBlocks inside blocks array)
         const slidesWithBase64 = await Promise.all(
             slides.map(async (slide) => {
-                if (slide.image) {
-                    const base64Image = await convertImageToBase64(slide.image);
-                    return { ...slide, image: base64Image };
-                }
-                return slide;
+                // Convert blocks array images to base64
+                const blocksWithBase64 = await Promise.all(
+                    (slide.blocks || []).map(async (block) => {
+                        if (block.type === 'image' && block.data.uri) {
+                            const base64Image = await convertImageToBase64(block.data.uri);
+                            return {
+                                ...block,
+                                data: { ...block.data, uri: base64Image }
+                            };
+                        }
+                        return block;
+                    })
+                );
+
+                return { ...slide, blocks: blocksWithBase64 };
             })
         );
 
