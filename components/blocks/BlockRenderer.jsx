@@ -1,5 +1,12 @@
+import CalloutBlock from "./CalloutBlock";
+import DividerBlock from "./DividerBlock";
+import EvidenceBlock from "./EvidenceBlock";
 import ParagraphBlock from "./ParagraphBlock";
+import QuoteBlock from "./QuoteBlock";
+import SectionHeaderBlock from "./SectionHeaderBlock";
 import TextBlock from "./TextBlock";
+import TimelineBlock from "./TimelineBlock";
+import TwoColumnBlock from "./TwoColumnBlock";
 import { BLOCK_TYPES } from "./blockTypes";
 
 /**
@@ -18,15 +25,28 @@ export default function BlockRenderer({ block, onUpdate, onDelete }) {
         case BLOCK_TYPES.PARAGRAPH:
             return <ParagraphBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
 
+        case BLOCK_TYPES.QUOTE:
+            return <QuoteBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
+
+        case BLOCK_TYPES.CALLOUT:
+            return <CalloutBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
+
+        case BLOCK_TYPES.TWO_COLUMN:
+            return <TwoColumnBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
+
+        case BLOCK_TYPES.TIMELINE:
+            return <TimelineBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
+
+        case BLOCK_TYPES.EVIDENCE:
+            return <EvidenceBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
+
+        case BLOCK_TYPES.SECTION_HEADER:
+            return <SectionHeaderBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
+
+        case BLOCK_TYPES.DIVIDER:
+            return <DividerBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
+
         // Future block types will be added here as we implement them
-        // case BLOCK_TYPES.QUOTE:
-        //     return <QuoteBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
-
-        // case BLOCK_TYPES.CALLOUT:
-        //     return <CalloutBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
-
-        // case BLOCK_TYPES.TWO_COLUMN:
-        //     return <TwoColumnBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
 
         // case BLOCK_TYPES.TIMELINE:
         //     return <TimelineBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;

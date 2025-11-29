@@ -15,8 +15,16 @@ export default function BlockPicker({ visible, onClose, onSelectBlock }) {
     };
 
     const renderBlockCard = ([blockType, metadata]) => {
-        // Enable TEXT and PARAGRAPH blocks for now, others coming soon
-        const isAvailable = blockType === BLOCK_TYPES.TEXT || blockType === BLOCK_TYPES.PARAGRAPH;
+        // Enable all blocks except IMAGE_GRID
+        const isAvailable = blockType === BLOCK_TYPES.TEXT ||
+            blockType === BLOCK_TYPES.PARAGRAPH ||
+            blockType === BLOCK_TYPES.QUOTE ||
+            blockType === BLOCK_TYPES.CALLOUT ||
+            blockType === BLOCK_TYPES.TWO_COLUMN ||
+            blockType === BLOCK_TYPES.TIMELINE ||
+            blockType === BLOCK_TYPES.EVIDENCE ||
+            blockType === BLOCK_TYPES.SECTION_HEADER ||
+            blockType === BLOCK_TYPES.DIVIDER;
 
         return (
             <TouchableOpacity

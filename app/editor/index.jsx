@@ -9,6 +9,7 @@ import GoldButton from "@/components/GoldButton";
 import BlockPicker from "@/components/blocks/BlockPicker";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import { BLOCK_TYPES, createDefaultBlock } from "@/components/blocks/blockTypes";
+import { getDummySlides } from "@/utils/dummyData";
 
 // Parse markdown-style text: *gold*, ~red~, _blue_
 const parseFormattedText = (text) => {
@@ -62,6 +63,9 @@ export default function EditorScreen() {
     const [blockPickerVisible, setBlockPickerVisible] = useState(false);
     const [showHeadingPreview, setShowHeadingPreview] = useState(false);
     const [showSubtitlePreview, setShowSubtitlePreview] = useState(false);
+
+    // TEST MODE - Only in development, zero production impact
+    const [testMode, setTestMode] = useState(false);
 
     const currentSlide = slides[currentSlideIndex];
 
@@ -142,6 +146,25 @@ export default function EditorScreen() {
             [field]: value
         };
         setSlides(newSlides);
+    }
+
+    // TEST MODE: Load dummy professional data
+    const toggleTestMode = () => {
+        if (__DEV__) {
+            if (!testMode) {
+                // Enable test mode - load dummy data
+                const dummySlides = getDummySlides();
+                setSlides(dummySlides);
+                setCurrentSlideIndex(0);
+                console.log('🧪 TEST MODE ENABLED: Loaded professional dummy data');
+            } else {
+                // Disable test mode - reset to empty
+                setSlides([{ title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)], image: null }]);
+                setCurrentSlideIndex(0);
+                console.log('🧹 TEST MODE DISABLED: Reset to empty slide');
+            }
+            setTestMode(!testMode);
+        }
     }
 
     const updateBlock = (blockId, updatedBlock) => {
@@ -229,6 +252,13 @@ export default function EditorScreen() {
                     <Text style={styles.templateName}>{getTemplateName(template)}</Text>
                     <Text style={styles.slideCounter}>Slide {currentSlideIndex + 1} of {slides.length}</Text>
                 </View>
+
+                {/* TEST MODE TOGGLE - Only visible in development */}
+                {__DEV__ && (
+                    <TouchableOpacity onPress={toggleTestMode} style={styles.testModeButton}>
+                        <Text style={styles.testModeText}>{testMode ? '🧪' : '📝'}</Text>
+                    </TouchableOpacity>
+                )}
             </View>
 
             {/* Slide Navigation */}
@@ -444,6 +474,17 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 2,
         fontFamily: "Inter_400Regular",
+    },
+    testModeButton: {
+        backgroundColor: colors.card,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+    },
+    testModeText: {
+        fontSize: 18,
     },
     editorContent: {
         padding: 20,
