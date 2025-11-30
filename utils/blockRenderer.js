@@ -295,68 +295,40 @@ const renderDividerBlock = (block) => {
     }
 };
 
-const renderImageBlock = (block) => {
+const renderImageBlock = (block, nextBlock) => {
     const { uri, caption, layout, size } = block.data;
 
     if (!uri) return '';
 
-    // Size configuration for float layouts
-    const getSizeStyle = (size, layout) => {
-        // Float layouts use fixed widths for proper wrapping
-        if (layout === 'floatLeft' || layout === 'floatRight') {
-            switch (size) {
-                case 'small':
-                    return 'width: 250px;';
-                case 'medium':
-                    return 'width: 350px;';
-                case 'large':
-                    return 'width: 450px;';
-                default:
-                    return 'width: 350px;';
-            }
-        }
-
-        // Full width layouts use percentage
+    // Size configuration (now width percentages for side-by-side)
+    const getSizeStyle = (size) => {
         switch (size) {
             case 'small':
-                return 'width: 60%; max-width: 400px;';
+                return 'width: 35%;'; // 35% image, content gets remaining
             case 'medium':
-                return 'width: 80%; max-width: 600px;';
+                return 'width: 45%;'; // 45% image, content gets remaining
             case 'large':
-                return 'width: 100%; max-width: 800px;';
+                return 'width: 55%;'; // 55% image, content gets remaining
             default:
-                return 'width: 80%; max-width: 600px;';
+                return 'width: 45%;';
         }
     };
 
-    // Layout/alignment with float support
-    const getLayoutStyle = (layout) => {
-        switch (layout) {
-            case 'floatLeft':
-                return 'float: left; margin: 0 20px 20px 0;';
-            case 'floatRight':
-                return 'float: right; margin: 0 0 20px 20px;';
-            case 'center':
-            default:
-                return 'margin-left: auto; margin-right: auto; display: block;';
-        }
-    };
-
-    const sizeStyle = getSizeStyle(size, layout);
-    const layoutStyle = getLayoutStyle(layout);
+    const sizeStyle = getSizeStyle(size);
     const formattedCaption = caption ? parseMarkdownToHTML(caption) : '';
 
     const captionHTML = caption
-        ? `<div style="text-align: center; color: #9CA3AF; font-size: 12px; font-style: italic; margin-top: 6px; line-height: 1.4;">${formattedCaption}</div>`
+        ? `<div style="text-align: center; color: #9CA3AF; font-size: 12px; font-style: italic; margin-top: 8px; line-height: 1.4;">${formattedCaption}</div>`
         : '';
 
-    // For float layouts, wrap in a container that can float
-    if (layout === 'floatLeft' || layout === 'floatRight') {
+    // Full width center layout
+    if (layout === 'center') {
+        const centerWidth = size === 'small' ? '60%' : size === 'medium' ? '80%' : '100%';
         return `
-            <div class="image-block-float" style="${layoutStyle}">
+            <div class="image-block" style="margin: 20px 0; display: flex; flex-direction: column; align-items: center;">
                 <img 
                     src="${uri}" 
-                    style="${sizeStyle} border-radius: 8px; border: 1px solid rgba(203, 164, 74, 0.3); display: block; height: auto;"
+                    style="width: ${centerWidth}; max-width: 800px; border-radius: 8px; border: 1px solid rgba(203, 164, 74, 0.3); height: auto;"
                     alt="${caption || 'Slide image'}"
                 />
                 ${captionHTML}
@@ -364,15 +336,17 @@ const renderImageBlock = (block) => {
         `;
     }
 
-    // Full width layouts (center)
+    // Side-by-side layouts (floatLeft/floatRight) - mark as grouped
     return `
-        <div class="image-block" style="margin: 20px 0; display: flex; flex-direction: column;">
-            <img 
-                src="${uri}" 
-                style="${sizeStyle} ${layoutStyle} border-radius: 8px; border: 1px solid rgba(203, 164, 74, 0.3); height: auto;"
-                alt="${caption || 'Slide image'}"
-            />
-            ${captionHTML}
+        <div class="image-block-grouped" data-layout="${layout}" data-size="${size}" style="display: none;">
+            <div style="flex: 0 0 auto; ${sizeStyle}">
+                <img 
+                    src="${uri}" 
+                    style="width: 100%; border-radius: 8px; border: 1px solid rgba(203, 164, 74, 0.3); height: auto;"
+                    alt="${caption || 'Slide image'}"
+                />
+                ${captionHTML}
+            </div>
         </div>
     `;
 };

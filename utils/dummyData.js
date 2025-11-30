@@ -8,7 +8,7 @@ import { BLOCK_TYPES } from "@/components/blocks/blockTypes";
 
 export const getDummySlides = () => {
     return [
-        // Slide 1: Case Overview
+        // Slide 1: Case Overview (Minimal - Title focus)
         {
             title: "Case Summary",
             subtitle: "Sharma vs. State of Maharashtra",
@@ -25,26 +25,10 @@ export const getDummySlides = () => {
                     type: BLOCK_TYPES.TIMELINE,
                     data: {
                         events: [
-                            { date: "10 Jan 2024", event: "Petitioner *arrested* without warrant by state police" },
-                            { date: "11 Jan 2024", event: "~No FIR filed~ within 24-hour mandatory period" },
-                            { date: "13 Jan 2024", event: "Finally presented before magistrate after *72 hours*" },
-                            { date: "15 Jan 2024", event: "Writ petition filed in High Court under _Article 226_" },
-                            { date: "20 Jan 2024", event: "Court issues notice to State, orders immediate release" }
+                            { date: "10 Jan 2024", event: "Petitioner *arrested* without warrant" },
+                            { date: "11 Jan 2024", event: "~No FIR filed~ within 24 hours" },
+                            { date: "15 Jan 2024", event: "Writ petition filed under _Article 226_" }
                         ]
-                    }
-                },
-                {
-                    id: `divider_${Date.now()}_1a`,
-                    type: BLOCK_TYPES.DIVIDER,
-                    data: {
-                        style: "solid"
-                    }
-                },
-                {
-                    id: `paragraph_${Date.now()}_2`,
-                    type: BLOCK_TYPES.PARAGRAPH,
-                    data: {
-                        text: "This landmark case involves *constitutional rights* under Article 21, where the petitioner challenged ~arbitrary detention~ by state authorities without due process."
                     }
                 },
                 {
@@ -54,45 +38,21 @@ export const getDummySlides = () => {
                         quote: "No person shall be deprived of his life or personal liberty except according to procedure established by law.",
                         citation: "Article 21, Constitution of India"
                     }
-                },
-                {
-                    id: `image_${Date.now()}_3a`,
-                    type: BLOCK_TYPES.IMAGE,
-                    data: {
-                        uri: null, // Users will upload their own images
-                        caption: "*Supreme Court* of India - Constitutional Bench",
-                        layout: "center",
-                        size: "medium"
-                    }
                 }
             ]
         },
 
-        // Slide 2: Legal Arguments
+        // Slide 2: Two Column Layout Test
         {
             title: "Arguments Presented",
-            subtitle: "Petitioner vs State - Side by Side",
+            subtitle: "Petitioner vs State",
             blocks: [
-                {
-                    id: `section_${Date.now()}_2a`,
-                    type: BLOCK_TYPES.SECTION_HEADER,
-                    data: {
-                        title: "Legal Contentions"
-                    }
-                },
-                {
-                    id: `divider_${Date.now()}_2b`,
-                    type: BLOCK_TYPES.DIVIDER,
-                    data: {
-                        style: "dotted"
-                    }
-                },
                 {
                     id: `callout_${Date.now()}_4`,
                     type: BLOCK_TYPES.CALLOUT,
                     data: {
                         title: "Key Legal Issue",
-                        description: "Whether detention without magistrate presentation within 24 hours violates constitutional guarantees under Article 21.",
+                        description: "Whether detention without magistrate presentation within 24 hours violates constitutional guarantees.",
                         variant: "warning"
                     }
                 },
@@ -103,42 +63,32 @@ export const getDummySlides = () => {
                         leftTitle: "Petitioner's Arguments",
                         rightTitle: "State's Counter",
                         leftPoints: [
-                            "*No formal FIR* filed within mandatory 24-hour period",
-                            "Magistrate presentation delayed by ~48 hours~ beyond legal limit",
-                            "Evidence of _prima facie_ violation of CRPC Section 57",
-                            "Comparable to *D.K. Basu guidelines* non-compliance"
+                            "*No formal FIR* filed within 24 hours",
+                            "Magistrate presentation delayed by ~48 hours~",
+                            "Violation of _CRPC Section 57_"
                         ],
                         rightPoints: [
-                            "National security concerns under *UAPA provisions* justified delay",
-                            "Risk of evidence tampering if released prematurely",
-                            "_Public order_ maintenance required extended custody",
-                            "~However~, failed to produce documentary evidence"
+                            "National security concerns justified delay",
+                            "Risk of evidence tampering",
+                            "~Failed to produce~ documentary proof"
                         ]
-                    }
-                },
-                {
-                    id: `quote_${Date.now()}_6`,
-                    type: BLOCK_TYPES.QUOTE,
-                    data: {
-                        quote: "The State must not only act fairly but must be seen to act fairly. Procedural fairness is the soul of natural justice.",
-                        citation: "Supreme Court in Mohinder Singh Gill vs Chief Election Commissioner (1978)"
                     }
                 }
             ]
         },
 
-        // Slide 3: Counter Arguments
+        // Slide 3: Evidence & Callout Test
         {
             title: "State's Response",
-            subtitle: "Counter-Arguments & Justification",
+            subtitle: "Counter-Arguments",
             blocks: [
                 {
-                    id: `callout_${Date.now()}_8`,
-                    type: BLOCK_TYPES.CALLOUT,
+                    id: `evidence_${Date.now()}_9`,
+                    type: BLOCK_TYPES.EVIDENCE,
                     data: {
-                        title: "State's Defense Position",
-                        description: "Claimed exceptional circumstances under preventive detention framework, citing national security concerns.",
-                        variant: "info"
+                        evidenceName: "Exhibit A - Police Report",
+                        summary: "Initial detention order citing *suspected involvement* in unlawful activities. Claims ~urgent need~ for custody to prevent tampering.",
+                        citation: "Police Station Diary Entry No. 42/2024"
                     }
                 },
                 {
@@ -149,77 +99,31 @@ export const getDummySlides = () => {
                     }
                 },
                 {
-                    id: `evidence_${Date.now()}_9`,
-                    type: BLOCK_TYPES.EVIDENCE,
-                    data: {
-                        evidenceName: "Exhibit A - Police Report",
-                        summary: "Initial detention order citing *suspected involvement* in unlawful activities. Report claims ~urgent need~ for custody to prevent evidence tampering and ensure _public safety_.",
-                        citation: "Police Station Diary Entry No. 42/2024, dated 10 January 2024, Page 3-4"
-                    }
-                },
-                {
-                    id: `paragraph_${Date.now()}_10`,
-                    type: BLOCK_TYPES.PARAGRAPH,
-                    data: {
-                        text: "The State contended that ~exceptional circumstances~ warranted extended detention under _preventive detention laws_."
-                    }
-                },
-                {
                     id: `text_${Date.now()}_11`,
                     type: BLOCK_TYPES.TEXT,
                     data: {
                         points: [
-                            "National security concerns under *UAPA provisions*",
-                            "Risk of evidence tampering if released prematurely",
-                            "_Public order_ maintenance justified extended custody",
-                            "~However~, failed to produce documentary evidence"
+                            "National security under *UAPA provisions*",
+                            "_Public order_ maintenance required",
+                            "~However~, no documentary evidence produced"
                         ]
-                    }
-                },
-                {
-                    id: `quote_${Date.now()}_11`,
-                    type: BLOCK_TYPES.QUOTE,
-                    data: {
-                        quote: "While national security is paramount, it cannot be used as a blanket justification to override fundamental rights without proper documentation.",
-                        citation: "Delhi High Court in Previous Precedent (2019)"
                     }
                 }
             ]
         },
 
-        // Slide 4: Court's Verdict
+        // Slide 4: Judgment with Multiple Block Types
         {
-            title: "Judgement & Relief",
-            subtitle: "Final Decision by Honorable Court",
+            title: "Court's Verdict",
+            subtitle: "Final Decision",
             blocks: [
-                {
-                    id: `section_${Date.now()}_4a`,
-                    type: BLOCK_TYPES.SECTION_HEADER,
-                    data: {
-                        title: "Final Order"
-                    }
-                },
-                {
-                    id: `divider_${Date.now()}_4b`,
-                    type: BLOCK_TYPES.DIVIDER,
-                    data: {
-                        style: "solid"
-                    }
-                },
                 {
                     id: `callout_${Date.now()}_12`,
                     type: BLOCK_TYPES.CALLOUT,
                     data: {
                         title: "Critical Violation Found",
-                        description: "Court found flagrant violation of Article 21 and CRPC Section 57. Procedural safeguards completely ignored.",
+                        description: "Court found flagrant violation of Article 21 and CRPC Section 57.",
                         variant: "critical"
-                    }
-                },
-                {
-                    id: `paragraph_${Date.now()}_13`,
-                    type: BLOCK_TYPES.PARAGRAPH,
-                    data: {
-                        text: "The court ruled *in favor* of the petitioner, citing clear violations of constitutional safeguards and procedural requirements."
                     }
                 },
                 {
@@ -229,8 +133,7 @@ export const getDummySlides = () => {
                         points: [
                             "*Immediate release* ordered with compensation",
                             "₹5 lakhs awarded for _unlawful detention_",
-                            "~Departmental inquiry~ mandated against responsible officers",
-                            "New guidelines issued for future arrests"
+                            "~Inquiry~ mandated against officers"
                         ]
                     }
                 },
@@ -238,30 +141,23 @@ export const getDummySlides = () => {
                     id: `quote_${Date.now()}_15`,
                     type: BLOCK_TYPES.QUOTE,
                     data: {
-                        quote: "Liberty is the most precious of all rights. When the State acts arbitrarily, courts must intervene decisively to protect individual freedoms.",
-                        citation: "Hon'ble Justice Sharma, High Court of Maharashtra (2024)"
+                        quote: "Liberty is the most precious of all rights. When the State acts arbitrarily, courts must intervene decisively.",
+                        citation: "Hon'ble Justice Sharma, High Court (2024)"
                     }
                 }
             ]
         },
 
-        // Slide 5: Evidence Analysis with Images
+        // Slide 5: Center Image Layout Test
         {
             title: "Documentary Evidence",
-            subtitle: "Visual Analysis & Exhibits",
+            subtitle: "Visual Exhibits",
             blocks: [
-                {
-                    id: `section_${Date.now()}_5a`,
-                    type: BLOCK_TYPES.SECTION_HEADER,
-                    data: {
-                        title: "Physical Evidence Presented"
-                    }
-                },
                 {
                     id: `paragraph_${Date.now()}_5b`,
                     type: BLOCK_TYPES.PARAGRAPH,
                     data: {
-                        text: "The following documentary evidence was submitted to the court, demonstrating clear violations of *procedural safeguards* and ~arbitrary detention~ practices."
+                        text: "The following evidence was submitted, demonstrating clear violations of *procedural safeguards*."
                     }
                 },
                 {
@@ -269,66 +165,35 @@ export const getDummySlides = () => {
                     type: BLOCK_TYPES.IMAGE,
                     data: {
                         uri: null,
-                        caption: "Exhibit A: *Detention Order* - Unsigned and undated document",
+                        caption: "*Detention Order* - Unsigned document",
                         layout: "center",
-                        size: "large"
+                        size: "medium"
                     }
                 },
                 {
                     id: `evidence_${Date.now()}_5d`,
                     type: BLOCK_TYPES.EVIDENCE,
                     data: {
-                        evidenceName: "Exhibit B - Station Diary Entry",
-                        summary: "Official police records showing *delayed FIR registration* and ~missing timestamps~ for mandatory magistrate presentation.",
-                        citation: "Police Station Records, January 2024"
-                    }
-                },
-                {
-                    id: `image_${Date.now()}_5e`,
-                    type: BLOCK_TYPES.IMAGE,
-                    data: {
-                        uri: null,
-                        caption: "Station diary entry highlighting _procedural lapses_",
-                        layout: "floatLeft",
-                        size: "small"
-                    }
-                },
-                {
-                    id: `text_${Date.now()}_5f`,
-                    type: BLOCK_TYPES.TEXT,
-                    data: {
-                        points: [
-                            "*Entry timestamp* shows 72-hour delay",
-                            "~Missing magistrate signature~ on detention order",
-                            "No record of _family notification_",
-                            "Medical examination delayed beyond legal limit"
-                        ]
+                        evidenceName: "Exhibit B - Station Diary",
+                        summary: "Records showing *delayed FIR* and ~missing timestamps~.",
+                        citation: "Police Records, Jan 2024"
                     }
                 }
             ]
         },
 
-        // Slide 6: Comparative Case Law with Images
+        // Slide 6: Float Left Image Test
         {
             title: "Legal Precedents",
-            subtitle: "Landmark Judgments on Personal Liberty",
+            subtitle: "D.K. Basu Guidelines",
             blocks: [
-                {
-                    id: `callout_${Date.now()}_6a`,
-                    type: BLOCK_TYPES.CALLOUT,
-                    data: {
-                        title: "Supreme Court Precedents",
-                        description: "Multiple landmark cases have established strict timelines for detention and magistrate presentation.",
-                        variant: "info"
-                    }
-                },
                 {
                     id: `image_${Date.now()}_6b`,
                     type: BLOCK_TYPES.IMAGE,
                     data: {
                         uri: null,
-                        caption: "*D.K. Basu vs State of West Bengal* (1997) - Established custodial safeguards",
-                        layout: "floatRight",
+                        caption: "*D.K. Basu vs West Bengal* (1997)",
+                        layout: "floatLeft",
                         size: "small"
                     }
                 },
@@ -336,95 +201,121 @@ export const getDummySlides = () => {
                     id: `paragraph_${Date.now()}_6b1`,
                     type: BLOCK_TYPES.PARAGRAPH,
                     data: {
-                        text: "The landmark judgment in *D.K. Basu* established comprehensive guidelines for arrests and detentions. The court mandated strict timelines and procedural safeguards to prevent _custodial abuse_ and protect constitutional rights under Article 21."
-                    }
-                },
-                {
-                    id: `twocolumn_${Date.now()}_6c`,
-                    type: BLOCK_TYPES.TWO_COLUMN,
-                    data: {
-                        leftTitle: "D.K. Basu Guidelines (1997)",
-                        rightTitle: "Current Case Compliance",
-                        leftPoints: [
-                            "*Arrest memo* must be prepared immediately",
-                            "Family/friend to be _informed_ within 24 hours",
-                            "Magistrate presentation *mandatory* within 24 hours",
-                            "Medical examination of arrested person"
-                        ],
-                        rightPoints: [
-                            "~No arrest memo~ found in records",
-                            "~Family not informed~ for 48 hours",
-                            "Presented after *72 hours* - clear violation",
-                            "~Medical exam delayed~ by 2 days"
-                        ]
+                        text: "The landmark *D.K. Basu* judgment established comprehensive guidelines for arrests. The court mandated strict timelines to prevent _custodial abuse_ and protect Article 21 rights."
                     }
                 },
                 {
                     id: `divider_${Date.now()}_6d`,
                     type: BLOCK_TYPES.DIVIDER,
                     data: {
-                        style: "gradient"
+                        style: "dotted"
                     }
                 },
                 {
-                    id: `quote_${Date.now()}_6e`,
-                    type: BLOCK_TYPES.QUOTE,
+                    id: `text_${Date.now()}_6e`,
+                    type: BLOCK_TYPES.TEXT,
                     data: {
-                        quote: "The rights enshrined in Article 21 are not mere paper tigers. They must be zealously protected by courts through concrete guidelines.",
-                        citation: "Supreme Court in D.K. Basu vs State of West Bengal (1997)"
+                        points: [
+                            "*Arrest memo* required immediately",
+                            "Family informed within _24 hours_",
+                            "Magistrate presentation *mandatory*"
+                        ]
                     }
                 }
             ]
         },
 
-        // Slide 7: Impact Assessment with Visual Data
+        // Slide 7: Float Right Image Test
         {
             title: "Impact & Recommendations",
-            subtitle: "Systemic Changes Required",
+            subtitle: "Systemic Changes",
             blocks: [
-                {
-                    id: `section_${Date.now()}_7a`,
-                    type: BLOCK_TYPES.SECTION_HEADER,
-                    data: {
-                        title: "Broader Implications"
-                    }
-                },
                 {
                     id: `image_${Date.now()}_7b`,
                     type: BLOCK_TYPES.IMAGE,
                     data: {
                         uri: null,
-                        caption: "Statistical analysis: *Detention violations* across Maharashtra (~2023-2024~)",
+                        caption: "*Detention violations* across Maharashtra",
                         layout: "floatRight",
-                        size: "medium"
+                        size: "small"
                     }
                 },
                 {
                     id: `paragraph_${Date.now()}_7c`,
                     type: BLOCK_TYPES.PARAGRAPH,
                     data: {
-                        text: "This case highlights *systemic issues* in detention procedures across the state. The statistical data reveals a concerning pattern of ~procedural violations~ in multiple police stations. The court's decision sets a precedent for _stricter enforcement_ of constitutional safeguards and mandatory compliance with CRPC provisions."
-                    }
-                },
-                {
-                    id: `text_${Date.now()}_7d`,
-                    type: BLOCK_TYPES.TEXT,
-                    data: {
-                        points: [
-                            "*Mandatory training* for police officers on CRPC Section 57",
-                            "Digital tracking system for _detention timelines_",
-                            "~Penalties~ for officers violating 24-hour rule",
-                            "Monthly audit of station diaries by judicial magistrates"
-                        ]
+                        text: "This case highlights *systemic issues* in detention procedures. The data reveals ~procedural violations~ in multiple stations, setting precedent for _stricter enforcement_."
                     }
                 },
                 {
                     id: `callout_${Date.now()}_7e`,
                     type: BLOCK_TYPES.CALLOUT,
                     data: {
-                        title: "Court's Final Direction",
-                        description: "State government ordered to implement automated detention tracking system within 6 months to prevent future violations.",
-                        variant: "critical"
+                        title: "Court's Direction",
+                        description: "Implement automated tracking system within 6 months.",
+                        variant: "info"
+                    }
+                }
+            ]
+        },
+
+        // Slide 8: Float Left Image with Bullet Points
+        {
+            title: "Key Findings",
+            subtitle: "Evidence-Based Analysis",
+            blocks: [
+                {
+                    id: `image_${Date.now()}_8a`,
+                    type: BLOCK_TYPES.IMAGE,
+                    data: {
+                        uri: null,
+                        caption: "Documentary evidence from *police records*",
+                        layout: "floatLeft",
+                        size: "medium"
+                    }
+                },
+                {
+                    id: `text_${Date.now()}_8b`,
+                    type: BLOCK_TYPES.TEXT,
+                    data: {
+                        points: [
+                            "*72-hour delay* in magistrate presentation",
+                            "~No written FIR~ on record",
+                            "Missing signatures on _detention order_",
+                            "Family not informed for *48 hours*",
+                            "Medical examination delayed beyond legal limits"
+                        ]
+                    }
+                }
+            ]
+        },
+
+        // Slide 9: Float Right Image with Bullet Points (Vice Versa)
+        {
+            title: "Constitutional Violations",
+            subtitle: "Rights Infringement Summary",
+            blocks: [
+                {
+                    id: `image_${Date.now()}_9a`,
+                    type: BLOCK_TYPES.IMAGE,
+                    data: {
+                        uri: null,
+                        caption: "*Article 21* - Right to Life and Personal Liberty",
+                        layout: "floatRight",
+                        size: "medium"
+                    }
+                },
+                {
+                    id: `text_${Date.now()}_9b`,
+                    type: BLOCK_TYPES.TEXT,
+                    data: {
+                        points: [
+                            "Violation of *Article 21* - Personal Liberty",
+                            "Non-compliance with ~CRPC Section 57~",
+                            "Breach of _D.K. Basu guidelines_",
+                            "Denial of *legal representation* rights",
+                            "Arbitrary detention without due process"
+                        ]
                     }
                 }
             ]

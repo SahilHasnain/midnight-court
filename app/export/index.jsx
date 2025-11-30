@@ -1,3 +1,4 @@
+import { BLOCK_TYPES } from "@/components/blocks/blockTypes";
 import GoldButton from "@/components/GoldButton";
 import { colors } from "@/theme/colors";
 import { renderBlockToHTML } from "@/utils/blockRenderer";
@@ -11,6 +12,57 @@ export default function ExportScreen() {
     const { slides: slidesParam } = useLocalSearchParams();
     const slides = slidesParam ? JSON.parse(slidesParam) : [];
     const [isGenerating, setIsGenerating] = useState(false);
+
+    // Helper to group floatLeft/floatRight images with following content
+    const renderBlocksWithGrouping = (blocks) => {
+        let html = '';
+        let i = 0;
+
+        while (i < blocks.length) {
+            const block = blocks[i];
+
+            // Check if this is a side-by-side image block
+            if (block.type === BLOCK_TYPES.IMAGE &&
+                (block.data.layout === 'floatLeft' || block.data.layout === 'floatRight')) {
+
+                // Get the image HTML
+                const imageHTML = renderBlockToHTML(block);
+
+                // Get next content block if available
+                const nextBlock = blocks[i + 1];
+                let contentHTML = '';
+
+                if (nextBlock && nextBlock.type !== BLOCK_TYPES.IMAGE) {
+                    contentHTML = renderBlockToHTML(nextBlock);
+                    i++; // Skip next block as we've already rendered it
+                }
+
+                // Determine flex-direction based on layout
+                const isLeftLayout = block.data.layout === 'floatLeft';
+                const imageWidth = block.data.size === 'small' ? '45%' :
+                    block.data.size === 'medium' ? '50%' : '55%';
+
+                // Render side-by-side container
+                html += `
+                    <div style="display: flex; gap: 12px; margin: 20px 0; align-items: flex-start; ${isLeftLayout ? 'flex-direction: row;' : 'flex-direction: row-reverse;'}">
+                        <div style="flex: 0 0 ${imageWidth};">
+                            ${imageHTML.replace('style="display: none;"', 'style=""')}
+                        </div>
+                        <div style="flex: 1; min-width: 0; padding-left: 0; margin-left: 0;">
+                            ${contentHTML || '<div style="color: #9CA3AF; font-style: italic; font-size: 14px;">Add content block after image for side-by-side layout</div>'}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Regular block rendering
+                html += renderBlockToHTML(block);
+            }
+
+            i++;
+        }
+
+        return html;
+    };
 
     const convertImageToBase64 = async (uri) => {
         try {
@@ -139,7 +191,7 @@ export default function ExportScreen() {
             font-size: 20px;
             line-height: 1.8;
             margin: 12px 0;
-            padding-left: 30px;
+            padding-left: 28px;
             position: relative;
         }
         
@@ -194,12 +246,7 @@ export default function ExportScreen() {
             <div class="gold-line"></div>
             <h2>${slide.subtitle || ''}</h2>
             
-            ${slide.blocks && slide.blocks.length > 0 ? slide.blocks.map(block => renderBlockToHTML(block)).join('') : ''}
-            
-            <div class="footer">
-                <div class="footer-text">MIDNIGHT COURT</div>
-                <div class="footer-text">${new Date().toLocaleDateString()}</div>
-            </div>
+            ${slide.blocks && slide.blocks.length > 0 ? renderBlocksWithGrouping(slide.blocks) : ''}
         </div>
     `).join('')}
 </body>
