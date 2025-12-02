@@ -627,7 +627,7 @@ export const saveCustomTemplate = async (templateName, description, slides, icon
     try {
         const customTemplates = await getCustomTemplates();
         const templateId = Date.now().toString();
-        
+
         const newTemplate = {
             id: templateId,
             name: templateName,
@@ -640,7 +640,7 @@ export const saveCustomTemplate = async (templateName, description, slides, icon
 
         customTemplates[templateId] = newTemplate;
         await AsyncStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(customTemplates));
-        
+
         console.log('✅ Saved custom template:', templateName);
         return templateId;
     } catch (error) {

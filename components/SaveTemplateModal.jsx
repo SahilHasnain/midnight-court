@@ -16,7 +16,7 @@ export default function SaveTemplateModal({ visible, onClose, onSave }) {
         }
 
         onSave(templateName.trim(), description.trim(), selectedIcon);
-        
+
         // Reset form
         setTemplateName('');
         setDescription('');
@@ -40,7 +40,7 @@ export default function SaveTemplateModal({ visible, onClose, onSave }) {
             <View style={styles.overlay}>
                 <View style={styles.modal}>
                     <Text style={styles.title}>Save as Template</Text>
-                    
+
                     <Text style={styles.label}>Template Name</Text>
                     <TextInput
                         style={styles.input}

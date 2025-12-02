@@ -1,5 +1,5 @@
 import { colors } from "@/theme/colors";
-import { getAllTemplates, getCustomTemplates, deleteCustomTemplate } from "@/utils/templateData";
+import { deleteCustomTemplate, getAllTemplates, getCustomTemplates } from "@/utils/templateData";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -42,10 +42,10 @@ export default function TemplateScreen() {
         );
     };
 
-    const currentTemplates = 
+    const currentTemplates =
         selectedTab === 'quick' ? templates.quick :
-        selectedTab === 'full' ? templates.full :
-        customTemplates;
+            selectedTab === 'full' ? templates.full :
+                customTemplates;
 
     return (
         <ScrollView style={styles.container}>
@@ -133,7 +133,7 @@ export default function TemplateScreen() {
                                     <Text style={styles.arrowText}>›</Text>
                                 </View>
                             </TouchableOpacity>
-                            
+
                             {/* Delete button for custom templates */}
                             {item.type === 'custom' && (
                                 <TouchableOpacity

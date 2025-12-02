@@ -10,7 +10,7 @@ import BlockPicker from "@/components/blocks/BlockPicker";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import { BLOCK_TYPES, createDefaultBlock } from "@/components/blocks/blockTypes";
 import { getDummySlides } from "@/utils/dummyData";
-import { getTemplateById, getCustomTemplateById, saveCustomTemplate } from "@/utils/templateData";
+import { getCustomTemplateById, getTemplateById, saveCustomTemplate } from "@/utils/templateData";
 
 // Parse markdown-style text: *gold*, ~red~, _blue_
 const parseFormattedText = (text) => {
@@ -78,14 +78,14 @@ export default function EditorScreen() {
             // Priority 1: Load template if provided
             if (template) {
                 let templateData;
-                
+
                 // Check if it's a custom template
                 if (templateType === 'custom') {
                     templateData = await getCustomTemplateById(template);
                 } else {
                     templateData = getTemplateById(template, templateType || 'quick');
                 }
-                
+
                 if (templateData && templateData.slides) {
                     // Use template's pre-configured slides
                     setSlides(templateData.slides);
