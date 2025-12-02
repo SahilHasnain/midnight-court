@@ -115,18 +115,12 @@ export default function EditorScreen() {
     useEffect(() => {
         const loadPresentation = async () => {
             try {
-                // DEV MODE: Auto-clear AsyncStorage on app start during development
-                if (__DEV__) {
-                    console.log('🧹 DEV MODE: Clearing AsyncStorage for fresh start');
-                    await AsyncStorage.clear();
-                    return; // Don't load old data
-                }
-
                 const saved = await AsyncStorage.getItem('current_presentation');
                 if (saved) {
                     const data = JSON.parse(saved);
-                    if (data.template === template && data.slides) {
+                    if (data.slides) {
                         setSlides(data.slides);
+                        console.log('✅ Loaded saved presentation with', data.slides.length, 'slides');
                     }
                 }
             } catch (error) {
@@ -135,7 +129,7 @@ export default function EditorScreen() {
         };
 
         loadPresentation();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, []);
 
     const updateSlide = (field, value) => {

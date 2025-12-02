@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>PDF Layout Test - 7 Slides</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Georgia", serif;
+        background: #000;
+        overflow-x: hidden;
+      }
+
+      .slide {
+        width: 100vw;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0b1120 0%, #1a2332 100%);
+        padding: 40px 20px 80px 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      @media (min-width: 768px) {
+        .slide {
+          padding: 60px 80px 100px 80px;
+        }
+      }
+
+      .watermark {
+        color: rgba(203, 164, 74, 0.08);
+        font-size: 80px;
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        transform: rotate(-15deg);
+        pointer-events: none;
+      }
+
+      @media (min-width: 768px) {
+        .watermark {
+          font-size: 120px;
+          bottom: -20px;
+          right: -20px;
+        }
+      }
+
+      .slide-number {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: #cba44a;
+        font-size: 12px;
+        opacity: 0.7;
+      }
+
+      @media (min-width: 768px) {
+        .slide-number {
+          top: 30px;
+          right: 60px;
+          font-size: 14px;
+        }
+      }
+
+      h1 {
+        color: #cba44a;
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0 0 12px 0;
+        letter-spacing: 0.5px;
+        line-height: 1.2;
+      }
+
+      @media (min-width: 768px) {
+        h1 {
+          font-size: 48px;
+          margin: 0 0 15px 0;
+        }
+      }
+
+      .gold-line {
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, #cba44a 0%, #e5c76b 100%);
+        margin: 15px 0 20px 0;
+        border-radius: 2px;
+      }
+
+      @media (min-width: 768px) {
+        .gold-line {
+          width: 100px;
+          height: 4px;
+          margin: 20px 0 30px 0;
+        }
+      }
+
+      h2 {
+        color: #f5eedf;
+        font-size: 18px;
+        font-weight: 400;
+        margin: 0 0 30px 0;
+        opacity: 0.9;
+      }
+
+      @media (min-width: 768px) {
+        h2 {
+          font-size: 28px;
+          margin: 0 0 40px 0;
+        }
+      }
+
+      /* Timeline */
+      .timeline-block {
+        padding-left: 8px;
+        margin: 12px 0;
+      }
+
+      .timeline-event {
+        position: relative;
+        display: flex;
+        min-height: 80px;
+      }
+
+      .timeline-event:last-child {
+        min-height: 60px;
+      }
+
+      .timeline-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 6px;
+        background-color: #cba44a;
+        margin-top: 4px;
+        z-index: 2;
+        border: 2px solid #1a1a1a;
+        flex-shrink: 0;
+      }
+
+      .timeline-connector {
+        position: absolute;
+        left: 5px;
+        top: 16px;
+        bottom: 0;
+        width: 2px;
+        background-color: rgba(203, 164, 74, 0.3);
+        z-index: 1;
+      }
+
+      .timeline-content {
+        flex: 1;
+        margin-left: 16px;
+        padding-bottom: 16px;
+      }
+
+      .timeline-date {
+        color: #cba44a;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      .timeline-text {
+        color: #f5f5dc;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      /* Quote */
+      .quote-block {
+        background-color: rgba(26, 26, 26, 0.4);
+        border-left: 4px solid #cba44a;
+        padding: 16px 20px;
+        margin: 12px 0;
+        border-radius: 8px;
+      }
+
+      .quote-text {
+        color: #f5f5dc;
+        font-size: 16px;
+        line-height: 1.6;
+        font-style: italic;
+        margin: 8px 0;
+      }
+
+      .quote-citation {
+        color: #9ca3af;
+        font-size: 13px;
+        margin-top: 12px;
+        text-align: right;
+      }
+
+      /* Callout */
+      .callout-block {
+        padding: 16px;
+        border-radius: 8px;
+        margin: 12px 0;
+        display: flex;
+        align-items: flex-start;
+      }
+
+      .callout-icon {
+        font-size: 24px;
+        margin-right: 12px;
+      }
+
+      .callout-content h4 {
+        margin: 0 0 8px 0;
+        color: #f5f5dc;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .callout-content p {
+        margin: 0;
+        color: #9ca3af;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .callout-warning {
+        border-left: 4px solid #cba44a;
+        background-color: rgba(203, 164, 74, 0.08);
+      }
+
+      .callout-critical {
+        border-left: 4px solid #ef4444;
+        background-color: rgba(239, 68, 68, 0.08);
+      }
+
+      .callout-info {
+        border-left: 4px solid #3b82f6;
+        background-color: rgba(59, 130, 246, 0.08);
+      }
+
+      /* Two Column */
+      .two-column-block {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin: 12px 0;
+      }
+
+      @media (min-width: 768px) {
+        .two-column-block {
+          flex-direction: row;
+          gap: 16px;
+        }
+      }
+
+      .column {
+        flex: 1;
+      }
+
+      .column h4 {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 0 12px 0;
+      }
+
+      .column-left h4 {
+        color: #cba44a;
+      }
+
+      .column-right {
+        border-left: none;
+      }
+
+      @media (min-width: 768px) {
+        .column-right {
+          padding-left: 16px;
+          border-left: 2px solid #cba44a;
+        }
+      }
+
+      .column-right h4 {
+        color: #ef4444;
+      }
+
+      .column-point {
+        margin-bottom: 8px;
+        padding-left: 12px;
+        color: #f5f5dc;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .column-left .column-point {
+        border-left: 2px solid #cba44a;
+      }
+
+      .column-right .column-point {
+        border-left: 2px solid #ef4444;
+      }
+
+      /* Evidence */
+      .evidence-block {
+        background-color: rgba(26, 26, 26, 0.5);
+        border-radius: 10px;
+        padding: 16px;
+        border-left: 4px solid #cba44a;
+        margin: 12px 0;
+      }
+
+      .evidence-title {
+        color: #cba44a;
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      .evidence-summary {
+        color: #f5f5dc;
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 8px;
+      }
+
+      .evidence-citation {
+        padding-top: 12px;
+        border-top: 1px solid rgba(203, 164, 74, 0.3);
+        margin-top: 12px;
+        display: flex;
+        gap: 6px;
+        align-items: flex-start;
+      }
+
+      .evidence-citation-label {
+        color: #cba44a;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .evidence-citation-text {
+        color: #9ca3af;
+        font-size: 12px;
+        font-style: italic;
+      }
+
+      /* Divider */
+      .divider-solid {
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          #cba44a 50%,
+          transparent 100%
+        );
+        margin: 24px 0;
+      }
+
+      .divider-dotted {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin: 24px 0;
+        padding: 12px 0;
+      }
+
+      .divider-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #cba44a;
+      }
+
+      .divider-gradient {
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          #cba44a 0%,
+          #e5c76b 50%,
+          #cba44a 100%
+        );
+        margin: 24px 0;
+        border-radius: 2px;
+      }
+
+      /* Section Header */
+      .section-header-block {
+        text-align: center;
+        padding: 40px 20px;
+        margin: 24px 0;
+      }
+
+      .section-header-title {
+        color: #cba44a;
+        font-size: 28px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .section-header-line {
+        width: 150px;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          #cba44a 50%,
+          transparent 100%
+        );
+        margin: 16px auto;
+      }
+
+      /* Text/Bullet Points */
+      .points {
+        margin-top: 16px;
+      }
+
+      .point {
+        color: #d1d5db;
+        font-size: 16px;
+        line-height: 1.7;
+        margin: 10px 0;
+        padding-left: 26px;
+        position: relative;
+      }
+
+      @media (min-width: 768px) {
+        .point {
+          font-size: 20px;
+          line-height: 1.8;
+          margin: 12px 0;
+          padding-left: 28px;
+        }
+      }
+
+      .point:before {
+        content: "⚖";
+        position: absolute;
+        left: 0;
+        color: #cba44a;
+        font-size: 16px;
+      }
+
+      @media (min-width: 768px) {
+        .point:before {
+          font-size: 18px;
+        }
+      }
+
+      /* Paragraph */
+      .paragraph p {
+        color: #f5f5dc;
+        font-size: 15px;
+        line-height: 1.6;
+        margin: 12px 0;
+      }
+
+      @media (min-width: 768px) {
+        .paragraph p {
+          font-size: 18px;
+          line-height: 1.7;
+        }
+      }
+
+      /* Side-by-side Image Layout */
+      .image-side-by-side {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin: 20px 0;
+      }
+
+      @media (min-width: 768px) {
+        .image-side-by-side {
+          flex-direction: row;
+          gap: 12px;
+          align-items: flex-start;
+        }
+
+        .image-side-by-side.reverse {
+          flex-direction: row-reverse;
+        }
+      }
+
+      .image-container {
+        width: 100%;
+      }
+
+      @media (min-width: 768px) {
+        .image-container {
+          flex: 0 0 50%;
+        }
+
+        .image-container.small {
+          flex: 0 0 45%;
+        }
+
+        .image-container.medium {
+          flex: 0 0 50%;
+        }
+
+        .image-container.large {
+          flex: 0 0 55%;
+        }
+      }
+
+      .image-container img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        border: 1px solid rgba(203, 164, 74, 0.3);
+        display: block;
+      }
+
+      .image-center {
+        margin: 20px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .image-center img {
+        width: 80%;
+        max-width: 600px;
+        height: auto;
+        border-radius: 8px;
+        border: 1px solid rgba(203, 164, 74, 0.3);
+      }
+
+      .image-caption {
+        text-align: center;
+        color: #9ca3af;
+        font-size: 11px;
+        font-style: italic;
+        margin-top: 6px;
+        line-height: 1.4;
+      }
+
+      @media (min-width: 768px) {
+        .image-caption {
+          font-size: 12px;
+          margin-top: 8px;
+        }
+      }
+
+      .content-container {
+        flex: 1;
+        padding-left: 0;
+        margin-left: 0;
+      }
+
+      /* Footer */
+      .footer {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        border-top: 1px solid rgba(203, 164, 74, 0.3);
+        padding-top: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      @media (min-width: 768px) {
+        .footer {
+          bottom: 30px;
+          left: 80px;
+          right: 80px;
+          padding-top: 20px;
+        }
+      }
+
+      .footer-text {
+        color: #cba44a;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 1px;
+      }
+
+      @media (min-width: 768px) {
+        .footer-text {
+          font-size: 14px;
+        }
+      }
+
+      /* Markdown Colors */
+      .gold {
+        color: #cba44a;
+        font-weight: 600;
+      }
+      .red {
+        color: #ef4444;
+        font-weight: 600;
+      }
+      .blue {
+        color: #3b82f6;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Slide 1: Case Summary with Timeline -->
+    <div class="slide">
+      <div class="watermark">⚖️</div>
+      <div class="slide-number">Slide 1 of 7</div>
+
+      <h1>Case Summary</h1>
+      <div class="gold-line"></div>
+      <h2>Sharma vs. State of Maharashtra</h2>
+
+      <div class="section-header-block">
+        <div class="section-header-title">Case Chronology</div>
+        <div class="section-header-line"></div>
+      </div>
+
+      <div class="timeline-block">
+        <div class="timeline-event">
+          <div class="timeline-dot"></div>
+          <div class="timeline-connector"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">10 Jan 2024</div>
+            <div class="timeline-text">
+              Petitioner <span class="gold">arrested</span> without warrant
+            </div>
+          </div>
+        </div>
+        <div class="timeline-event">
+          <div class="timeline-dot"></div>
+          <div class="timeline-connector"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">11 Jan 2024</div>
+            <div class="timeline-text">
+              <span class="red">No FIR filed</span> within 24 hours
+            </div>
+          </div>
+        </div>
+        <div class="timeline-event">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">15 Jan 2024</div>
+            <div class="timeline-text">
+              Writ petition filed under <span class="blue">Article 226</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quote-block">
+        <div class="quote-text">
+          "No person shall be deprived of his life or personal liberty except
+          according to procedure established by law."
+        </div>
+        <div class="quote-citation">— Article 21, Constitution of India</div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-text">MIDNIGHT COURT</div>
+        <div class="footer-text">Dec 1, 2025</div>
+      </div>
+    </div>
+
+    <!-- Slide 2: Arguments with Two Column -->
+    <div class="slide">
+      <div class="watermark">⚖️</div>
+      <div class="slide-number">Slide 2 of 7</div>
+
+      <h1>Arguments Presented</h1>
+      <div class="gold-line"></div>
+      <h2>Petitioner vs State</h2>
+
+      <div class="callout-block callout-warning">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-content">
+          <h4>Key Legal Issue</h4>
+          <p>
+            Whether detention without magistrate presentation within 24 hours
+            violates constitutional guarantees.
+          </p>
+        </div>
+      </div>
+
+      <div class="two-column-block">
+        <div class="column column-left">
+          <h4>Petitioner's Arguments</h4>
+          <div class="column-point">
+            <span class="gold">No formal FIR</span> filed within 24 hours
+          </div>
+          <div class="column-point">
+            Magistrate presentation delayed by <span class="red">48 hours</span>
+          </div>
+          <div class="column-point">
+            Violation of <span class="blue">CRPC Section 57</span>
+          </div>
+        </div>
+        <div class="column column-right">
+          <h4>State's Counter</h4>
+          <div class="column-point">
+            National security concerns justified delay
+          </div>
+          <div class="column-point">Risk of evidence tampering</div>
+          <div class="column-point">
+            <span class="red">Failed to produce</span> documentary proof
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-text">MIDNIGHT COURT</div>
+        <div class="footer-text">Dec 1, 2025</div>
+      </div>
+    </div>
+
+    <!-- Slide 3: State's Response with Evidence -->
+    <div class="slide">
+      <div class="watermark">⚖️</div>
+      <div class="slide-number">Slide 3 of 7</div>
+
+      <h1>State's Response</h1>
+      <div class="gold-line"></div>
+      <h2>Counter-Arguments</h2>
+
+      <div class="evidence-block">
+        <div class="evidence-title">Exhibit A - Police Report</div>
+        <div class="evidence-summary">
+          Initial detention order citing
+          <span class="gold">suspected involvement</span> in unlawful
+          activities. Claims <span class="red">urgent need</span> for custody to
+          prevent tampering.
+        </div>
+        <div class="evidence-citation">
+          <span class="evidence-citation-label">Source:</span>
+          <span class="evidence-citation-text"
+            >Police Station Diary Entry No. 42/2024</span
+          >
+        </div>
+      </div>
+
+      <div class="divider-gradient"></div>
+
+      <div class="points">
+        <div class="point">
+          National security under <span class="gold">UAPA provisions</span>
+        </div>
+        <div class="point">
+          <span class="blue">Public order</span> maintenance required
+        </div>
+        <div class="point">
+          <span class="red">However</span>, no documentary evidence produced
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-text">MIDNIGHT COURT</div>
+        <div class="footer-text">Dec 1, 2025</div>
+      </div>
+    </div>
+
+    <!-- Slide 4: Court's Verdict -->
+    <div class="slide">
+      <div class="watermark">⚖️</div>
+      <div class="slide-number">Slide 4 of 7</div>
+
+      <h1>Court's Verdict</h1>
+      <div class="gold-line"></div>
+      <h2>Final Decision</h2>
+
+      <div class="callout-block callout-critical">
+        <div class="callout-icon">🚨</div>
+        <div class="callout-content">
+          <h4>Critical Violation Found</h4>
+          <p>
+            Court found flagrant violation of Article 21 and CRPC Section 57.
+          </p>
+        </div>
+      </div>
+
+      <div class="points">
+        <div class="point">
+          <span class="gold">Immediate release</span> ordered with compensation
+        </div>
+        <div class="point">
+          ₹5 lakhs awarded for <span class="blue">unlawful detention</span>
+        </div>
+        <div class="point">
+          <span class="red">Inquiry</span> mandated against officers
+        </div>
+      </div>
+
+      <div class="quote-block">
+        <div class="quote-text">
+          "Liberty is the most precious of all rights. When the State acts
+          arbitrarily, courts must intervene decisively."
+        </div>
+        <div class="quote-citation">
+          — Hon'ble Justice Sharma, High Court (2024)
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-text">MIDNIGHT COURT</div>
+        <div class="footer-text">Dec 1, 2025</div>
+      </div>
+    </div>
+
+    <!-- Slide 5: Documentary Evidence with Center Image -->
+    <div class="slide">
+      <div class="watermark">⚖️</div>
+      <div class="slide-number">Slide 5 of 7</div>
+
+      <h1>Documentary Evidence</h1>
+      <div class="gold-line"></div>
+      <h2>Visual Exhibits</h2>
+
+      <div class="paragraph">
+        <p>
+          The following evidence was submitted, demonstrating clear violations
+          of <span class="gold">procedural safeguards</span>.
+        </p>
+      </div>
+
+      <div class="image-center">
+        <img src="../assets/images/intro.png" alt="Detention Order" />
+        <div class="image-caption">
+          <span class="gold">Detention Order</span> - Unsigned document
+        </div>
+      </div>
+
+      <div class="evidence-block">
+        <div class="evidence-title">Exhibit B - Station Diary</div>
+        <div class="evidence-summary">
+          Records showing <span class="gold">delayed FIR</span> and
+          <span class="red">missing timestamps</span>.
+        </div>
+        <div class="evidence-citation">
+          <span class="evidence-citation-label">Source:</span>
+          <span class="evidence-citation-text">Police Records, Jan 2024</span>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-text">MIDNIGHT COURT</div>
+        <div class="footer-text">Dec 1, 2025</div>
+      </div>
+    </div>
+
+    <!-- Slide 6: Legal Precedents with Float Left Image -->
+    <div class="slide">
+      <div class="watermark">⚖️</div>
+      <div class="slide-number">Slide 6 of 7</div>
+
+      <h1>Legal Precedents</h1>
+      <div class="gold-line"></div>
+      <h2>D.K. Basu Guidelines</h2>
+
+      <div class="image-side-by-side">
+        <div class="image-container small">
+          <img src="../assets/images/Habeus-corpus.png" alt="D.K. Basu Case" />
+          <div class="image-caption">
+            <span class="gold">D.K. Basu vs West Bengal</span> (1997)
+          </div>
+        </div>
+        <div class="content-container">
+          <div class="paragraph">
+            <p>
+              The landmark <span class="gold">D.K. Basu</span> judgment
+              established comprehensive guidelines for arrests. The court
+              mandated strict timelines to prevent
+              <span class="blue">custodial abuse</span> and protect Article 21
+              rights.
+            </p>
+          </div>
+          <div class="divider-dotted">
+            <div class="divider-dot"></div>
+            <div class="divider-dot"></div>
+            <div class="divider-dot"></div>
+            <div class="divider-dot"></div>
+            <div class="divider-dot"></div>
+          </div>
+          <div class="points">
+            <div class="point">
+              <span class="gold">Arrest memo</span> required immediately
+            </div>
+            <div class="point">
+              Family informed within <span class="blue">24 hours</span>
+            </div>
+            <div class="point">
+              Magistrate presentation <span class="gold">mandatory</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-text">MIDNIGHT COURT</div>
+        <div class="footer-text">Dec 1, 2025</div>
+      </div>
+    </div>
+
+    <!-- Slide 7: Impact with Float Right Image -->
+    <div class="slide">
+      <div class="watermark">⚖️</div>
+      <div class="slide-number">Slide 7 of 7</div>
+
+      <h1>Impact & Recommendations</h1>
+      <div class="gold-line"></div>
+      <h2>Systemic Changes</h2>
+
+      <div class="image-side-by-side reverse">
+        <div class="image-container small">
+          <img
+            src="../assets/images/type-of-writs.png"
+            alt="Statistical Data"
+          />
+          <div class="image-caption">
+            <span class="gold">Detention violations</span> across Maharashtra
+          </div>
+        </div>
+        <div class="content-container">
+          <div class="paragraph">
+            <p>
+              This case highlights <span class="gold">systemic issues</span> in
+              detention procedures. The data reveals
+              <span class="red">procedural violations</span> in multiple
+              stations, setting precedent for
+              <span class="blue">stricter enforcement</span>.
+            </p>
+          </div>
+          <div class="callout-block callout-info">
+            <div class="callout-icon">ℹ️</div>
+            <div class="callout-content">
+              <h4>Court's Direction</h4>
+              <p>Implement automated tracking system within 6 months.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-text">MIDNIGHT COURT</div>
+        <div class="footer-text">Dec 1, 2025</div>
+      </div>
+    </div>
+
+    <script>
+      console.log("PDF Layout Test - 7 Slides with Real Images");
+      console.log("Viewport:", window.innerWidth, "x", window.innerHeight);
+      console.log("All block types tested");
+    </script>
+  </body>
+</html>

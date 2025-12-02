@@ -300,21 +300,7 @@ const renderImageBlock = (block, nextBlock) => {
 
     if (!uri) return '';
 
-    // Size configuration (now width percentages for side-by-side)
-    const getSizeStyle = (size) => {
-        switch (size) {
-            case 'small':
-                return 'width: 35%;'; // 35% image, content gets remaining
-            case 'medium':
-                return 'width: 45%;'; // 45% image, content gets remaining
-            case 'large':
-                return 'width: 55%;'; // 55% image, content gets remaining
-            default:
-                return 'width: 45%;';
-        }
-    };
-
-    const sizeStyle = getSizeStyle(size);
+    // Note: For side-by-side (floatLeft/floatRight), width is controlled in export/index.jsx
     const formattedCaption = caption ? parseMarkdownToHTML(caption) : '';
 
     const captionHTML = caption
@@ -337,9 +323,10 @@ const renderImageBlock = (block, nextBlock) => {
     }
 
     // Side-by-side layouts (floatLeft/floatRight) - mark as grouped
+    // Note: Width is controlled by export/index.jsx. Keep inner wrapper at 100% to avoid extra inner gaps.
     return `
         <div class="image-block-grouped" data-layout="${layout}" data-size="${size}" style="display: none;">
-            <div style="flex: 0 0 auto; ${sizeStyle}">
+            <div style="width: 100%;">
                 <img 
                     src="${uri}" 
                     style="width: 100%; border-radius: 8px; border: 1px solid rgba(203, 164, 74, 0.3); height: auto;"

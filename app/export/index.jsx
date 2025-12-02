@@ -44,11 +44,11 @@ export default function ExportScreen() {
 
                 // Render side-by-side container
                 html += `
-                    <div style="display: flex; gap: 12px; margin: 20px 0; align-items: flex-start; ${isLeftLayout ? 'flex-direction: row;' : 'flex-direction: row-reverse;'}">
+                    <div style="display: flex; gap: 20px; margin: 20px 0; align-items: flex-start; ${isLeftLayout ? 'flex-direction: row;' : 'flex-direction: row-reverse;'}">
                         <div style="flex: 0 0 ${imageWidth};">
                             ${imageHTML.replace('style="display: none;"', 'style=""')}
                         </div>
-                        <div style="flex: 1; min-width: 0; padding-left: 0; margin-left: 0;">
+                        <div style="flex: 0 1 auto; min-width: 0; padding-left: 0; margin-left: 0;">
                             ${contentHTML || '<div style="color: #9CA3AF; font-style: italic; font-size: 14px;">Add content block after image for side-by-side layout</div>'}
                         </div>
                     </div>

@@ -78,13 +78,13 @@ export default function ImageBlock({ block, onUpdate, onDelete }) {
     const getSizeConfig = (size) => {
         switch (size) {
             case 'small':
-                return { width: '60%', height: 150 };
+                return { width: '50%', height: 400 };
             case 'medium':
-                return { width: '80%', height: 200 };
+                return { width: '60%', height: 500 };
             case 'large':
-                return { width: '100%', height: 250 };
+                return { width: '100%', height: 600 };
             default:
-                return { width: '80%', height: 200 };
+                return { width: '50%', height: 400 };
         }
     };
 
