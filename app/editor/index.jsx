@@ -2,14 +2,15 @@ import { colors } from "@/theme/colors";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import GoldButton from "@/components/GoldButton";
+import SaveTemplateModal from "@/components/SaveTemplateModal";
 import BlockPicker from "@/components/blocks/BlockPicker";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import { BLOCK_TYPES, createDefaultBlock } from "@/components/blocks/blockTypes";
 import { getDummySlides } from "@/utils/dummyData";
-import { getTemplateById } from "@/utils/templateData";
+import { getTemplateById, getCustomTemplateById, saveCustomTemplate } from "@/utils/templateData";
 
 // Parse markdown-style text: *gold*, ~red~, _blue_
 const parseFormattedText = (text) => {
@@ -64,6 +65,7 @@ export default function EditorScreen() {
     const [insertPosition, setInsertPosition] = useState(null);
     const [showHeadingPreview, setShowHeadingPreview] = useState(false);
     const [showSubtitlePreview, setShowSubtitlePreview] = useState(false);
+    const [saveTemplateVisible, setSaveTemplateVisible] = useState(false);
 
     // TEST MODE - Only in development, zero production impact
     const [testMode, setTestMode] = useState(false);
@@ -75,7 +77,15 @@ export default function EditorScreen() {
         const initializePresentation = async () => {
             // Priority 1: Load template if provided
             if (template) {
-                const templateData = getTemplateById(template, templateType || 'quick');
+                let templateData;
+                
+                // Check if it's a custom template
+                if (templateType === 'custom') {
+                    templateData = await getCustomTemplateById(template);
+                } else {
+                    templateData = getTemplateById(template, templateType || 'quick');
+                }
+                
                 if (templateData && templateData.slides) {
                     // Use template's pre-configured slides
                     setSlides(templateData.slides);
@@ -241,6 +251,16 @@ export default function EditorScreen() {
                 })))
             }
         });
+    }
+
+    const handleSaveTemplate = async (name, description, icon) => {
+        try {
+            await saveCustomTemplate(name, description, slides, icon);
+            Alert.alert('Success', `Template "${name}" saved successfully!`);
+            setSaveTemplateVisible(false);
+        } catch (_error) {
+            Alert.alert('Error', 'Failed to save template. Please try again.');
+        }
     }
 
     return (
@@ -451,6 +471,15 @@ export default function EditorScreen() {
                     </View>
                 </View>
 
+                {/* Save as Template Button */}
+                <TouchableOpacity
+                    onPress={() => setSaveTemplateVisible(true)}
+                    style={styles.saveTemplateButton}
+                >
+                    <Text style={styles.saveTemplateIcon}>💾</Text>
+                    <Text style={styles.saveTemplateText}>Save as Custom Template</Text>
+                </TouchableOpacity>
+
                 <GoldButton
                     title="Continue to Export"
                     onPress={goToExport}
@@ -465,6 +494,13 @@ export default function EditorScreen() {
                     setInsertPosition(null);
                 }}
                 onSelectBlock={(blockType) => addBlock(blockType)}
+            />
+
+            {/* Save Template Modal */}
+            <SaveTemplateModal
+                visible={saveTemplateVisible}
+                onClose={() => setSaveTemplateVisible(false)}
+                onSave={handleSaveTemplate}
             />
         </ScrollView>
     )
@@ -857,5 +893,27 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: '600',
         fontFamily: 'Inter_600SemiBold',
-    }
+    },
+    saveTemplateButton: {
+        backgroundColor: colors.surface,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        marginBottom: 16,
+    },
+    saveTemplateIcon: {
+        fontSize: 18,
+    },
+    saveTemplateText: {
+        color: colors.gold,
+        fontSize: 15,
+        fontWeight: '600',
+        fontFamily: 'Inter_600SemiBold',
+    },
 })

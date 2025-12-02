@@ -1,9 +1,12 @@
 import { BLOCK_TYPES } from "@/components/blocks/blockTypes";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 /**
  * Template Data - Pre-configured slide structures for different legal presentation types
  * Each template includes pre-filled content blocks with legal boilerplate
  */
+
+const CUSTOM_TEMPLATES_KEY = 'custom_templates';
 
 // Quick Templates (1-2 slides for specific purposes)
 export const QUICK_TEMPLATES = {
@@ -611,4 +614,78 @@ export const getAllTemplates = () => {
             ...FULL_TEMPLATES[key]
         }))
     };
+};
+
+/**
+ * Custom Templates - User-saved templates stored in AsyncStorage
+ */
+
+/**
+ * Save current presentation as custom template
+ */
+export const saveCustomTemplate = async (templateName, description, slides, icon = '📝') => {
+    try {
+        const customTemplates = await getCustomTemplates();
+        const templateId = Date.now().toString();
+        
+        const newTemplate = {
+            id: templateId,
+            name: templateName,
+            description: description,
+            icon: icon,
+            type: 'custom',
+            slides: slides,
+            createdAt: new Date().toISOString()
+        };
+
+        customTemplates[templateId] = newTemplate;
+        await AsyncStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(customTemplates));
+        
+        console.log('✅ Saved custom template:', templateName);
+        return templateId;
+    } catch (error) {
+        console.error('❌ Failed to save custom template:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get all custom templates
+ */
+export const getCustomTemplates = async () => {
+    try {
+        const stored = await AsyncStorage.getItem(CUSTOM_TEMPLATES_KEY);
+        return stored ? JSON.parse(stored) : {};
+    } catch (error) {
+        console.error('❌ Failed to load custom templates:', error);
+        return {};
+    }
+};
+
+/**
+ * Delete custom template by ID
+ */
+export const deleteCustomTemplate = async (templateId) => {
+    try {
+        const customTemplates = await getCustomTemplates();
+        delete customTemplates[templateId];
+        await AsyncStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(customTemplates));
+        console.log('✅ Deleted custom template:', templateId);
+    } catch (error) {
+        console.error('❌ Failed to delete custom template:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get custom template by ID
+ */
+export const getCustomTemplateById = async (templateId) => {
+    try {
+        const customTemplates = await getCustomTemplates();
+        return customTemplates[templateId] || null;
+    } catch (error) {
+        console.error('❌ Failed to get custom template:', error);
+        return null;
+    }
 };
