@@ -1,8 +1,8 @@
 import { colors } from "@/theme/colors";
+import { getAllTemplates } from "@/utils/templateData";
 import { router } from "expo-router";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { getAllTemplates } from "@/utils/templateData";
 
 export default function TemplateScreen() {
     const [selectedTab, setSelectedTab] = useState('quick'); // 'quick' or 'full'
@@ -31,7 +31,7 @@ export default function TemplateScreen() {
                     </Text>
                     <Text style={styles.tabHint}>1-2 slides</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                     style={[styles.tab, selectedTab === 'full' && styles.tabActive]}
                     onPress={() => setSelectedTab('full')}
@@ -52,7 +52,7 @@ export default function TemplateScreen() {
                         activeOpacity={0.7}
                         onPress={() => router.push({
                             pathname: "/editor",
-                            params: { 
+                            params: {
                                 template: item.id,
                                 templateType: item.type
                             }

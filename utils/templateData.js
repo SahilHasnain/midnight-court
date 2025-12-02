@@ -8,26 +8,18 @@ import { BLOCK_TYPES } from "@/components/blocks/blockTypes";
 // Quick Templates (1-2 slides for specific purposes)
 export const QUICK_TEMPLATES = {
     title: {
-        name: "Title Slide",
+        name: "Blank Slide",
         icon: "⚖️",
         description: "Start with authority and presence",
         slides: [
             {
                 title: "Case Title",
                 subtitle: "Your legal presentation begins here",
-                blocks: [
-                    {
-                        id: Date.now().toString(),
-                        type: BLOCK_TYPES.PARAGRAPH,
-                        data: {
-                            text: "Enter your case name, court details, and presentation context here."
-                        }
-                    }
-                ]
+                blocks: []
             }
         ]
     },
-    
+
     case: {
         name: "Case Summary",
         icon: "📋",
@@ -68,7 +60,7 @@ export const QUICK_TEMPLATES = {
             }
         ]
     },
-    
+
     arguments: {
         name: "Arguments vs Counter",
         icon: "⚔️",
@@ -109,7 +101,7 @@ export const QUICK_TEMPLATES = {
             }
         ]
     },
-    
+
     precedent: {
         name: "Legal Precedent",
         icon: "📚",
@@ -151,7 +143,7 @@ export const QUICK_TEMPLATES = {
             }
         ]
     },
-    
+
     verdict: {
         name: "Verdict & Conclusion",
         icon: "🏛️",
@@ -429,7 +421,7 @@ export const FULL_TEMPLATES = {
             }
         ]
     },
-    
+
     habeas_corpus: {
         name: "Habeas Corpus Petition",
         icon: "🔓",

@@ -70,18 +70,38 @@ export default function EditorScreen() {
 
     const currentSlide = slides[currentSlideIndex];
 
-    // Load template data on mount
+    // Load template or saved presentation on mount
     useEffect(() => {
-        if (template) {
-            const templateData = getTemplateById(template, templateType || 'quick');
-            if (templateData && templateData.slides) {
-                // Use template's pre-configured slides
-                setSlides(templateData.slides);
-                setCurrentSlideIndex(0);
-                console.log('✅ Loaded template:', templateData.name, 'with', templateData.slides.length, 'slides');
+        const initializePresentation = async () => {
+            // Priority 1: Load template if provided
+            if (template) {
+                const templateData = getTemplateById(template, templateType || 'quick');
+                if (templateData && templateData.slides) {
+                    // Use template's pre-configured slides
+                    setSlides(templateData.slides);
+                    setCurrentSlideIndex(0);
+                    console.log('✅ Loaded template:', templateData.name, 'with', templateData.slides.length, 'slides');
+                    return; // Exit early, don't load saved data
+                }
             }
-        }
-    }, [template, templateType])
+
+            // Priority 2: Load saved presentation if no template
+            try {
+                const saved = await AsyncStorage.getItem('current_presentation');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.slides) {
+                        setSlides(data.slides);
+                        console.log('✅ Loaded saved presentation with', data.slides.length, 'slides');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load presentation:', error);
+            }
+        };
+
+        initializePresentation();
+    }, [template, templateType]);
 
     // Auto-save slides to AsyncStorage
     useEffect(() => {
@@ -102,27 +122,6 @@ export default function EditorScreen() {
         const timeoutId = setTimeout(savePresentation, 1000);
         return () => clearTimeout(timeoutId);
     }, [slides, template]);
-
-    // Load saved presentation on mount
-    useEffect(() => {
-        const loadPresentation = async () => {
-            try {
-                const saved = await AsyncStorage.getItem('current_presentation');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    if (data.slides) {
-                        setSlides(data.slides);
-                        console.log('✅ Loaded saved presentation with', data.slides.length, 'slides');
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to load presentation:', error);
-            }
-        };
-
-        loadPresentation();
-
-    }, []);
 
     const updateSlide = (field, value) => {
         const newSlides = [...slides];
