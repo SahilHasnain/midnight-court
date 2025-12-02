@@ -60,6 +60,7 @@ export default function EditorScreen() {
     ]);
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
     const [blockPickerVisible, setBlockPickerVisible] = useState(false);
+    const [insertPosition, setInsertPosition] = useState(null);
     const [showHeadingPreview, setShowHeadingPreview] = useState(false);
     const [showSubtitlePreview, setShowSubtitlePreview] = useState(false);
 
@@ -169,7 +170,23 @@ export default function EditorScreen() {
 
     const addBlock = (blockType = BLOCK_TYPES.TEXT) => {
         const newBlock = createDefaultBlock(blockType);
-        updateSlide("blocks", [...currentSlide.blocks, newBlock]);
+
+        if (insertPosition !== null) {
+            // Insert at specific position
+            const newBlocks = [...currentSlide.blocks];
+            newBlocks.splice(insertPosition, 0, newBlock);
+            updateSlide("blocks", newBlocks);
+            setInsertPosition(null);
+        } else {
+            // Append at end
+            updateSlide("blocks", [...currentSlide.blocks, newBlock]);
+        }
+        setBlockPickerVisible(false);
+    }
+
+    const openInsertPicker = (position) => {
+        setInsertPosition(position);
+        setBlockPickerVisible(true);
     }
 
     const deleteBlock = (blockId) => {
@@ -182,6 +199,33 @@ export default function EditorScreen() {
     const addSlide = () => {
         setSlides([...slides, { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)] }]);
         setCurrentSlideIndex(slides.length);
+    }
+
+    const insertSlideBefore = () => {
+        const newSlide = { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)] };
+        const newSlides = [...slides];
+        newSlides.splice(currentSlideIndex, 0, newSlide);
+        setSlides(newSlides);
+        // Keep current index (new slide inserted before, so we're now on the new one)
+    }
+
+    const insertSlideAfter = () => {
+        const newSlide = { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)] };
+        const newSlides = [...slides];
+        newSlides.splice(currentSlideIndex + 1, 0, newSlide);
+        setSlides(newSlides);
+        setCurrentSlideIndex(currentSlideIndex + 1);
+    }
+
+    const deleteSlide = () => {
+        if (slides.length > 1) {
+            const newSlides = slides.filter((_, i) => i !== currentSlideIndex);
+            setSlides(newSlides);
+            // Adjust current index if needed
+            if (currentSlideIndex >= newSlides.length) {
+                setCurrentSlideIndex(newSlides.length - 1);
+            }
+        }
     }
 
     const nextSlide = () => {
@@ -332,13 +376,34 @@ export default function EditorScreen() {
 
                 {/* Content Blocks */}
                 <Text style={styles.label}>Content Blocks</Text>
-                {currentSlide.blocks.map((block) => (
-                    <BlockRenderer
-                        key={block.id}
-                        block={block}
-                        onUpdate={(updatedBlock) => updateBlock(block.id, updatedBlock)}
-                        onDelete={currentSlide.blocks.length > 1 ? () => deleteBlock(block.id) : null}
-                    />
+                {currentSlide.blocks.map((block, index) => (
+                    <View key={block.id}>
+                        {/* Insert button before first block and between blocks */}
+                        {index === 0 && (
+                            <TouchableOpacity
+                                onPress={() => openInsertPicker(0)}
+                                style={styles.insertButton}
+                            >
+                                <Text style={styles.insertButtonText}>+ Insert Block</Text>
+                            </TouchableOpacity>
+                        )}
+
+                        <BlockRenderer
+                            block={block}
+                            onUpdate={(updatedBlock) => updateBlock(block.id, updatedBlock)}
+                            onDelete={currentSlide.blocks.length > 1 ? () => deleteBlock(block.id) : null}
+                        />
+
+                        {/* Insert button between blocks (not after last) */}
+                        {index < currentSlide.blocks.length - 1 && (
+                            <TouchableOpacity
+                                onPress={() => openInsertPicker(index + 1)}
+                                style={styles.insertButton}
+                            >
+                                <Text style={styles.insertButtonText}>+ Insert Block</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 ))}
 
                 <TouchableOpacity
@@ -353,11 +418,48 @@ export default function EditorScreen() {
                     <Text style={styles.addBlockArrow}>›</Text>
                 </TouchableOpacity>
 
-                <GoldButton
-                    title="+ Add New Slide"
-                    onPress={addSlide}
-                    style={styles.addButton}
-                />
+                {/* Slide Management Section */}
+                <View style={styles.slideManagementSection}>
+                    <Text style={styles.sectionLabel}>Slide Management</Text>
+
+                    <View style={styles.slideActionRow}>
+                        <TouchableOpacity
+                            onPress={insertSlideBefore}
+                            style={styles.slideActionButton}
+                        >
+                            <Text style={styles.slideActionIcon}>⬆️</Text>
+                            <Text style={styles.slideActionText}>Insert Before</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={insertSlideAfter}
+                            style={styles.slideActionButton}
+                        >
+                            <Text style={styles.slideActionIcon}>⬇️</Text>
+                            <Text style={styles.slideActionText}>Insert After</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.slideActionRow}>
+                        <TouchableOpacity
+                            onPress={addSlide}
+                            style={[styles.slideActionButton, styles.slideActionButtonFull]}
+                        >
+                            <Text style={styles.slideActionIcon}>➕</Text>
+                            <Text style={styles.slideActionText}>Add at End</Text>
+                        </TouchableOpacity>
+
+                        {slides.length > 1 && (
+                            <TouchableOpacity
+                                onPress={deleteSlide}
+                                style={[styles.slideActionButton, styles.slideActionButtonDanger]}
+                            >
+                                <Text style={styles.slideActionIcon}>🗑️</Text>
+                                <Text style={styles.slideActionTextDanger}>Delete Slide</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                </View>
 
                 <GoldButton
                     title="Continue to Export"
@@ -368,7 +470,10 @@ export default function EditorScreen() {
             {/* Block Picker Modal */}
             <BlockPicker
                 visible={blockPickerVisible}
-                onClose={() => setBlockPickerVisible(false)}
+                onClose={() => {
+                    setBlockPickerVisible(false);
+                    setInsertPosition(null);
+                }}
                 onSelectBlock={(blockType) => addBlock(blockType)}
             />
         </ScrollView>
@@ -688,5 +793,79 @@ const styles = StyleSheet.create({
         color: colors.gold,
         fontSize: 24,
         fontWeight: '300',
+    },
+    insertButton: {
+        alignSelf: 'center',
+        paddingVertical: 6,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+        borderStyle: 'dashed',
+        opacity: 0.5,
+        marginVertical: 8,
+        backgroundColor: 'transparent',
+    },
+    insertButtonText: {
+        color: colors.gold,
+        fontSize: 12,
+        fontWeight: '600',
+        fontFamily: 'Inter_600SemiBold',
+    },
+    slideManagementSection: {
+        marginTop: 24,
+        marginBottom: 16,
+        padding: 16,
+        backgroundColor: colors.card,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+    },
+    sectionLabel: {
+        color: colors.gold,
+        fontSize: 15,
+        fontWeight: '700',
+        fontFamily: 'Inter_700Bold',
+        marginBottom: 12,
+    },
+    slideActionRow: {
+        flexDirection: 'row',
+        gap: 8,
+        marginBottom: 8,
+    },
+    slideActionButton: {
+        flex: 1,
+        backgroundColor: colors.background,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+    },
+    slideActionButtonFull: {
+        flex: 1,
+    },
+    slideActionButtonDanger: {
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239, 68, 68, 0.05)',
+    },
+    slideActionIcon: {
+        fontSize: 16,
+    },
+    slideActionText: {
+        color: colors.gold,
+        fontSize: 13,
+        fontWeight: '600',
+        fontFamily: 'Inter_600SemiBold',
+    },
+    slideActionTextDanger: {
+        color: '#ef4444',
+        fontSize: 13,
+        fontWeight: '600',
+        fontFamily: 'Inter_600SemiBold',
     }
 })
