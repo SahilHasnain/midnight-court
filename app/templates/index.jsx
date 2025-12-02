@@ -1,49 +1,16 @@
 import { colors } from "@/theme/colors";
 import { router } from "expo-router";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-const TEMPLATES = [
-    {
-        id: "title",
-        name: "Title Slide",
-        icon: "⚖️",
-        description: "Start with authority and presence"
-    },
-    {
-        id: "case",
-        name: "Case Summary",
-        icon: "📋",
-        description: "Facts, issues, and parties involved"
-    },
-    {
-        id: "judgement",
-        name: "Judgement",
-        icon: "⚡",
-        description: "Court's ruling and legal reasoning"
-    },
-    {
-        id: "arguments",
-        name: "Arguments vs Counter",
-        icon: "⚔️",
-        description: "Present both sides with clarity"
-    },
-    {
-        id: "precedent",
-        name: "Legal Precedent",
-        icon: "📚",
-        description: "Cite landmark cases and rulings"
-    },
-    {
-        id: "verdict",
-        name: "Verdict & Conclusion",
-        icon: "🏛️",
-        description: "Final stand and key takeaways"
-    },
-];
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { getAllTemplates } from "@/utils/templateData";
 
 export default function TemplateScreen() {
+    const [selectedTab, setSelectedTab] = useState('quick'); // 'quick' or 'full'
+    const templates = getAllTemplates();
+    const currentTemplates = selectedTab === 'quick' ? templates.quick : templates.full;
+
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.heading}>Choose Your Template</Text>
@@ -53,18 +20,42 @@ export default function TemplateScreen() {
                 </Text>
             </View>
 
+            {/* Tab Selector */}
+            <View style={styles.tabContainer}>
+                <TouchableOpacity
+                    style={[styles.tab, selectedTab === 'quick' && styles.tabActive]}
+                    onPress={() => setSelectedTab('quick')}
+                >
+                    <Text style={[styles.tabText, selectedTab === 'quick' && styles.tabTextActive]}>
+                        Quick Start
+                    </Text>
+                    <Text style={styles.tabHint}>1-2 slides</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                    style={[styles.tab, selectedTab === 'full' && styles.tabActive]}
+                    onPress={() => setSelectedTab('full')}
+                >
+                    <Text style={[styles.tabText, selectedTab === 'full' && styles.tabTextActive]}>
+                        Full Presentation
+                    </Text>
+                    <Text style={styles.tabHint}>5-7 slides</Text>
+                </TouchableOpacity>
+            </View>
+
             {/* Template List */}
-            <FlatList
-                data={TEMPLATES}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.listContent}
-                renderItem={({ item }) => (
+            <View style={styles.listContent}>
+                {currentTemplates.map((item) => (
                     <TouchableOpacity
+                        key={item.id}
                         style={styles.card}
                         activeOpacity={0.7}
                         onPress={() => router.push({
                             pathname: "/editor",
-                            params: { template: item.id }
+                            params: { 
+                                template: item.id,
+                                templateType: item.type
+                            }
                         })}
                     >
                         <View style={styles.cardContent}>
@@ -74,15 +65,20 @@ export default function TemplateScreen() {
                             <View style={styles.textContainer}>
                                 <Text style={styles.cardTitle}>{item.name}</Text>
                                 <Text style={styles.cardDescription}>{item.description}</Text>
+                                {item.type === 'full' && (
+                                    <Text style={styles.slideCount}>
+                                        📑 {item.slides.length} pre-configured slides
+                                    </Text>
+                                )}
                             </View>
                         </View>
                         <View style={styles.arrow}>
                             <Text style={styles.arrowText}>›</Text>
                         </View>
                     </TouchableOpacity>
-                )}
-            />
-        </View>
+                ))}
+            </View>
+        </ScrollView>
     )
 }
 
@@ -180,5 +176,48 @@ const styles = StyleSheet.create({
         color: colors.gold,
         fontSize: 28,
         fontWeight: "300",
+    },
+    tabContainer: {
+        flexDirection: 'row',
+        gap: 12,
+        paddingHorizontal: 20,
+        marginBottom: 20,
+    },
+    tab: {
+        flex: 1,
+        backgroundColor: colors.card,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+        alignItems: 'center',
+    },
+    tabActive: {
+        backgroundColor: colors.background,
+        borderWidth: 2,
+        borderColor: colors.gold,
+    },
+    tabText: {
+        color: colors.textSecondary,
+        fontSize: 15,
+        fontWeight: '600',
+        fontFamily: 'Inter_600SemiBold',
+        marginBottom: 2,
+    },
+    tabTextActive: {
+        color: colors.gold,
+    },
+    tabHint: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        fontFamily: 'Inter_400Regular',
+        opacity: 0.7,
+    },
+    slideCount: {
+        color: colors.gold,
+        fontSize: 11,
+        fontFamily: 'Inter_600SemiBold',
+        marginTop: 4,
     }
 })

@@ -9,6 +9,7 @@ import BlockPicker from "@/components/blocks/BlockPicker";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import { BLOCK_TYPES, createDefaultBlock } from "@/components/blocks/blockTypes";
 import { getDummySlides } from "@/utils/dummyData";
+import { getTemplateById } from "@/utils/templateData";
 
 // Parse markdown-style text: *gold*, ~red~, _blue_
 const parseFormattedText = (text) => {
@@ -52,7 +53,7 @@ const parseFormattedText = (text) => {
 
 
 export default function EditorScreen() {
-    const { template } = useLocalSearchParams();
+    const { template, templateType } = useLocalSearchParams();
 
     // Multi-slide state (now using blocks instead of points)
     const [slides, setSlides] = useState([
@@ -69,28 +70,18 @@ export default function EditorScreen() {
 
     const currentSlide = slides[currentSlideIndex];
 
+    // Load template data on mount
     useEffect(() => {
-        if (template === "case") {
-            updateSlide("title", "Case Summary");
-            updateSlide("subtitle", "Facts & Issues");
-        } else if (template === "judgement") {
-            updateSlide("title", "Judgement");
-            updateSlide("subtitle", "Holding & Reasoning");
-        } else if (template === "arguments") {
-            updateSlide("title", "Arguments vs Counter");
-            updateSlide("subtitle", "Key Points");
-        } else if (template === "precedent") {
-            updateSlide("title", "Legal Precedents");
-            updateSlide("subtitle", "Important Cases");
-        } else if (template === "verdict") {
-            updateSlide("title", "Verdict & Conclusion");
-            updateSlide("subtitle", "Final Stand");
-        } else {
-            updateSlide("title", "Title Slide");
-            updateSlide("subtitle", "Topic");
+        if (template) {
+            const templateData = getTemplateById(template, templateType || 'quick');
+            if (templateData && templateData.slides) {
+                // Use template's pre-configured slides
+                setSlides(templateData.slides);
+                setCurrentSlideIndex(0);
+                console.log('✅ Loaded template:', templateData.name, 'with', templateData.slides.length, 'slides');
+            }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [template])
+    }, [template, templateType])
 
     // Auto-save slides to AsyncStorage
     useEffect(() => {
