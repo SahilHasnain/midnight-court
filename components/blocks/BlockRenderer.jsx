@@ -14,7 +14,7 @@ import { BLOCK_TYPES } from "./blockTypes";
  * BlockRenderer - Renders the appropriate block component based on block type
  * This is the central component that handles all block rendering
  */
-export default function BlockRenderer({ block, onUpdate, onDelete }) {
+export default function BlockRenderer({ block, onUpdate, onDelete, onOpenImageSearch }) {
     if (!block || !block.type) {
         return null;
     }
@@ -48,7 +48,7 @@ export default function BlockRenderer({ block, onUpdate, onDelete }) {
             return <DividerBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
 
         case BLOCK_TYPES.IMAGE:
-            return <ImageBlock block={block} onUpdate={onUpdate} onDelete={onDelete} />;
+            return <ImageBlock block={block} onUpdate={onUpdate} onDelete={onDelete} onOpenImageSearch={onOpenImageSearch} />;
 
         // Future block types will be added here as we implement them
 

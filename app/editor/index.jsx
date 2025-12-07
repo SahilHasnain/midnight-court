@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import GoldButton from "@/components/GoldButton";
+import ImageSearchModal from "@/components/ImageSearchModal";
 import SaveTemplateModal from "@/components/SaveTemplateModal";
 import BlockPicker from "@/components/blocks/BlockPicker";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
@@ -66,6 +67,8 @@ export default function EditorScreen() {
     const [showHeadingPreview, setShowHeadingPreview] = useState(false);
     const [showSubtitlePreview, setShowSubtitlePreview] = useState(false);
     const [saveTemplateVisible, setSaveTemplateVisible] = useState(false);
+    const [imageSearchVisible, setImageSearchVisible] = useState(false);
+    const [selectedImageBlockId, setSelectedImageBlockId] = useState(null);
 
     // TEST MODE - Only in development, zero production impact
     const [testMode, setTestMode] = useState(false);
@@ -402,6 +405,10 @@ export default function EditorScreen() {
                             block={block}
                             onUpdate={(updatedBlock) => updateBlock(block.id, updatedBlock)}
                             onDelete={currentSlide.blocks.length > 1 ? () => deleteBlock(block.id) : null}
+                            onOpenImageSearch={(blockId) => {
+                                setSelectedImageBlockId(blockId);
+                                setImageSearchVisible(true);
+                            }}
                         />
 
                         {/* Insert button between blocks (not after last) */}
@@ -501,6 +508,31 @@ export default function EditorScreen() {
                 visible={saveTemplateVisible}
                 onClose={() => setSaveTemplateVisible(false)}
                 onSave={handleSaveTemplate}
+            />
+
+            {/* Image Search Modal */}
+            <ImageSearchModal
+                visible={imageSearchVisible}
+                onClose={() => setImageSearchVisible(false)}
+                onSelectImage={(image) => {
+                    // Update the selected image block
+                    if (selectedImageBlockId) {
+                        const updatedBlock = currentSlide.blocks.find(
+                            (b) => b.id === selectedImageBlockId
+                        );
+                        if (updatedBlock) {
+                            updateBlock(selectedImageBlockId, {
+                                ...updatedBlock,
+                                data: {
+                                    ...updatedBlock.data,
+                                    uri: image.uri,
+                                    caption: image.caption,
+                                },
+                            });
+                        }
+                    }
+                    setSelectedImageBlockId(null);
+                }}
             />
         </ScrollView>
     )

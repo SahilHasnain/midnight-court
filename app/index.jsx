@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { router } from "expo-router"
 import { useEffect, useState } from "react"
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
-import GoldButton from "../components/GoldButton"
 import { colors } from "../theme/colors"
 
 export default function Index() {
@@ -68,11 +67,28 @@ export default function Index() {
         </TouchableOpacity>
       )}
 
-      <GoldButton
-        title="Begin Your Case"
-        onPress={() => router.push("/templates")}
-        style={styles.ctaButton}
-      />
+      {/* Main Action Buttons */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => router.push("/templates")}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.actionIcon}>⚖️</Text>
+          <Text style={styles.actionTitle}>Begin Your Case</Text>
+          <Text style={styles.actionSubtitle}>Create a powerful presentation</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => router.push("/image-library")}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.actionIcon}>🖼️</Text>
+          <Text style={styles.actionTitle}>Legal Images</Text>
+          <Text style={styles.actionSubtitle}>Download & manage images</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Footer Helper */}
       <Text style={styles.helper}>
@@ -150,6 +166,45 @@ const styles = StyleSheet.create({
   ctaButton: {
     paddingHorizontal: 48,
     paddingVertical: 16,
+  },
+  buttonContainer: {
+    width: "100%",
+    gap: 16,
+    marginVertical: 20,
+  },
+  actionButton: {
+    backgroundColor: colors.card,
+    borderWidth: 2,
+    borderColor: colors.borderGold,
+    borderRadius: 16,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    activeOpacity: 0.75,
+    shadowColor: colors.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  actionIcon: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  actionTitle: {
+    color: colors.gold,
+    fontSize: 18,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 6,
+    fontFamily: "Inter_700Bold",
+  },
+  actionSubtitle: {
+    color: colors.textSecondary,
+    fontSize: 13,
+    textAlign: "center",
+    fontFamily: "Inter_400Regular",
   },
   continueButton: {
     backgroundColor: colors.card,

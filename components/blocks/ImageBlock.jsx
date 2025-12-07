@@ -7,7 +7,7 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "reac
  * ImageBlock - Image with caption and layout control
  * Allows flexible image placement anywhere in slide content
  */
-export default function ImageBlock({ block, onUpdate, onDelete }) {
+export default function ImageBlock({ block, onUpdate, onDelete, onOpenImageSearch }) {
     const [showPreview, setShowPreview] = useState(false);
 
     const updateField = (field, value) => {
@@ -162,6 +162,21 @@ export default function ImageBlock({ block, onUpdate, onDelete }) {
                             </View>
                         )}
                     </TouchableOpacity>
+
+                    {/* Search & Upload Buttons */}
+                    <View style={styles.buttonRow}>
+                        <TouchableOpacity
+                            style={[styles.imagePickerButton, styles.searchButton]}
+                            onPress={() => {
+                                if (onOpenImageSearch) {
+                                    onOpenImageSearch(block.id);
+                                }
+                            }}
+                        >
+                            <Text style={styles.searchButtonIcon}>🔍</Text>
+                            <Text style={styles.searchButtonText}>Search Photos</Text>
+                        </TouchableOpacity>
+                    </View>
 
                     {/* Layout Selector */}
                     <View style={styles.controlGroup}>
@@ -436,5 +451,24 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
         textAlign: 'center',
         lineHeight: 18,
+    },
+    buttonRow: {
+        marginVertical: 12,
+        gap: 10,
+    },
+    searchButton: {
+        backgroundColor: colors.background,
+        borderColor: colors.borderGold,
+        flexDirection: 'row',
+        gap: 8,
+    },
+    searchButtonIcon: {
+        fontSize: 16,
+    },
+    searchButtonText: {
+        color: colors.gold,
+        fontSize: 13,
+        fontWeight: '600',
+        fontFamily: 'Inter_600SemiBold',
     },
 });
