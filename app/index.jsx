@@ -96,12 +96,20 @@ export default function Index() {
       </Text>
 
       {/* Dev Menu - Remove before production */}
-      <TouchableOpacity
-        style={styles.devButton}
-        onPress={() => router.push("/dev/gemini-test")}
-      >
-        <Text style={styles.devButtonText}>🔧 Dev: Gemini Test</Text>
-      </TouchableOpacity>
+      <View style={styles.devMenu}>
+        <TouchableOpacity
+          style={styles.devButton}
+          onPress={() => router.push("/dev/gemini-test")}
+        >
+          <Text style={styles.devButtonText}>🔧 Gemini Test</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.devButton}
+          onPress={() => router.push("/dev/citation-test")}
+        >
+          <Text style={styles.devButtonText}>⚖️ Citation Test</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }
@@ -246,8 +254,13 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     fontFamily: "Inter_400Regular",
   },
-  devButton: {
+  devMenu: {
     marginTop: 20,
+    flexDirection: "row",
+    gap: 8,
+  },
+  devButton: {
+    flex: 1,
     padding: 8,
     borderRadius: 6,
     backgroundColor: "rgba(212, 175, 55, 0.1)",

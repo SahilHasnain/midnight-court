@@ -290,6 +290,12 @@ export default function EditorScreen() {
                         >
                             <Text style={styles.geminiTestText}>🔧</Text>
                         </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => router.push("/dev/citation-test")}
+                            style={styles.geminiTestButton}
+                        >
+                            <Text style={styles.geminiTestText}>⚖️</Text>
+                        </TouchableOpacity>
                     </View>
                 )}
             </View>
