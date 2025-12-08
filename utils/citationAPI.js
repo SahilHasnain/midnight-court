@@ -16,13 +16,13 @@ import { callGeminiJSON } from './geminiAPI';
  * Returns comprehensive, accurate citations from latest legal knowledge
  */
 export const findCitations = async (query) => {
-  if (!query || query.trim().length < 2) {
-    return [];
-  }
+    if (!query || query.trim().length < 2) {
+        return [];
+    }
 
-  console.log('🤖 Gemini AI citation search:', query);
+    console.log('🤖 Gemini AI citation search:', query);
 
-  const prompt = `You are an expert Indian legal researcher. Find the most relevant and accurate Indian legal citations for: "${query}"
+    const prompt = `You are an expert Indian legal researcher. Find the most relevant and accurate Indian legal citations for: "${query}"
 
 Include:
 1. Constitutional Articles - with article number, title, and brief description
@@ -50,30 +50,30 @@ Return as JSON array:
 
 Return 5-10 most relevant results. ONLY return valid JSON, no additional text.`;
 
-  try {
-    const response = await callGeminiJSON(prompt, {
-      temperature: 0.1, // Very low - maximum accuracy for legal citations
-      maxOutputTokens: 2000,
-    });
+    try {
+        const response = await callGeminiJSON(prompt, {
+            temperature: 0.1, // Very low - maximum accuracy for legal citations
+            maxOutputTokens: 2000,
+        });
 
-    if (Array.isArray(response)) {
-      const sorted = response.sort((a, b) => (b.relevance || 0) - (a.relevance || 0));
-      console.log(`✅ Gemini found ${sorted.length} citations for: ${query}`);
-      return sorted.slice(0, 10);
+        if (Array.isArray(response)) {
+            const sorted = response.sort((a, b) => (b.relevance || 0) - (a.relevance || 0));
+            console.log(`✅ Gemini found ${sorted.length} citations for: ${query}`);
+            return sorted.slice(0, 10);
+        }
+
+        // If not array, try to extract from response
+        if (typeof response === 'object' && response.citations) {
+            const sorted = response.citations.sort((a, b) => (b.relevance || 0) - (a.relevance || 0));
+            return sorted.slice(0, 10);
+        }
+
+        console.warn('Gemini returned unexpected format:', response);
+        return [];
+    } catch (error) {
+        console.error('❌ Gemini citation search failed:', error);
+        throw error;
     }
-
-    // If not array, try to extract from response
-    if (typeof response === 'object' && response.citations) {
-      const sorted = response.citations.sort((a, b) => (b.relevance || 0) - (a.relevance || 0));
-      return sorted.slice(0, 10);
-    }
-
-    console.warn('Gemini returned unexpected format:', response);
-    return [];
-  } catch (error) {
-    console.error('❌ Gemini citation search failed:', error);
-    throw error;
-  }
 };
 
 /**
@@ -81,9 +81,9 @@ Return 5-10 most relevant results. ONLY return valid JSON, no additional text.`;
  * Uses Gemini to provide comprehensive legal analysis
  */
 export const getCitationDetails = async (citation) => {
-  console.log('🤖 Fetching citation details:', citation);
+    console.log('🤖 Fetching citation details:', citation);
 
-  const prompt = `Provide comprehensive details about this Indian legal citation: "${citation}"
+    const prompt = `Provide comprehensive details about this Indian legal citation: "${citation}"
 
 Include:
 - Full case name or article title
@@ -109,18 +109,18 @@ Return as JSON:
 
 Return ONLY valid JSON.`;
 
-  try {
-    const response = await callGeminiJSON(prompt, {
-      temperature: 0.1,
-      maxOutputTokens: 1500,
-    });
+    try {
+        const response = await callGeminiJSON(prompt, {
+            temperature: 0.1,
+            maxOutputTokens: 1500,
+        });
 
-    console.log('✅ Citation details retrieved');
-    return response;
-  } catch (error) {
-    console.error('❌ Failed to get citation details:', error);
-    throw error;
-  }
+        console.log('✅ Citation details retrieved');
+        return response;
+    } catch (error) {
+        console.error('❌ Failed to get citation details:', error);
+        throw error;
+    }
 };
 
 /**
@@ -128,9 +128,9 @@ Return ONLY valid JSON.`;
  * Quality check using Gemini's legal knowledge
  */
 export const verifyCitation = async (citation) => {
-  console.log('🔍 Verifying citation:', citation);
+    console.log('🔍 Verifying citation:', citation);
 
-  const prompt = `Verify this Indian legal citation: "${citation}"
+    const prompt = `Verify this Indian legal citation: "${citation}"
 
 Check:
 1. Is the citation format correct?
@@ -150,27 +150,27 @@ Return as JSON:
 
 Return ONLY valid JSON.`;
 
-  try {
-    const response = await callGeminiJSON(prompt, {
-      temperature: 0.1,
-      maxOutputTokens: 800,
-    });
+    try {
+        const response = await callGeminiJSON(prompt, {
+            temperature: 0.1,
+            maxOutputTokens: 800,
+        });
 
-    console.log('✅ Citation verified');
-    return response;
-  } catch (error) {
-    console.error('❌ Citation verification failed:', error);
-    throw error;
-  }
+        console.log('✅ Citation verified');
+        return response;
+    } catch (error) {
+        console.error('❌ Citation verification failed:', error);
+        throw error;
+    }
 };
 
 /**
  * Get related citations for building stronger legal arguments
  */
 export const getRelatedCitations = async (citation) => {
-  console.log('🔗 Finding related citations for:', citation);
+    console.log('🔗 Finding related citations for:', citation);
 
-  const prompt = `Find citations related to: "${citation}"
+    const prompt = `Find citations related to: "${citation}"
 
 Include:
 - Cases that cited this case
@@ -192,31 +192,31 @@ Return 5-8 most relevant related citations as JSON array:
 
 Return ONLY valid JSON array.`;
 
-  try {
-    const response = await callGeminiJSON(prompt, {
-      temperature: 0.2,
-      maxOutputTokens: 1500,
-    });
+    try {
+        const response = await callGeminiJSON(prompt, {
+            temperature: 0.2,
+            maxOutputTokens: 1500,
+        });
 
-    if (Array.isArray(response)) {
-      return response.slice(0, 8);
+        if (Array.isArray(response)) {
+            return response.slice(0, 8);
+        }
+
+        console.warn('Unexpected format for related citations');
+        return [];
+    } catch (error) {
+        console.error('❌ Failed to get related citations:', error);
+        throw error;
     }
-
-    console.warn('Unexpected format for related citations');
-    return [];
-  } catch (error) {
-    console.error('❌ Failed to get related citations:', error);
-    throw error;
-  }
 };
 
 /**
  * Search citations by legal topic or area
  */
 export const searchByTopic = async (topic) => {
-  console.log('📚 Searching citations by topic:', topic);
+    console.log('📚 Searching citations by topic:', topic);
 
-  const prompt = `Find important Indian legal citations related to the topic: "${topic}"
+    const prompt = `Find important Indian legal citations related to the topic: "${topic}"
 
 Include landmark cases, constitutional provisions, and key statutes.
 
@@ -235,20 +235,20 @@ Return as JSON array with 8-12 most important citations:
 Prioritize foundational cases and frequently cited authorities.
 Return ONLY valid JSON array.`;
 
-  try {
-    const response = await callGeminiJSON(prompt, {
-      temperature: 0.2,
-      maxOutputTokens: 2500,
-    });
+    try {
+        const response = await callGeminiJSON(prompt, {
+            temperature: 0.2,
+            maxOutputTokens: 2500,
+        });
 
-    if (Array.isArray(response)) {
-      const sorted = response.sort((a, b) => (b.importance || 0) - (a.importance || 0));
-      return sorted.slice(0, 12);
+        if (Array.isArray(response)) {
+            const sorted = response.sort((a, b) => (b.importance || 0) - (a.importance || 0));
+            return sorted.slice(0, 12);
+        }
+
+        return [];
+    } catch (error) {
+        console.error('❌ Topic search failed:', error);
+        throw error;
     }
-
-    return [];
-  } catch (error) {
-    console.error('❌ Topic search failed:', error);
-    throw error;
-  }
 };
