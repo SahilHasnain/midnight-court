@@ -280,9 +280,17 @@ export default function EditorScreen() {
 
                 {/* TEST MODE TOGGLE - Only visible in development */}
                 {__DEV__ && (
-                    <TouchableOpacity onPress={toggleTestMode} style={styles.testModeButton}>
-                        <Text style={styles.testModeText}>{testMode ? '🧪' : '📝'}</Text>
-                    </TouchableOpacity>
+                    <View style={styles.devButtonsContainer}>
+                        <TouchableOpacity onPress={toggleTestMode} style={styles.testModeButton}>
+                            <Text style={styles.testModeText}>{testMode ? '🧪' : '📝'}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => router.push("/dev/gemini-test")}
+                            style={styles.geminiTestButton}
+                        >
+                            <Text style={styles.geminiTestText}>🔧</Text>
+                        </TouchableOpacity>
+                    </View>
                 )}
             </View>
 
@@ -599,6 +607,21 @@ const styles = StyleSheet.create({
         borderColor: colors.borderGold,
     },
     testModeText: {
+        fontSize: 18,
+    },
+    devButtonsContainer: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    geminiTestButton: {
+        backgroundColor: colors.card,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.gold,
+    },
+    geminiTestText: {
         fontSize: 18,
     },
     editorContent: {

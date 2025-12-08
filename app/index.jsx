@@ -94,6 +94,14 @@ export default function Index() {
       <Text style={styles.helper}>
         Professional slides. Anywhere. Anytime.
       </Text>
+
+      {/* Dev Menu - Remove before production */}
+      <TouchableOpacity
+        style={styles.devButton}
+        onPress={() => router.push("/dev/gemini-test")}
+      >
+        <Text style={styles.devButtonText}>🔧 Dev: Gemini Test</Text>
+      </TouchableOpacity>
     </View>
   )
 }
@@ -237,5 +245,19 @@ const styles = StyleSheet.create({
     marginTop: 20,
     opacity: 0.7,
     fontFamily: "Inter_400Regular",
-  }
+  },
+  devButton: {
+    marginTop: 20,
+    padding: 8,
+    borderRadius: 6,
+    backgroundColor: "rgba(212, 175, 55, 0.1)",
+    borderWidth: 1,
+    borderColor: colors.gold,
+  },
+  devButtonText: {
+    color: colors.gold,
+    fontSize: 11,
+    textAlign: "center",
+    fontFamily: "Inter_400Regular",
+  },
 })
