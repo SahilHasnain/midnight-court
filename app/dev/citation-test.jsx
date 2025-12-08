@@ -1,6 +1,5 @@
-import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -11,24 +10,12 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { colors } from "../../theme/colors";
-import { findCitations, getCacheStats, clearCitationCache } from "../../utils/citationAPI";
+import { findCitations } from "../../utils/citationAPI";
 
 export default function CitationTestScreen() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [cacheStats, setCacheStats] = useState(null);
-
-  useFocusEffect(
-    useCallback(() => {
-      loadCacheStats();
-    }, [])
-  );
-
-  const loadCacheStats = async () => {
-    const stats = await getCacheStats();
-    setCacheStats(stats);
-  };
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -37,7 +24,6 @@ export default function CitationTestScreen() {
     try {
       const citations = await findCitations(query);
       setResults(citations);
-      await loadCacheStats();
     } catch (error) {
       console.error("Search error:", error);
       setResults([]);
@@ -46,18 +32,15 @@ export default function CitationTestScreen() {
     }
   };
 
-  const handleClearCache = async () => {
-    await clearCitationCache();
-    await loadCacheStats();
-  };
-
   const testQueries = [
     "right to privacy",
     "article 21",
     "kesavananda bharati",
     "freedom of speech",
-    "reservation",
-    "sexual harassment",
+    "reservation obc",
+    "sexual harassment workplace",
+    "environmental protection",
+    "section 377",
   ];
 
   const runTestQuery = async (testQuery) => {
@@ -66,7 +49,6 @@ export default function CitationTestScreen() {
     try {
       const citations = await findCitations(testQuery);
       setResults(citations);
-      await loadCacheStats();
     } catch (error) {
       console.error("Test error:", error);
       setResults([]);
@@ -82,8 +64,8 @@ export default function CitationTestScreen() {
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.title}>⚖️ Citation Finder Test</Text>
-          <Text style={styles.subtitle}>Chunk 1.3 - Backend</Text>
+          <Text style={styles.title}>⚖️ Citation Finder (Pure AI)</Text>
+          <Text style={styles.subtitle}>Chunk 1.3 - Gemini Only</Text>
         </View>
       </View>
 
@@ -130,22 +112,6 @@ export default function CitationTestScreen() {
         </View>
       </View>
 
-      {/* Cache Stats */}
-      {cacheStats && (
-        <View style={styles.section}>
-          <View style={styles.statsHeader}>
-            <Text style={styles.sectionTitle}>Cache Stats</Text>
-            <TouchableOpacity onPress={handleClearCache} style={styles.clearButton}>
-              <Text style={styles.clearButtonText}>Clear Cache</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.statsBox}>
-            <Text style={styles.statText}>Cached Queries: {cacheStats.entries}</Text>
-            <Text style={styles.statText}>Cache Size: {(cacheStats.size / 1024).toFixed(1)} KB</Text>
-          </View>
-        </View>
-      )}
-
       {/* Results */}
       {results.length > 0 && (
         <View style={styles.section}>
@@ -155,9 +121,10 @@ export default function CitationTestScreen() {
               <View style={styles.resultHeader}>
                 <Text style={styles.resultType}>
                   {result.type === 'constitutional_article' && '📜'}
-                  {result.type === 'case' && '⚖️'}
+                  {result.type === 'supreme_court_case' && '⚖️'}
+                  {result.type === 'high_court_case' && '🏛️'}
                   {result.type === 'act' && '📖'}
-                  {' ' + result.type.replace('_', ' ').toUpperCase()}
+                  {' ' + (result.type || 'citation').replace(/_/g, ' ').toUpperCase()}
                 </Text>
                 {result.relevance !== undefined && (
                   <Text style={styles.relevanceScore}>{result.relevance}%</Text>
@@ -170,14 +137,8 @@ export default function CitationTestScreen() {
                 <Text style={styles.resultName}>{result.name}</Text>
               )}
               
-              {result.title && (
-                <Text style={styles.resultTitle}>{result.title}</Text>
-              )}
-              
-              {(result.summary || result.description) && (
-                <Text style={styles.resultSummary}>
-                  {result.summary || result.description}
-                </Text>
+              {result.summary && (
+                <Text style={styles.resultSummary}>{result.summary}</Text>
               )}
               
               {result.year && (
@@ -188,21 +149,24 @@ export default function CitationTestScreen() {
         </View>
       )}
 
-      {/* Instructions */}
+      {/* How it works */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>📋 How It Works</Text>
+        <Text style={styles.sectionTitle}>🤖 Pure AI Approach</Text>
         <View style={styles.instructionBox}>
           <Text style={styles.instructionText}>
-            1. <Text style={styles.bold}>Local Search:</Text> Checks 11 constitutional articles, 10 landmark cases, 8 important acts
+            ✨ <Text style={styles.bold}>Always Fresh:</Text> Every search calls Gemini AI
           </Text>
           <Text style={styles.instructionText}>
-            2. <Text style={styles.bold}>Fuzzy Matching:</Text> Keyword-based relevance scoring
+            🎯 <Text style={styles.bold}>Maximum Accuracy:</Text> Latest legal knowledge
           </Text>
           <Text style={styles.instructionText}>
-            3. <Text style={styles.bold}>Gemini AI:</Text> Used for complex queries with no local matches
+            📚 <Text style={styles.bold}>Comprehensive:</Text> Not limited to pre-stored data
           </Text>
           <Text style={styles.instructionText}>
-            4. <Text style={styles.bold}>Caching:</Text> Results cached for 7 days to reduce API calls
+            ⚖️ <Text style={styles.bold}>Quality First:</Text> Best citations for law students
+          </Text>
+          <Text style={styles.instructionText}>
+            💰 <Text style={styles.bold}>Cost:</Text> ~₹10-20/month for quality results
           </Text>
         </View>
       </View>
@@ -299,37 +263,6 @@ const styles = StyleSheet.create({
     color: colors.gold,
     fontSize: 12,
   },
-  statsHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  statsBox: {
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.borderGold,
-    borderRadius: 10,
-    padding: 12,
-  },
-  statText: {
-    color: colors.text,
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  clearButton: {
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
-    borderWidth: 1,
-    borderColor: "#ef4444",
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-  },
-  clearButtonText: {
-    color: "#ef4444",
-    fontSize: 11,
-    fontWeight: "600",
-  },
   resultCard: {
     backgroundColor: colors.card,
     borderWidth: 1,
@@ -365,11 +298,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 13,
     fontWeight: "600",
-    marginBottom: 4,
-  },
-  resultTitle: {
-    color: colors.text,
-    fontSize: 13,
     marginBottom: 4,
   },
   resultSummary: {

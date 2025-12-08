@@ -4,6 +4,6 @@ export const colors = {
   ivory: "#F5EEDF",
   textPrimary: "#FFFFFF",
   textSecondary: "#D1D5DB",
-  card: "#111827",
+  card: "white",
   borderGold: "#E5C76B",
 };

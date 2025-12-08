@@ -142,11 +142,13 @@ const PEXELS_KEY = "your_free_key";
 **Implementation Summary:**
 
 - Created `utils/legalDatabase.json` with:
+
   - 11 Constitutional articles (14, 19, 21, 32, 226, 370, 15, 16, 25, 29, 51A)
   - 10 Landmark cases (Kesavananda Bharati, Maneka Gandhi, K.S. Puttaswamy, etc.)
   - 8 Important acts (IPC, CrPC, Evidence Act, IT Act, RTI, etc.)
 
 - Created `utils/citationAPI.js` with:
+
   - `findCitations(query)` - Main search function with 3-tier strategy
   - `searchLocalDatabase()` - Fuzzy keyword matching with relevance scoring
   - `searchWithGemini()` - AI-powered search for complex queries
