@@ -2,6 +2,7 @@ import { colors } from "@/theme/colors";
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from "react";
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import SavedImagesModal from "../SavedImagesModal";
 
 /**
  * ImageBlock - Image with caption and layout control
@@ -9,6 +10,7 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "reac
  */
 export default function ImageBlock({ block, onUpdate, onDelete, onOpenImageSearch }) {
     const [showPreview, setShowPreview] = useState(false);
+    const [showLibraryModal, setShowLibraryModal] = useState(false);
 
     const updateField = (field, value) => {
         onUpdate({
@@ -34,6 +36,11 @@ export default function ImageBlock({ block, onUpdate, onDelete, onOpenImageSearc
         if (!result.canceled && result.assets[0]) {
             updateField('uri', result.assets[0].uri);
         }
+    };
+
+    const handleSelectFromLibrary = (image) => {
+        updateField('uri', image.url);
+        setShowLibraryModal(false);
     };
 
     // Parse markdown for caption preview
@@ -176,6 +183,14 @@ export default function ImageBlock({ block, onUpdate, onDelete, onOpenImageSearc
                             <Text style={styles.searchButtonIcon}>🔍</Text>
                             <Text style={styles.searchButtonText}>Search Photos</Text>
                         </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.imagePickerButton, styles.libraryButton]}
+                            onPress={() => setShowLibraryModal(true)}
+                        >
+                            <Text style={styles.searchButtonIcon}>📚</Text>
+                            <Text style={styles.searchButtonText}>My Library</Text>
+                        </TouchableOpacity>
                     </View>
 
                     {/* Layout Selector */}
@@ -262,6 +277,13 @@ export default function ImageBlock({ block, onUpdate, onDelete, onOpenImageSearc
                     </View>
                 </View>
             )}
+
+            {/* Saved Images Modal */}
+            <SavedImagesModal
+                visible={showLibraryModal}
+                onClose={() => setShowLibraryModal(false)}
+                onSelectImage={handleSelectFromLibrary}
+            />
         </View>
     );
 }
@@ -457,6 +479,12 @@ const styles = StyleSheet.create({
         gap: 10,
     },
     searchButton: {
+        backgroundColor: colors.background,
+        borderColor: colors.borderGold,
+        flexDirection: 'row',
+        gap: 8,
+    },
+    libraryButton: {
         backgroundColor: colors.background,
         borderColor: colors.borderGold,
         flexDirection: 'row',

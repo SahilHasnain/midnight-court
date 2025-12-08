@@ -1,18 +1,21 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
+import { Directory, File, Paths } from "expo-file-system";
 import { router } from "expo-router";
+import * as Sharing from "expo-sharing";
 import { useCallback, useState } from "react";
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Image,
-    SafeAreaView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
 import { searchImages } from "../utils/imageSearchAPI";
 
@@ -100,6 +103,30 @@ export default function ImageLibrary() {
         }
     };
 
+    const downloadImage = async (image) => {
+        try {
+            const filename = `legal_image_${Date.now()}.jpg`;
+            const destinationDir = new Directory(Paths.document, "legal-images");
+            await destinationDir.create();
+            const targetFile = new File(destinationDir, filename);
+
+            const output = await File.downloadFileAsync(image.url, targetFile);
+            if (!output.exists) {
+                throw new Error("Download failed");
+            }
+
+            const canShare = await Sharing.isAvailableAsync();
+            if (canShare) {
+                await Sharing.shareAsync(output.uri);
+            } else {
+                Alert.alert("Downloaded", "Image saved to app documents");
+            }
+        } catch (error) {
+            console.error("Download error:", error);
+            Alert.alert("Error", "Failed to download image");
+        }
+    };
+
     const renderImageCard = ({ item, isFromSearch = false }) => (
         <View style={styles.imageCardContainer}>
             <Image
@@ -109,19 +136,35 @@ export default function ImageLibrary() {
             />
             <View style={styles.imageCardActions}>
                 {isFromSearch ? (
-                    <TouchableOpacity
-                        style={[styles.actionBtn, styles.saveBtnStyle]}
-                        onPress={() => saveImage(item)}
-                    >
-                        <Text style={styles.saveBtnText}>💾 Save</Text>
-                    </TouchableOpacity>
+                    <>
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.saveBtnStyle]}
+                            onPress={() => saveImage(item)}
+                        >
+                            <Text style={styles.saveBtnText}>💾</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.downloadBtnStyle]}
+                            onPress={() => downloadImage(item)}
+                        >
+                            <Text style={styles.downloadBtnText}>⬇️</Text>
+                        </TouchableOpacity>
+                    </>
                 ) : (
-                    <TouchableOpacity
-                        style={[styles.actionBtn, styles.deleteBtnStyle]}
-                        onPress={() => deleteImage(item.id)}
-                    >
-                        <Text style={styles.deleteBtnText}>🗑️ Delete</Text>
-                    </TouchableOpacity>
+                    <>
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.downloadBtnStyle]}
+                            onPress={() => downloadImage(item)}
+                        >
+                            <Text style={styles.downloadBtnText}>⬇️</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.deleteBtnStyle]}
+                            onPress={() => deleteImage(item.id)}
+                        >
+                            <Text style={styles.deleteBtnText}>🗑️</Text>
+                        </TouchableOpacity>
+                    </>
                 )}
             </View>
         </View>
@@ -495,7 +538,18 @@ const styles = StyleSheet.create({
     },
     saveBtnText: {
         color: colors.background,
-        fontSize: 12,
+        fontSize: 20,
+        fontWeight: "600",
+        fontFamily: "Inter_600SemiBold",
+    },
+    downloadBtnStyle: {
+        backgroundColor: colors.card,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+    },
+    downloadBtnText: {
+        color: colors.gold,
+        fontSize: 20,
         fontWeight: "600",
         fontFamily: "Inter_600SemiBold",
     },
@@ -506,7 +560,7 @@ const styles = StyleSheet.create({
     },
     deleteBtnText: {
         color: colors.text,
-        fontSize: 12,
+        fontSize: 20,
         fontWeight: "600",
         fontFamily: "Inter_600SemiBold",
     },
