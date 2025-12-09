@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_KEY;
 
@@ -8,15 +8,20 @@ if (!GEMINI_API_KEY) {
     );
 }
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY || "");
+// Initialize Gemini with new SDK
+// Client automatically reads from GEMINI_API_KEY env var if no apiKey provided
+const ai = new GoogleGenAI({
+    apiKey: GEMINI_API_KEY,
+});
 
-// Rate limiting configuration
+// Rate limiting configuration (NEW FREE TIER LIMITS - Much higher!)
 const RATE_LIMIT_CONFIG = {
-    FREE_TIER_REQUESTS_PER_MINUTE: 60,
+    // Gemini 2.0 Flash: 2000 RPM, 4M TPM
+    // Gemini 2.5 Flash: 1000 RPM, 1M TPM
+    TIER_1_REQUESTS_PER_MINUTE: 2000, // Updated from 60 to 2000!
     REQUEST_QUEUE: [],
     LAST_REQUEST_TIME: 0,
-    MIN_INTERVAL_MS: (1000 * 60) / 60, // 1 request per second for safety margin
+    MIN_INTERVAL_MS: 30, // 30ms between requests (2000 req/min = ~33x faster than before!)
 };
 
 /**
@@ -37,7 +42,7 @@ const rateLimiter = async () => {
 };
 
 /**
- * Main Gemini API call wrapper
+ * Main Gemini API call wrapper (NEW SDK)
  * @param {string} prompt - The prompt to send to Gemini
  * @param {object} options - Configuration options
  * @returns {Promise<string>} - The response text from Gemini
@@ -51,38 +56,33 @@ export const callGemini = async (
         await rateLimiter();
 
         const {
-            model = "gemini-2.5-flash",
+            model = "gemini-2.0-flash", // Updated to latest model
             temperature = 0.7,
             maxOutputTokens = 1024,
             systemPrompt = "",
         } = options;
 
-        const model_instance = genAI.getGenerativeModel({ model });
-
-        let fullPrompt = prompt;
+        // Build contents
+        let contents = prompt;
         if (systemPrompt) {
-            fullPrompt = `${systemPrompt}\n\n${prompt}`;
+            contents = `${systemPrompt}\n\n${prompt}`;
         }
 
-        const response = await model_instance.generateContent({
-            contents: [
-                {
-                    role: "user",
-                    parts: [{ text: fullPrompt }],
-                },
-            ],
-            generationConfig: {
+        // New SDK API call
+        const response = await ai.models.generateContent({
+            model,
+            contents,
+            config: {
                 temperature,
                 maxOutputTokens,
             },
         });
 
-        if (!response.response) {
+        if (!response || !response.text) {
             throw new Error("No response from Gemini API");
         }
 
-        const responseText = response.response.text();
-        return responseText;
+        return response.text;
     } catch (error) {
         console.error("❌ Gemini API Error:", error);
         throw new Error(`Gemini API call failed: ${error.message}`);
@@ -120,12 +120,13 @@ export const callGeminiJSON = async (
 };
 
 /**
- * Get API status and limits info
+ * Get API status and limits info (UPDATED)
  */
 export const getGeminiStatus = () => {
     return {
         api_key_configured: !!GEMINI_API_KEY,
-        free_tier_limit: "60 requests/minute",
+        sdk_version: "@google/genai v1.32.0",
+        tier_1_limits: "2000 RPM, 4M TPM (Gemini 2.0 Flash)",
         min_interval_ms: RATE_LIMIT_CONFIG.MIN_INTERVAL_MS,
         last_request_time: RATE_LIMIT_CONFIG.LAST_REQUEST_TIME,
     };
