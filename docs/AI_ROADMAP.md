@@ -198,11 +198,13 @@ const PEXELS_KEY = "your_free_key";
 **🔄 MAJOR REFACTOR (Dec 2025):**
 
 **REMOVED (Quality > Cost philosophy):**
+
 - ❌ Local database (`legalDatabase.json`) - Limited to 29 entries, outdated
 - ❌ Caching layer (AsyncStorage) - Stale results, potential inaccuracies
 - ❌ Fuzzy search - Keyword matching unreliable for legal precision
 
 **NEW APPROACH (Pure AI):**
+
 - ✅ **ALWAYS call Gemini AI** for every citation search
 - ✅ Fresh, accurate citations from latest legal knowledge
 - ✅ Comprehensive case summaries and analysis
@@ -210,6 +212,7 @@ const PEXELS_KEY = "your_free_key";
 - ✅ Related citations and topic exploration
 
 **Why Pure AI?**
+
 ```
 Law students deserve maximum quality, no compromises!
 

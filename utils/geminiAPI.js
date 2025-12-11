@@ -56,7 +56,7 @@ export const callGemini = async (
         await rateLimiter();
 
         const {
-            model = "gemini-2.0-flash", // Updated to latest model
+            model = "gemini-2.5-flash", // Updated to latest model
             temperature = 0.7,
             maxOutputTokens = 1024,
             systemPrompt = "",
@@ -90,32 +90,76 @@ export const callGemini = async (
 };
 
 /**
- * Call Gemini with JSON response parsing
- * Ensures response is valid JSON
+ * Call Gemini with structured JSON output
+ * Uses JSON Schema for guaranteed valid JSON responses
+ * @param {string} prompt - The prompt to send to Gemini
+ * @param {object} options - Configuration options
+ * @param {string} options.model - Model name
+ * @param {object} options.schema - Zod schema for structured output
+ * @param {number} options.temperature - Temperature for randomness
+ * @param {number} options.maxOutputTokens - Max output tokens
+ * @returns {Promise<object>} - Parsed JSON object matching schema
  */
-export const callGeminiJSON = async (
+export const callGeminiWithSchema = async (
     prompt,
     options = {}
 ) => {
     try {
-        const response = await callGemini(prompt, options);
+        // Apply rate limiting
+        await rateLimiter();
 
-        // Try to parse JSON response
-        try {
-            const jsonMatch = response.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-            if (jsonMatch) {
-                return JSON.parse(jsonMatch[0]);
-            }
-        } catch (parseError) {
-            console.warn("⚠️ Could not parse JSON from response:", parseError);
-            // Return as is if not valid JSON
-            return { raw_response: response };
+        const {
+            model = "gemini-2.5-flash",
+            schema = null,
+            temperature = 0.7,
+            maxOutputTokens = 2048,
+            systemPrompt = "",
+        } = options;
+
+        if (!schema) {
+            throw new Error("Schema is required for structured output");
         }
 
-        return { raw_response: response };
+        // Import zod-to-json-schema dynamically to convert Zod schema
+        const { zodToJsonSchema } = await import("zod-to-json-schema");
+        const jsonSchema = zodToJsonSchema(schema);
+
+        // Build contents
+        let contents = prompt;
+        if (systemPrompt) {
+            contents = `${systemPrompt}\n\n${prompt}`;
+        }
+
+        // Call with structured output
+        const response = await ai.models.generateContent({
+            model,
+            contents,
+            config: {
+                temperature,
+                maxOutputTokens,
+                responseMimeType: "application/json",
+                responseJsonSchema: jsonSchema,
+            },
+        });
+
+        if (!response || !response.text) {
+            throw new Error("No response from Gemini API");
+        }
+
+        // Parse JSON response
+        try {
+            const jsonResponse = JSON.parse(response.text);
+            // Validate against schema
+            const validatedData = schema.parse(jsonResponse);
+            return validatedData;
+        } catch (parseError) {
+            console.error("❌ JSON parsing or validation failed:", parseError);
+            console.log("Raw response:", response.text);
+            throw new Error(`Failed to parse/validate response: ${parseError.message}`);
+        }
     } catch (error) {
-        console.error("❌ Gemini JSON call failed:", error);
-        throw error;
+        console.error("❌ Gemini structured output error:", error);
+        throw new Error(`Gemini API call failed: ${error.message}`);
     }
 };
 
@@ -126,7 +170,7 @@ export const getGeminiStatus = () => {
     return {
         api_key_configured: !!GEMINI_API_KEY,
         sdk_version: "@google/genai v1.32.0",
-        tier_1_limits: "2000 RPM, 4M TPM (Gemini 2.0 Flash)",
+        tier_1_limits: "2000 RPM, 4M TPM (Gemini 2.5 Flash)",
         min_interval_ms: RATE_LIMIT_CONFIG.MIN_INTERVAL_MS,
         last_request_time: RATE_LIMIT_CONFIG.LAST_REQUEST_TIME,
     };
@@ -154,7 +198,7 @@ export const testGeminiAPI = async () => {
 
 export default {
     callGemini,
-    callGeminiJSON,
+    callGeminiWithSchema,
     getGeminiStatus,
     testGeminiAPI,
 };
