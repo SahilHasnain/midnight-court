@@ -16,8 +16,8 @@ export const QUICK_TEMPLATES = {
         description: "Start with authority and presence",
         slides: [
             {
-                title: "Case Title",
-                subtitle: "Your legal presentation begins here",
+                title: "",
+                subtitle: "",
                 blocks: []
             }
         ]

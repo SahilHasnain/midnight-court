@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { router } from "expo-router"
 import { useEffect, useState } from "react"
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { colors } from "../theme/colors"
 
 export default function Index() {
@@ -34,93 +35,85 @@ export default function Index() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header Section */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Midnight Court</Text>
-        <View style={styles.goldLine} />
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Header Section */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Midnight Court</Text>
+          <View style={styles.goldLine} />
+        </View>
 
-      {/* Quote Section */}
-      <View style={styles.quoteContainer}>
-        <Text style={styles.quote}>
-          &ldquo;Justice delayed is justice denied&rdquo;
+        {/* Tagline */}
+        <Text style={styles.tagline}>
+          For your voice, for your case
         </Text>
-        <Text style={styles.quoteAuthor}>— William E. Gladstone</Text>
-      </View>
 
-      {/* Tagline */}
-      <Text style={styles.tagline}>
-        For every law student who dreams of making a difference.
-      </Text>
-      <Text style={styles.subtitle}>
-        Craft powerful presentations that speak with authority.
-      </Text>
+        {/* CTA Buttons */}
+        {hasSavedPresentation && (
+          <TouchableOpacity onPress={continueSaved} style={styles.continueButton}>
+            <Text style={styles.continueText}>⚡ Continue Last Presentation</Text>
+            <Text style={styles.continueHint}>
+              {savedData?.slides?.length || 0} slide{(savedData?.slides?.length || 0) !== 1 ? 's' : ''}
+            </Text>
+          </TouchableOpacity>
+        )}
 
-      {/* CTA Buttons */}
-      {hasSavedPresentation && (
-        <TouchableOpacity onPress={continueSaved} style={styles.continueButton}>
-          <Text style={styles.continueText}>⚡ Continue Last Presentation</Text>
-          <Text style={styles.continueHint}>
-            {savedData?.slides?.length || 0} slide{(savedData?.slides?.length || 0) !== 1 ? 's' : ''}
-          </Text>
-        </TouchableOpacity>
-      )}
+        {/* Main Action Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push("/templates")}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.actionIcon}>⚖️</Text>
+            <Text style={styles.actionTitle}>Begin Your Case</Text>
+            <Text style={styles.actionSubtitle}>Create a powerful presentation</Text>
+          </TouchableOpacity>
 
-      {/* Main Action Buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => router.push("/templates")}
-          activeOpacity={0.75}
-        >
-          <Text style={styles.actionIcon}>⚖️</Text>
-          <Text style={styles.actionTitle}>Begin Your Case</Text>
-          <Text style={styles.actionSubtitle}>Create a powerful presentation</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push("/image-library")}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.actionIcon}>🖼️</Text>
+            <Text style={styles.actionTitle}>Legal Images</Text>
+            <Text style={styles.actionSubtitle}>Download & manage images</Text>
+          </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => router.push("/image-library")}
-          activeOpacity={0.75}
-        >
-          <Text style={styles.actionIcon}>🖼️</Text>
-          <Text style={styles.actionTitle}>Legal Images</Text>
-          <Text style={styles.actionSubtitle}>Download & manage images</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Footer Helper */}
+        <Text style={styles.helper}>
+          Professional slides. Anywhere. Anytime.
+        </Text>
 
-      {/* Footer Helper */}
-      <Text style={styles.helper}>
-        Professional slides. Anywhere. Anytime.
-      </Text>
-
-      {/* Dev Menu - Remove before production */}
-      <View style={styles.devMenu}>
-        <TouchableOpacity
-          style={styles.devButton}
-          onPress={() => router.push("/dev/gemini-test")}
-        >
-          <Text style={styles.devButtonText}>🔧 Gemini Test</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.devButton}
-          onPress={() => router.push("/dev/citation-test")}
-        >
-          <Text style={styles.devButtonText}>⚖️ Citation Test</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+        {/* Dev Menu - Remove before production */}
+        <View style={styles.devMenu}>
+          <TouchableOpacity
+            style={styles.devButton}
+            onPress={() => router.push("/dev/gemini-test")}
+          >
+            <Text style={styles.devButtonText}>🔧 Gemini Test</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.devButton}
+            onPress={() => router.push("/dev/citation-test")}
+          >
+            <Text style={styles.devButtonText}>⚖️ Citation Test</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: colors.background,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 24,
+    paddingVertical: 40,
   },
   header: {
     alignItems: "center",
@@ -162,13 +155,17 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
   },
   tagline: {
-    color: colors.ivory,
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.gold,
+    fontSize: 24,
+    fontWeight: "700",
     textAlign: "center",
-    marginBottom: 8,
-    lineHeight: 24,
-    fontFamily: "Inter_600SemiBold",
+    marginBottom: 40,
+    lineHeight: 32,
+    letterSpacing: 0.5,
+    fontFamily: "PlayfairDisplay_700Bold",
+    textShadowColor: 'rgba(212, 175, 55, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   subtitle: {
     color: colors.textSecondary,

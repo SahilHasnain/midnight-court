@@ -62,8 +62,8 @@ export default function ParagraphBlock({ block, onUpdate, onDelete }) {
                         onPress={() => setShowPreview(!showPreview)}
                         style={styles.previewToggle}
                     >
-                        <Text style={styles.previewToggleText}>
-                            {showPreview ? '✏️ Edit' : '👁️ Preview'}
+                        <Text style={styles.previewToggleSmallText}>
+                            {showPreview ? '✏️' : '👁️'}
                         </Text>
                     </TouchableOpacity>
                     {onDelete && (
@@ -105,84 +105,91 @@ export default function ParagraphBlock({ block, onUpdate, onDelete }) {
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 20,
+        marginBottom: 28,
         backgroundColor: colors.card,
-        borderRadius: 12,
-        padding: 16,
+        borderRadius: 14,
+        padding: 20,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
-        marginBottom: 12,
+        marginBottom: 14,
+        paddingBottom: 12,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(212, 175, 55, 0.15)',
     },
     label: {
         color: colors.gold,
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: "600",
         fontFamily: "Inter_600SemiBold",
+        opacity: 0.95,
+        letterSpacing: 0.2,
     },
     hint: {
         color: colors.textSecondary,
-        fontSize: 11,
+        fontSize: 10,
         fontFamily: "Inter_400Regular",
-        marginTop: 2,
+        marginTop: 3,
+        opacity: 0.75,
     },
     headerButtons: {
         flexDirection: 'row',
-        gap: 8,
+        gap: 10,
     },
     previewToggle: {
         backgroundColor: colors.gold,
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        borderRadius: 10,
     },
     previewToggleText: {
         color: colors.background,
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: "600",
         fontFamily: "Inter_600SemiBold",
+        letterSpacing: 0.2,
     },
     deleteBlock: {
-        backgroundColor: colors.background,
+        backgroundColor: 'rgba(239, 68, 68, 0.08)',
         borderWidth: 1,
-        borderColor: "#ef4444",
-        borderRadius: 8,
-        paddingVertical: 6,
-        paddingHorizontal: 10,
+        borderColor: 'rgba(239, 68, 68, 0.4)',
+        borderRadius: 10,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
     },
     deleteBlockText: {
         color: "#ef4444",
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: "600",
     },
     input: {
         backgroundColor: colors.background,
-        padding: 14,
-        borderRadius: 12,
+        padding: 16,
+        borderRadius: 14,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         color: colors.textPrimary,
         fontSize: 15,
-        minHeight: 100,
+        minHeight: 108,
         fontFamily: "Inter_400Regular",
         textAlignVertical: 'top',
     },
     previewContainer: {
-        backgroundColor: colors.background,
-        padding: 14,
-        borderRadius: 12,
+        backgroundColor: 'rgba(212, 175, 55, 0.08)',
+        padding: 16,
+        borderRadius: 14,
         borderWidth: 1,
-        borderColor: colors.borderGold,
-        minHeight: 100,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
+        minHeight: 108,
     },
     previewText: {
         fontSize: 15,
         fontFamily: "Inter_400Regular",
-        lineHeight: 22,
+        lineHeight: 23,
         color: colors.ivory,
     },
     emptyPreview: {
@@ -190,5 +197,6 @@ const styles = StyleSheet.create({
         fontFamily: "Inter_400Regular",
         color: colors.textSecondary,
         fontStyle: 'italic',
+        opacity: 0.7,
     }
 });

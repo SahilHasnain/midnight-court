@@ -239,27 +239,34 @@ export default function TwoColumnBlock({ block, onUpdate, onDelete }) {
 const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.card,
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
+        borderRadius: 14,
+        padding: 20,
+        marginBottom: 28,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 16,
+        paddingBottom: 12,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(212, 175, 55, 0.15)',
     },
     headerLabel: {
         color: colors.gold,
         fontSize: 15,
         fontWeight: '600',
         fontFamily: 'Inter_600SemiBold',
+        maxWidth: '60%',
+        flexWrap: 'wrap',
+        textAlign: "center",
+        marginLeft: -10
     },
     headerRight: {
         flexDirection: 'row',
-        gap: 8,
+        gap: 10,
     },
     previewToggle: {
         backgroundColor: colors.gold,
@@ -271,12 +278,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     deleteButton: {
-        backgroundColor: colors.background,
+        backgroundColor: 'rgba(239, 68, 68, 0.08)',
         paddingVertical: 6,
         paddingHorizontal: 12,
-        borderRadius: 6,
+        borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#ef4444',
+        borderColor: 'rgba(239, 68, 68, 0.4)',
     },
     deleteText: {
         color: '#ef4444',
@@ -298,6 +305,8 @@ const styles = StyleSheet.create({
         color: colors.gold,
         fontSize: 13,
         fontWeight: '600',
+        opacity: 0.95,
+        letterSpacing: 0.2,
         fontFamily: 'Inter_600SemiBold',
     },
     titleInput: {
@@ -305,7 +314,7 @@ const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         color: colors.textPrimary,
         fontSize: 15,
         fontWeight: '600',
@@ -322,19 +331,19 @@ const styles = StyleSheet.create({
         padding: 12,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         color: colors.textPrimary,
         fontSize: 14,
         fontFamily: 'Inter_400Regular',
         minHeight: 44,
     },
     deletePointButton: {
-        backgroundColor: colors.background,
+        backgroundColor: 'rgba(239, 68, 68, 0.08)',
         paddingVertical: 10,
         paddingHorizontal: 10,
-        borderRadius: 6,
+        borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#ef4444',
+        borderColor: 'rgba(239, 68, 68, 0.4)',
     },
     deletePointText: {
         color: '#ef4444',
@@ -345,7 +354,7 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         alignItems: 'center',
     },
     addPointText: {
@@ -378,7 +387,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         paddingLeft: 12,
         borderLeftWidth: 2,
-        borderLeftColor: colors.borderGold,
+        borderLeftColor: 'rgba(212, 175, 55, 0.25)',
     },
     previewPointText: {
         fontSize: 14,
@@ -387,6 +396,6 @@ const styles = StyleSheet.create({
     },
     previewDivider: {
         width: 2,
-        backgroundColor: colors.borderGold,
+        backgroundColor: 'rgba(212, 175, 55, 0.25)',
     },
 });

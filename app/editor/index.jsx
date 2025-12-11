@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import GoldButton from "@/components/GoldButton";
 import ImageSearchModal from "@/components/ImageSearchModal";
@@ -267,19 +268,20 @@ export default function EditorScreen() {
     }
 
     return (
-        <ScrollView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Text style={styles.backText}>‹ Back</Text>
-                </TouchableOpacity>
-                <View style={styles.headerCenter}>
-                    <Text style={styles.templateName}>{getTemplateName(template)}</Text>
-                    <Text style={styles.slideCounter}>Slide {currentSlideIndex + 1} of {slides.length}</Text>
-                </View>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
+            <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+                {/* Header */}
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <Text style={styles.backText}>‹ Back</Text>
+                    </TouchableOpacity>
+                    <View style={styles.headerCenter}>
+                        <Text style={styles.templateName}>{getTemplateName(template)}</Text>
+                        <Text style={styles.slideCounter}>Slide {currentSlideIndex + 1} of {slides.length}</Text>
+                    </View>
 
-                {/* TEST MODE TOGGLE - Only visible in development */}
-                {__DEV__ && (
+                    {/* TEST MODE TOGGLE - Only visible in development */}
+                    {/* {__DEV__ && (
                     <View style={styles.devButtonsContainer}>
                         <TouchableOpacity onPress={toggleTestMode} style={styles.testModeButton}>
                             <Text style={styles.testModeText}>{testMode ? '🧪' : '📝'}</Text>
@@ -297,258 +299,259 @@ export default function EditorScreen() {
                             <Text style={styles.geminiTestText}>⚖️</Text>
                         </TouchableOpacity>
                     </View>
-                )}
-            </View>
+                )} */}
+                </View>
 
-            {/* Slide Navigation */}
-            <View style={styles.slideNav}>
-                <TouchableOpacity
-                    onPress={prevSlide}
-                    style={[styles.navButton, currentSlideIndex === 0 && styles.navButtonDisabled]}
-                    disabled={currentSlideIndex === 0}
-                >
-                    <Text style={[styles.navText, currentSlideIndex === 0 && styles.navTextDisabled]}>‹ Prev</Text>
-                </TouchableOpacity>
+                {/* Slide Navigation */}
+                <View style={styles.slideNav}>
+                    <TouchableOpacity
+                        onPress={prevSlide}
+                        style={[styles.navButton, currentSlideIndex === 0 && styles.navButtonDisabled]}
+                        disabled={currentSlideIndex === 0}
+                    >
+                        <Text style={[styles.navText, currentSlideIndex === 0 && styles.navTextDisabled]}>‹ Prev</Text>
+                    </TouchableOpacity>
 
-                <View style={styles.slideIndicator}>
-                    {slides.map((_, i) => (
-                        <TouchableOpacity key={i} onPress={() => setCurrentSlideIndex(i)}>
-                            <View style={[styles.dot, i === currentSlideIndex && styles.dotActive]} />
-                        </TouchableOpacity>
+                    <View style={styles.slideIndicator}>
+                        {slides.map((_, i) => (
+                            <TouchableOpacity key={i} onPress={() => setCurrentSlideIndex(i)}>
+                                <View style={[styles.dot, i === currentSlideIndex && styles.dotActive]} />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
+                    <TouchableOpacity
+                        onPress={nextSlide}
+                        style={[styles.navButton, currentSlideIndex === slides.length - 1 && styles.navButtonDisabled]}
+                        disabled={currentSlideIndex === slides.length - 1}
+                    >
+                        <Text style={[styles.navText, currentSlideIndex === slides.length - 1 && styles.navTextDisabled]}>Next ›</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Main Editor */}
+                <View style={styles.editorContent}>
+                    {/* Heading Section */}
+                    <View style={styles.sectionContainer}>
+                        <View style={styles.sectionHeader}>
+                            <View>
+                                <Text style={styles.label}>Heading</Text>
+                                <Text style={styles.hint}>Always displays in gold</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => setShowHeadingPreview(!showHeadingPreview)}
+                                style={styles.previewToggleSmall}
+                            >
+                                <Text style={styles.previewToggleSmallText}>
+                                    {showHeadingPreview ? '✏️' : '👁️'}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {showHeadingPreview ? (
+                            <View style={styles.headingPreview}>
+                                <Text style={styles.headingPreviewText}>
+                                    {currentSlide.title || 'Preview: Your heading will appear here'}
+                                </Text>
+                            </View>
+                        ) : (
+                            <TextInput
+                                value={currentSlide.title || ""}
+                                onChangeText={(text) => updateSlide("title", text)}
+                                placeholder="Enter heading"
+                                placeholderTextColor={colors.textSecondary}
+                                style={styles.headingInput}
+                            />
+                        )}
+                    </View>
+
+                    {/* Subtitle Section */}
+                    <View style={styles.sectionContainer}>
+                        <View style={styles.sectionHeader}>
+                            <View>
+                                <Text style={styles.label}>Subtitle</Text>
+                                <Text style={styles.hint}>Optional: Use *gold* ~red~ _blue_ for emphasis</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => setShowSubtitlePreview(!showSubtitlePreview)}
+                                style={styles.previewToggleSmall}
+                            >
+                                <Text style={styles.previewToggleSmallText}>
+                                    {showSubtitlePreview ? '✏️' : '👁️'}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {showSubtitlePreview ? (
+                            <View style={styles.subtitlePreview}>
+                                <Text style={styles.subtitlePreviewText}>
+                                    {parseFormattedText(currentSlide.subtitle || "").map((part, idx) => (
+                                        <Text key={idx} style={{ color: part.color || colors.textSecondary, fontWeight: '500' }}>
+                                            {part.text}
+                                        </Text>
+                                    ))}
+                                </Text>
+                            </View>
+                        ) : (
+                            <TextInput
+                                value={currentSlide.subtitle || ""}
+                                onChangeText={(text) => updateSlide("subtitle", text)}
+                                placeholder="Enter subtitle"
+                                placeholderTextColor={colors.textSecondary}
+                                style={styles.input}
+                            />
+                        )}
+                    </View>
+
+                    {/* Content Blocks */}
+                    <Text style={styles.label}>Content Blocks</Text>
+                    {currentSlide.blocks.map((block, index) => (
+                        <View key={block.id}>
+                            {/* Insert button before first block and between blocks */}
+                            {index === 0 && (
+                                <TouchableOpacity
+                                    onPress={() => openInsertPicker(0)}
+                                    style={styles.insertButton}
+                                >
+                                    <Text style={styles.insertButtonText}>+ Insert Block</Text>
+                                </TouchableOpacity>
+                            )}
+
+                            <BlockRenderer
+                                block={block}
+                                onUpdate={(updatedBlock) => updateBlock(block.id, updatedBlock)}
+                                onDelete={currentSlide.blocks.length > 1 ? () => deleteBlock(block.id) : null}
+                                onOpenImageSearch={(blockId) => {
+                                    setSelectedImageBlockId(blockId);
+                                    setImageSearchVisible(true);
+                                }}
+                            />
+
+                            {/* Insert button between blocks (not after last) */}
+                            {index < currentSlide.blocks.length - 1 && (
+                                <TouchableOpacity
+                                    onPress={() => openInsertPicker(index + 1)}
+                                    style={styles.insertButton}
+                                >
+                                    <Text style={styles.insertButtonText}>+ Insert Block</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     ))}
-                </View>
 
-                <TouchableOpacity
-                    onPress={nextSlide}
-                    style={[styles.navButton, currentSlideIndex === slides.length - 1 && styles.navButtonDisabled]}
-                    disabled={currentSlideIndex === slides.length - 1}
-                >
-                    <Text style={[styles.navText, currentSlideIndex === slides.length - 1 && styles.navTextDisabled]}>Next ›</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Main Editor */}
-            <View style={styles.editorContent}>
-                {/* Heading Section */}
-                <View style={styles.sectionContainer}>
-                    <View style={styles.sectionHeader}>
-                        <View>
-                            <Text style={styles.label}>Heading</Text>
-                            <Text style={styles.hint}>Always displays in gold</Text>
+                    <TouchableOpacity
+                        onPress={() => setBlockPickerVisible(true)}
+                        style={styles.addBlockButton}
+                    >
+                        <Text style={styles.addBlockIcon}>✨</Text>
+                        <View style={styles.addBlockTextContainer}>
+                            <Text style={styles.addBlockTitle}>Add Content Block</Text>
+                            <Text style={styles.addBlockSubtitle}>Choose from text, quotes, timelines & more</Text>
                         </View>
-                        <TouchableOpacity
-                            onPress={() => setShowHeadingPreview(!showHeadingPreview)}
-                            style={styles.previewToggleSmall}
-                        >
-                            <Text style={styles.previewToggleSmallText}>
-                                {showHeadingPreview ? '✏️' : '👁️'}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
+                        <Text style={styles.addBlockArrow}>›</Text>
+                    </TouchableOpacity>
 
-                    {showHeadingPreview ? (
-                        <View style={styles.headingPreview}>
-                            <Text style={styles.headingPreviewText}>
-                                {currentSlide.title || 'Preview: Your heading will appear here'}
-                            </Text>
-                        </View>
-                    ) : (
-                        <TextInput
-                            value={currentSlide.title}
-                            onChangeText={(text) => updateSlide("title", text)}
-                            placeholder="Enter heading"
-                            placeholderTextColor={colors.textSecondary}
-                            style={styles.headingInput}
-                        />
-                    )}
-                </View>
+                    {/* Slide Management Section */}
+                    <View style={styles.slideManagementSection}>
+                        <Text style={styles.sectionLabel}>Slide Management</Text>
 
-                {/* Subtitle Section */}
-                <View style={styles.sectionContainer}>
-                    <View style={styles.sectionHeader}>
-                        <View>
-                            <Text style={styles.label}>Subtitle</Text>
-                            <Text style={styles.hint}>Optional: Use *gold* ~red~ _blue_ for emphasis</Text>
-                        </View>
-                        <TouchableOpacity
-                            onPress={() => setShowSubtitlePreview(!showSubtitlePreview)}
-                            style={styles.previewToggleSmall}
-                        >
-                            <Text style={styles.previewToggleSmallText}>
-                                {showSubtitlePreview ? '✏️' : '👁️'}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {showSubtitlePreview ? (
-                        <View style={styles.subtitlePreview}>
-                            <Text style={styles.subtitlePreviewText}>
-                                {parseFormattedText(currentSlide.subtitle).map((part, idx) => (
-                                    <Text key={idx} style={{ color: part.color || colors.textSecondary, fontWeight: '500' }}>
-                                        {part.text}
-                                    </Text>
-                                ))}
-                            </Text>
-                        </View>
-                    ) : (
-                        <TextInput
-                            value={currentSlide.subtitle}
-                            onChangeText={(text) => updateSlide("subtitle", text)}
-                            placeholder="Enter subtitle"
-                            placeholderTextColor={colors.textSecondary}
-                            style={styles.input}
-                        />
-                    )}
-                </View>
-
-                {/* Content Blocks */}
-                <Text style={styles.label}>Content Blocks</Text>
-                {currentSlide.blocks.map((block, index) => (
-                    <View key={block.id}>
-                        {/* Insert button before first block and between blocks */}
-                        {index === 0 && (
+                        <View style={styles.slideActionRow}>
                             <TouchableOpacity
-                                onPress={() => openInsertPicker(0)}
-                                style={styles.insertButton}
+                                onPress={insertSlideBefore}
+                                style={styles.slideActionButton}
                             >
-                                <Text style={styles.insertButtonText}>+ Insert Block</Text>
+                                <Text style={styles.slideActionIcon}>⬆️</Text>
+                                <Text style={styles.slideActionText}>Insert Before</Text>
                             </TouchableOpacity>
-                        )}
 
-                        <BlockRenderer
-                            block={block}
-                            onUpdate={(updatedBlock) => updateBlock(block.id, updatedBlock)}
-                            onDelete={currentSlide.blocks.length > 1 ? () => deleteBlock(block.id) : null}
-                            onOpenImageSearch={(blockId) => {
-                                setSelectedImageBlockId(blockId);
-                                setImageSearchVisible(true);
-                            }}
-                        />
-
-                        {/* Insert button between blocks (not after last) */}
-                        {index < currentSlide.blocks.length - 1 && (
                             <TouchableOpacity
-                                onPress={() => openInsertPicker(index + 1)}
-                                style={styles.insertButton}
+                                onPress={insertSlideAfter}
+                                style={styles.slideActionButton}
                             >
-                                <Text style={styles.insertButtonText}>+ Insert Block</Text>
+                                <Text style={styles.slideActionIcon}>⬇️</Text>
+                                <Text style={styles.slideActionText}>Insert After</Text>
                             </TouchableOpacity>
-                        )}
-                    </View>
-                ))}
+                        </View>
 
-                <TouchableOpacity
-                    onPress={() => setBlockPickerVisible(true)}
-                    style={styles.addBlockButton}
-                >
-                    <Text style={styles.addBlockIcon}>✨</Text>
-                    <View style={styles.addBlockTextContainer}>
-                        <Text style={styles.addBlockTitle}>Add Content Block</Text>
-                        <Text style={styles.addBlockSubtitle}>Choose from text, quotes, timelines & more</Text>
-                    </View>
-                    <Text style={styles.addBlockArrow}>›</Text>
-                </TouchableOpacity>
-
-                {/* Slide Management Section */}
-                <View style={styles.slideManagementSection}>
-                    <Text style={styles.sectionLabel}>Slide Management</Text>
-
-                    <View style={styles.slideActionRow}>
-                        <TouchableOpacity
-                            onPress={insertSlideBefore}
-                            style={styles.slideActionButton}
-                        >
-                            <Text style={styles.slideActionIcon}>⬆️</Text>
-                            <Text style={styles.slideActionText}>Insert Before</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            onPress={insertSlideAfter}
-                            style={styles.slideActionButton}
-                        >
-                            <Text style={styles.slideActionIcon}>⬇️</Text>
-                            <Text style={styles.slideActionText}>Insert After</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.slideActionRow}>
-                        <TouchableOpacity
-                            onPress={addSlide}
-                            style={[styles.slideActionButton, styles.slideActionButtonFull]}
-                        >
-                            <Text style={styles.slideActionIcon}>➕</Text>
-                            <Text style={styles.slideActionText}>Add at End</Text>
-                        </TouchableOpacity>
-
-                        {slides.length > 1 && (
+                        <View style={styles.slideActionRow}>
                             <TouchableOpacity
-                                onPress={deleteSlide}
-                                style={[styles.slideActionButton, styles.slideActionButtonDanger]}
+                                onPress={addSlide}
+                                style={[styles.slideActionButton, styles.slideActionButtonFull]}
                             >
-                                <Text style={styles.slideActionIcon}>🗑️</Text>
-                                <Text style={styles.slideActionTextDanger}>Delete Slide</Text>
+                                <Text style={styles.slideActionIcon}>➕</Text>
+                                <Text style={styles.slideActionText}>Add at End</Text>
                             </TouchableOpacity>
-                        )}
+
+                            {slides.length > 1 && (
+                                <TouchableOpacity
+                                    onPress={deleteSlide}
+                                    style={[styles.slideActionButton, styles.slideActionButtonDanger]}
+                                >
+                                    <Text style={styles.slideActionIcon}>🗑️</Text>
+                                    <Text style={styles.slideActionTextDanger}>Delete Slide</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     </View>
+
+                    {/* Save as Template Button */}
+                    <TouchableOpacity
+                        onPress={() => setSaveTemplateVisible(true)}
+                        style={styles.saveTemplateButton}
+                    >
+                        <Text style={styles.saveTemplateIcon}>💾</Text>
+                        <Text style={styles.saveTemplateText}>Save as Custom Template</Text>
+                    </TouchableOpacity>
+
+                    <GoldButton
+                        title="Continue to Export"
+                        onPress={goToExport}
+                    />
                 </View>
 
-                {/* Save as Template Button */}
-                <TouchableOpacity
-                    onPress={() => setSaveTemplateVisible(true)}
-                    style={styles.saveTemplateButton}
-                >
-                    <Text style={styles.saveTemplateIcon}>💾</Text>
-                    <Text style={styles.saveTemplateText}>Save as Custom Template</Text>
-                </TouchableOpacity>
-
-                <GoldButton
-                    title="Continue to Export"
-                    onPress={goToExport}
+                {/* Block Picker Modal */}
+                <BlockPicker
+                    visible={blockPickerVisible}
+                    onClose={() => {
+                        setBlockPickerVisible(false);
+                        setInsertPosition(null);
+                    }}
+                    onSelectBlock={(blockType) => addBlock(blockType)}
                 />
-            </View>
 
-            {/* Block Picker Modal */}
-            <BlockPicker
-                visible={blockPickerVisible}
-                onClose={() => {
-                    setBlockPickerVisible(false);
-                    setInsertPosition(null);
-                }}
-                onSelectBlock={(blockType) => addBlock(blockType)}
-            />
+                {/* Save Template Modal */}
+                <SaveTemplateModal
+                    visible={saveTemplateVisible}
+                    onClose={() => setSaveTemplateVisible(false)}
+                    onSave={handleSaveTemplate}
+                />
 
-            {/* Save Template Modal */}
-            <SaveTemplateModal
-                visible={saveTemplateVisible}
-                onClose={() => setSaveTemplateVisible(false)}
-                onSave={handleSaveTemplate}
-            />
-
-            {/* Image Search Modal */}
-            <ImageSearchModal
-                visible={imageSearchVisible}
-                onClose={() => setImageSearchVisible(false)}
-                onSelectImage={(image) => {
-                    // Update the selected image block
-                    if (selectedImageBlockId) {
-                        const updatedBlock = currentSlide.blocks.find(
-                            (b) => b.id === selectedImageBlockId
-                        );
-                        if (updatedBlock) {
-                            updateBlock(selectedImageBlockId, {
-                                ...updatedBlock,
-                                data: {
-                                    ...updatedBlock.data,
-                                    uri: image.uri,
-                                    caption: image.caption,
-                                },
-                            });
+                {/* Image Search Modal */}
+                <ImageSearchModal
+                    visible={imageSearchVisible}
+                    onClose={() => setImageSearchVisible(false)}
+                    onSelectImage={(image) => {
+                        // Update the selected image block
+                        if (selectedImageBlockId) {
+                            const updatedBlock = currentSlide.blocks.find(
+                                (b) => b.id === selectedImageBlockId
+                            );
+                            if (updatedBlock) {
+                                updateBlock(selectedImageBlockId, {
+                                    ...updatedBlock,
+                                    data: {
+                                        ...updatedBlock.data,
+                                        uri: image.uri,
+                                        caption: image.caption,
+                                    },
+                                });
+                            }
                         }
-                    }
-                    setSelectedImageBlockId(null);
-                }}
-            />
-        </ScrollView>
+                        setSelectedImageBlockId(null);
+                    }}
+                />
+            </ScrollView>
+        </SafeAreaView>
     )
 }
 
@@ -565,18 +568,25 @@ const getTemplateName = (template) => {
 }
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
     container: {
         flex: 1,
         backgroundColor: colors.background,
     },
+    scrollContent: {
+        paddingBottom: 40,
+    },
     header: {
-        paddingTop: 50,
-        paddingHorizontal: 20,
-        paddingBottom: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderGold,
+        paddingHorizontal: 24,
+        paddingVertical: 20,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(212, 175, 55, 0.2)',
         flexDirection: "row",
         alignItems: "center",
+        backgroundColor: colors.background,
     },
     backButton: {
         padding: 8,
@@ -631,23 +641,26 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     editorContent: {
-        padding: 20,
+        padding: 24,
     },
     label: {
         color: colors.gold,
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: "600",
         fontFamily: "Inter_600SemiBold",
-        marginBottom: 4,
+        marginBottom: 6,
+        opacity: 0.9,
+        letterSpacing: 0.3,
     },
     hint: {
         color: colors.textSecondary,
         fontSize: 11,
         fontFamily: "Inter_400Regular",
         marginTop: 2,
+        opacity: 0.7,
     },
     sectionContainer: {
-        marginBottom: 20,
+        marginBottom: 28,
     },
     sectionHeader: {
         flexDirection: 'row',
@@ -666,23 +679,23 @@ const styles = StyleSheet.create({
     },
     headingInput: {
         backgroundColor: colors.card,
-        padding: 16,
-        borderRadius: 12,
+        padding: 18,
+        borderRadius: 14,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         color: colors.textPrimary,
         fontSize: 20,
         fontWeight: "700",
         fontFamily: "Inter_700Bold",
-        minHeight: 60,
+        minHeight: 64,
     },
     headingPreview: {
         backgroundColor: colors.card,
-        padding: 16,
-        borderRadius: 12,
+        padding: 18,
+        borderRadius: 14,
         borderWidth: 1,
-        borderColor: colors.borderGold,
-        minHeight: 60,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
+        minHeight: 64,
         justifyContent: 'center',
     },
     headingPreviewText: {
@@ -693,11 +706,11 @@ const styles = StyleSheet.create({
     },
     subtitlePreview: {
         backgroundColor: colors.card,
-        padding: 14,
-        borderRadius: 12,
+        padding: 16,
+        borderRadius: 14,
         borderWidth: 1,
-        borderColor: colors.borderGold,
-        minHeight: 50,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
+        minHeight: 54,
         justifyContent: 'center',
     },
     subtitlePreviewText: {
@@ -707,12 +720,11 @@ const styles = StyleSheet.create({
     },
     input: {
         backgroundColor: colors.card,
-        padding: 14,
-        borderRadius: 12,
+        padding: 16,
+        borderRadius: 14,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         color: colors.textPrimary,
-        marginBottom: 12,
         fontSize: 15,
         fontFamily: "Inter_400Regular",
     },
@@ -724,10 +736,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.borderGold,
+        paddingHorizontal: 24,
+        paddingVertical: 18,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(212, 175, 55, 0.2)',
+        backgroundColor: colors.background,
     },
     navButton: {
         paddingVertical: 8,
@@ -843,18 +856,18 @@ const styles = StyleSheet.create({
     addBlockButton: {
         backgroundColor: colors.card,
         borderRadius: 16,
-        padding: 18,
-        marginBottom: 12,
-        marginTop: 8,
-        borderWidth: 2,
-        borderColor: colors.gold,
+        padding: 20,
+        marginBottom: 16,
+        marginTop: 12,
+        borderWidth: 1.5,
+        borderColor: 'rgba(212, 175, 55, 0.4)',
         flexDirection: 'row',
         alignItems: 'center',
         shadowColor: colors.gold,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 5,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+        elevation: 3,
     },
     addBlockIcon: {
         fontSize: 28,
@@ -883,37 +896,40 @@ const styles = StyleSheet.create({
     },
     insertButton: {
         alignSelf: 'center',
-        paddingVertical: 6,
-        paddingHorizontal: 16,
-        borderRadius: 12,
+        paddingVertical: 8,
+        paddingHorizontal: 20,
+        borderRadius: 14,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.3)',
         borderStyle: 'dashed',
-        opacity: 0.5,
-        marginVertical: 8,
-        backgroundColor: 'transparent',
+        opacity: 0.6,
+        marginVertical: 10,
+        backgroundColor: 'rgba(212, 175, 55, 0.05)',
     },
     insertButtonText: {
         color: colors.gold,
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: '600',
         fontFamily: 'Inter_600SemiBold',
+        opacity: 0.8,
     },
     slideManagementSection: {
-        marginTop: 24,
-        marginBottom: 16,
-        padding: 16,
+        marginTop: 32,
+        marginBottom: 20,
+        padding: 20,
         backgroundColor: colors.card,
-        borderRadius: 12,
+        borderRadius: 16,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
     },
     sectionLabel: {
         color: colors.gold,
-        fontSize: 15,
+        fontSize: 14,
         fontWeight: '700',
         fontFamily: 'Inter_700Bold',
-        marginBottom: 12,
+        marginBottom: 14,
+        letterSpacing: 0.3,
+        opacity: 0.95,
     },
     slideActionRow: {
         flexDirection: 'row',
@@ -923,11 +939,11 @@ const styles = StyleSheet.create({
     slideActionButton: {
         flex: 1,
         backgroundColor: colors.background,
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        borderRadius: 10,
+        paddingVertical: 14,
+        paddingHorizontal: 14,
+        borderRadius: 12,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.3)',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -957,16 +973,16 @@ const styles = StyleSheet.create({
     },
     saveTemplateButton: {
         backgroundColor: colors.surface,
-        paddingVertical: 16,
-        paddingHorizontal: 20,
-        borderRadius: 12,
+        paddingVertical: 18,
+        paddingHorizontal: 22,
+        borderRadius: 14,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.3)',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,
-        marginBottom: 16,
+        marginBottom: 20,
     },
     saveTemplateIcon: {
         fontSize: 18,
