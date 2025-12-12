@@ -280,26 +280,7 @@ export default function EditorScreen() {
                         <Text style={styles.slideCounter}>Slide {currentSlideIndex + 1} of {slides.length}</Text>
                     </View>
 
-                    {/* TEST MODE TOGGLE - Only visible in development */}
-                    {/* {__DEV__ && (
-                    <View style={styles.devButtonsContainer}>
-                        <TouchableOpacity onPress={toggleTestMode} style={styles.testModeButton}>
-                            <Text style={styles.testModeText}>{testMode ? '🧪' : '📝'}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => router.push("/dev/gemini-test")}
-                            style={styles.geminiTestButton}
-                        >
-                            <Text style={styles.geminiTestText}>🔧</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => router.push("/dev/citation-test")}
-                            style={styles.geminiTestButton}
-                        >
-                            <Text style={styles.geminiTestText}>⚖️</Text>
-                        </TouchableOpacity>
-                    </View>
-                )} */}
+                    {/* Dev controls removed for production */}
                 </View>
 
                 {/* Slide Navigation */}

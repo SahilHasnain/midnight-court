@@ -48,7 +48,7 @@ export default function TemplateScreen() {
                 customTemplates;
 
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 60}}>
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.heading}>Choose Your Template</Text>
@@ -129,9 +129,7 @@ export default function TemplateScreen() {
                                         )}
                                     </View>
                                 </View>
-                                <View style={styles.arrow}>
-                                    <Text style={styles.arrowText}>›</Text>
-                                </View>
+    
                             </TouchableOpacity>
 
                             {/* Delete button for custom templates */}
@@ -159,7 +157,7 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 24,
-        marginBottom: 24,
+        marginBottom: 20,
     },
     heading: {
         color: colors.gold,
@@ -167,6 +165,7 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         letterSpacing: 0.5,
         fontFamily: "PlayfairDisplay_700Bold",
+        marginBottom: 4,
     },
     goldLine: {
         width: 60,
@@ -182,25 +181,26 @@ const styles = StyleSheet.create({
         fontStyle: "italic",
         lineHeight: 20,
         fontFamily: "PlayfairDisplay_400Regular",
+        opacity: 0.9,
     },
     listContent: {
         paddingHorizontal: 20,
-        paddingBottom: 20,
+        paddingBottom: 24,
     },
     card: {
         backgroundColor: colors.card,
         padding: 18,
-        borderRadius: 16,
+        borderRadius: 14,
         marginBottom: 14,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        shadowColor: colors.gold,
+        shadowColor: 'rgba(0,0,0,0.35)',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        shadowOpacity: 0.12,
+        shadowRadius: 6,
         elevation: 3,
     },
     cardContent: {
@@ -211,10 +211,10 @@ const styles = StyleSheet.create({
     iconContainer: {
         width: 50,
         height: 50,
-        borderRadius: 25,
+        borderRadius: 14,
         backgroundColor: colors.background,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         justifyContent: "center",
         alignItems: "center",
         marginRight: 16,
@@ -228,9 +228,9 @@ const styles = StyleSheet.create({
     cardTitle: {
         color: colors.ivory,
         fontSize: 17,
-        fontWeight: "600",
+        fontWeight: "700",
         marginBottom: 4,
-        fontFamily: "Inter_600SemiBold",
+        fontFamily: "Inter_700Bold",
     },
     cardDescription: {
         color: colors.textSecondary,
@@ -243,14 +243,14 @@ const styles = StyleSheet.create({
     },
     arrowText: {
         color: colors.gold,
-        fontSize: 28,
-        fontWeight: "300",
+        fontSize: 26,
+        fontWeight: "400",
     },
     tabContainer: {
         flexDirection: 'row',
-        gap: 12,
+        gap: 10,
         paddingHorizontal: 20,
-        marginBottom: 20,
+        marginBottom: 18,
     },
     tab: {
         flex: 1,
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         alignItems: 'center',
     },
     tabActive: {
@@ -281,13 +281,14 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         fontSize: 11,
         fontFamily: 'Inter_400Regular',
-        opacity: 0.7,
+        opacity: 0.75,
     },
     slideCount: {
         color: colors.gold,
         fontSize: 11,
         fontFamily: 'Inter_600SemiBold',
         marginTop: 4,
+        opacity: 0.95,
     },
     cardWrapper: {
         position: 'relative',
@@ -295,19 +296,20 @@ const styles = StyleSheet.create({
     },
     deleteButton: {
         position: 'absolute',
-        top: 8,
-        right: 8,
-        backgroundColor: 'rgba(239, 68, 68, 0.9)',
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        top: 10,
+        right: 10,
+        backgroundColor: 'rgba(239, 68, 68, 0.08)',
+        width: 34,
+        height: 34,
+        borderRadius: 17,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#ef4444',
+        borderColor: 'rgba(239, 68, 68, 0.4)',
     },
     deleteIcon: {
-        fontSize: 16,
+        fontSize: 15,
+        color: '#ef4444',
     },
     emptyState: {
         alignItems: 'center',

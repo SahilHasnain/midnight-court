@@ -5,6 +5,7 @@ import {
     Alert,
     FlatList,
     Image,
+    Keyboard,
     Modal,
     StyleSheet,
     Text,
@@ -19,6 +20,7 @@ export default function ImageSearchModal({ visible, onClose, onSelectImage }) {
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedSource, setSelectedSource] = useState("pexels");
+    const [isTyping, setIsTyping] = useState(false);
 
     const handleSearch = async () => {
         if (!searchQuery.trim()) {
@@ -26,6 +28,9 @@ export default function ImageSearchModal({ visible, onClose, onSelectImage }) {
             return;
         }
 
+        // Ensure search triggers even when keyboard is open
+        Keyboard.dismiss();
+        setIsTyping(false);
         setLoading(true);
         try {
             const results = await searchImages(searchQuery.trim(), selectedSource);
@@ -105,10 +110,15 @@ export default function ImageSearchModal({ visible, onClose, onSelectImage }) {
                 <View style={styles.searchSection}>
                     <TextInput
                         style={styles.searchInput}
-                        placeholder="e.g., courtroom, legal scales, justice"
+                        placeholder="e.g., courtroom, legal scales"
                         placeholderTextColor={colors.textSecondary}
                         value={searchQuery}
-                        onChangeText={setSearchQuery}
+                        onChangeText={(t) => {
+                            setSearchQuery(t);
+                            setIsTyping(true);
+                        }}
+                        onFocus={() => setIsTyping(true)}
+                        onSubmitEditing={handleSearch}
                         returnKeyType="search"
                     />
                     <TouchableOpacity
@@ -161,7 +171,7 @@ export default function ImageSearchModal({ visible, onClose, onSelectImage }) {
                 </View>
 
                 {/* Results Grid */}
-                {searchResults.length > 0 ? (
+                {!isTyping && searchResults.length > 0 ? (
                     <FlatList
                         data={searchResults}
                         renderItem={renderImage}
@@ -169,9 +179,10 @@ export default function ImageSearchModal({ visible, onClose, onSelectImage }) {
                         numColumns={2}
                         columnWrapperStyle={styles.gridRow}
                         contentContainerStyle={styles.gridContent}
+                        keyboardShouldPersistTaps="handled"
                         scrollEnabled
                     />
-                ) : searchQuery && !loading ? (
+                ) : (!isTyping && searchQuery && !loading) ? (
                     <View style={styles.emptyState}>
                         <Text style={styles.emptyIcon}>🖼️</Text>
                         <Text style={styles.emptyTitle}>No Results</Text>
@@ -189,13 +200,6 @@ export default function ImageSearchModal({ visible, onClose, onSelectImage }) {
                         </Text>
                     </View>
                 )}
-
-                {/* Footer Attribution */}
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>
-                        Photos from Unsplash, Pexels • Creative Commons • Free to use
-                    </Text>
-                </View>
             </View>
         </Modal>
     );
@@ -213,8 +217,8 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         paddingHorizontal: 20,
         paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(212, 175, 55, 0.15)',
     },
     closeButton: {
         fontSize: 24,
@@ -232,25 +236,25 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 16,
         gap: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(212, 175, 55, 0.15)',
     },
     searchInput: {
         flex: 1,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,
         borderWidth: 1,
-        borderColor: colors.borderGold,
-        borderRadius: 8,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
+        borderRadius: 12,
         paddingHorizontal: 12,
-        paddingVertical: 10,
+        paddingVertical: 12,
         fontSize: 14,
-        color: "white",
+        color: colors.textPrimary,
         fontFamily: "Inter_400Regular",
     },
     searchButton: {
         backgroundColor: colors.gold,
         paddingHorizontal: 20,
-        borderRadius: 8,
+        borderRadius: 12,
         justifyContent: "center",
         alignItems: "center",
         minWidth: 80,
@@ -266,22 +270,22 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 12,
         gap: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(212, 175, 55, 0.15)',
     },
     sourceButton: {
         flex: 1,
         paddingVertical: 8,
         paddingHorizontal: 12,
-        borderRadius: 6,
+        borderRadius: 10,
         borderWidth: 1,
-        borderColor: colors.borderGold,
-        backgroundColor: colors.surface,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
+        backgroundColor: colors.background,
         alignItems: "center",
     },
     sourceButtonActive: {
         borderColor: colors.gold,
-        backgroundColor: "rgba(203, 164, 74, 0.1)",
+        backgroundColor: "rgba(212, 175, 55, 0.10)",
     },
     sourceButtonText: {
         fontSize: 13,
@@ -304,10 +308,10 @@ const styles = StyleSheet.create({
         flex: 1,
         marginHorizontal: 5,
         backgroundColor: colors.card,
-        borderRadius: 10,
+        borderRadius: 14,
         overflow: "hidden",
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
     },
     imageWrapper: {
         position: "relative",
@@ -316,14 +320,14 @@ const styles = StyleSheet.create({
     thumbnail: {
         width: "100%",
         height: 180,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,
     },
     imageOverlay: {
         position: "absolute",
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.75)",
+        backgroundColor: "rgba(0, 0, 0, 0.72)",
         paddingVertical: 8,
         paddingHorizontal: 12,
         justifyContent: "center",
@@ -370,9 +374,9 @@ const styles = StyleSheet.create({
     footer: {
         paddingHorizontal: 20,
         paddingVertical: 12,
-        borderTopWidth: 1,
-        borderTopColor: colors.border,
-        backgroundColor: colors.surface,
+        borderTopWidth: 0.5,
+        borderTopColor: 'rgba(212, 175, 55, 0.15)',
+        backgroundColor: colors.card,
     },
     footerText: {
         fontSize: 11,

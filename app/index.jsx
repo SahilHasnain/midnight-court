@@ -37,33 +37,30 @@ export default function Index() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Header Section */}
-        <View style={styles.header}>
+        {/* Hero */}
+        <View style={styles.heroCard}>
+          <Text style={styles.kicker}>LEGAL PRESENTATIONS</Text>
           <Text style={styles.title}>Midnight Court</Text>
           <View style={styles.goldLine} />
+          <Text style={styles.tagline}>For your voice, for your case</Text>
+          <Text style={styles.subtitle}>Build clear, elegant decks for courtrooms and clients.</Text>
+
+          {hasSavedPresentation && (
+            <TouchableOpacity onPress={continueSaved} style={styles.continueButton} activeOpacity={0.85}>
+              <Text style={styles.continueText}>⚡ Continue Last Presentation</Text>
+              <Text style={styles.continueHint}>
+                {savedData?.slides?.length || 0} slide{(savedData?.slides?.length || 0) !== 1 ? 's' : ''}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
-        {/* Tagline */}
-        <Text style={styles.tagline}>
-          For your voice, for your case
-        </Text>
-
-        {/* CTA Buttons */}
-        {hasSavedPresentation && (
-          <TouchableOpacity onPress={continueSaved} style={styles.continueButton}>
-            <Text style={styles.continueText}>⚡ Continue Last Presentation</Text>
-            <Text style={styles.continueHint}>
-              {savedData?.slides?.length || 0} slide{(savedData?.slides?.length || 0) !== 1 ? 's' : ''}
-            </Text>
-          </TouchableOpacity>
-        )}
-
-        {/* Main Action Buttons */}
+        {/* Main Actions */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => router.push("/templates")}
-            activeOpacity={0.75}
+            activeOpacity={0.82}
           >
             <Text style={styles.actionIcon}>⚖️</Text>
             <Text style={styles.actionTitle}>Begin Your Case</Text>
@@ -73,7 +70,7 @@ export default function Index() {
           <TouchableOpacity
             style={styles.actionButton}
             onPress={() => router.push("/image-library")}
-            activeOpacity={0.75}
+            activeOpacity={0.82}
           >
             <Text style={styles.actionIcon}>🖼️</Text>
             <Text style={styles.actionTitle}>Legal Images</Text>
@@ -81,13 +78,10 @@ export default function Index() {
           </TouchableOpacity>
         </View>
 
-        {/* Footer Helper */}
-        <Text style={styles.helper}>
-          Professional slides. Anywhere. Anytime.
-        </Text>
+        <Text style={styles.helper}>Professional slides. Anywhere. Anytime.</Text>
 
         {/* Dev Menu - Remove before production */}
-        <View style={styles.devMenu}>
+        {/* <View style={styles.devMenu}>
           <TouchableOpacity
             style={styles.devButton}
             onPress={() => router.push("/dev/gemini-test")}
@@ -100,7 +94,7 @@ export default function Index() {
           >
             <Text style={styles.devButtonText}>⚖️ Citation Test</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   )
@@ -113,11 +107,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 24,
-    paddingVertical: 40,
+    paddingVertical: 36,
   },
-  header: {
-    alignItems: "center",
-    marginBottom: 32,
+  heroCard: {
+    width: '100%',
+    maxWidth: 480,
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 24,
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.25)',
+    shadowColor: 'rgba(0,0,0,0.35)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 4,
+    alignItems: 'center',
+  },
+  kicker: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    letterSpacing: 2,
+    marginBottom: 6,
+    fontFamily: 'Inter_600SemiBold',
   },
   title: {
     color: colors.gold,
@@ -131,7 +144,8 @@ const styles = StyleSheet.create({
     width: 80,
     height: 3,
     backgroundColor: colors.gold,
-    marginTop: 12,
+    marginTop: 10,
+    marginBottom: 12,
     borderRadius: 2,
   },
   quoteContainer: {
@@ -156,11 +170,11 @@ const styles = StyleSheet.create({
   },
   tagline: {
     color: colors.gold,
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "700",
     textAlign: "center",
-    marginBottom: 40,
-    lineHeight: 32,
+    marginBottom: 12,
+    lineHeight: 30,
     letterSpacing: 0.5,
     fontFamily: "PlayfairDisplay_700Bold",
     textShadowColor: 'rgba(212, 175, 55, 0.3)',
@@ -169,11 +183,11 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     color: colors.textSecondary,
-    fontSize: 14,
+    fontSize: 13,
     textAlign: "center",
-    marginBottom: 40,
-    lineHeight: 22,
-    paddingHorizontal: 10,
+    marginBottom: 16,
+    lineHeight: 20,
+    paddingHorizontal: 8,
     fontFamily: "Inter_400Regular",
   },
   ctaButton: {
@@ -182,28 +196,29 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: "100%",
-    gap: 16,
-    marginVertical: 20,
+    maxWidth: 480,
+    gap: 14,
+    marginTop: 4,
+    marginBottom: 22,
   },
   actionButton: {
     backgroundColor: colors.card,
-    borderWidth: 2,
-    borderColor: colors.borderGold,
-    borderRadius: 16,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.25)',
+    borderRadius: 14,
+    paddingVertical: 20,
+    paddingHorizontal: 18,
     alignItems: "center",
     justifyContent: "center",
-    activeOpacity: 0.75,
-    shadowColor: colors.gold,
+    shadowColor: 'rgba(0,0,0,0.25)',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.12,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 3,
   },
   actionIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+    fontSize: 44,
+    marginBottom: 10,
   },
   actionTitle: {
     color: colors.gold,
@@ -247,12 +262,13 @@ const styles = StyleSheet.create({
   helper: {
     color: colors.textSecondary,
     fontSize: 12,
-    marginTop: 20,
-    opacity: 0.7,
+    marginTop: 8,
+    marginBottom: 12,
+    opacity: 0.75,
     fontFamily: "Inter_400Regular",
   },
   devMenu: {
-    marginTop: 20,
+    marginTop: 10,
     flexDirection: "row",
     gap: 8,
   },
@@ -260,9 +276,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 8,
     borderRadius: 6,
-    backgroundColor: "rgba(212, 175, 55, 0.1)",
+    backgroundColor: "rgba(212, 175, 55, 0.08)",
     borderWidth: 1,
-    borderColor: colors.gold,
+    borderColor: 'rgba(212, 175, 55, 0.4)',
   },
   devButtonText: {
     color: colors.gold,

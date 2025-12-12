@@ -83,15 +83,16 @@ export default function ImageBlock({ block, onUpdate, onDelete, onOpenImageSearc
     };
 
     const getSizeConfig = (size) => {
+        // Keep preview sizes reasonable so layout stays intact
         switch (size) {
             case 'small':
-                return { width: '50%', height: 400 };
+                return { width: '90%', height: 240 };
             case 'medium':
-                return { width: '60%', height: 500 };
+                return { width: '100%', height: 280 };
             case 'large':
-                return { width: '100%', height: 600 };
+                return { width: '100%', height: 320 };
             default:
-                return { width: '50%', height: 400 };
+                return { width: '90%', height: 240 };
         }
     };
 

@@ -1,8 +1,5 @@
 1) While adding slide, there should be a toast like element and while deleting as well.
-
-
-
-
+2) same for while saving image
 
 
 ### Good features to add

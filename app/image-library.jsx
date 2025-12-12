@@ -9,6 +9,7 @@ import {
     Alert,
     FlatList,
     Image,
+    Keyboard,
     StyleSheet,
     Text,
     TextInput,
@@ -37,6 +38,7 @@ export default function ImageLibrary() {
     const [isLoading, setIsLoading] = useState(false);
     const [selectedSource, setSelectedSource] = useState("pexels");
     const [activeTab, setActiveTab] = useState("search"); // 'search' or 'saved'
+    const [isTyping, setIsTyping] = useState(false);
 
     // Load saved images on mount
     useFocusEffect(
@@ -58,7 +60,8 @@ export default function ImageLibrary() {
 
     const handleSearch = async () => {
         if (!searchQuery.trim()) return;
-
+        Keyboard.dismiss();
+        setIsTyping(false);
         setIsLoading(true);
         try {
             const results = await searchImages(searchQuery, selectedSource);
@@ -129,11 +132,20 @@ export default function ImageLibrary() {
 
     const renderImageCard = ({ item, isFromSearch = false }) => (
         <View style={styles.imageCardContainer}>
-            <Image
-                source={{ uri: item.thumbnail || item.url }}
-                style={styles.imageCardThumbnail}
-                resizeMode="cover"
-            />
+            <View style={styles.imageWrapper}>
+                <Image
+                    source={{ uri: item.thumbnail || item.url }}
+                    style={styles.imageCardThumbnail}
+                    resizeMode="cover"
+                />
+                {item.photographer && (
+                    <View style={styles.imageInfoOverlay}>
+                        <Text style={styles.photographerText} numberOfLines={1}>
+                            📷 {item.photographer}
+                        </Text>
+                    </View>
+                )}
+            </View>
             <View style={styles.imageCardActions}>
                 {isFromSearch ? (
                     <>
@@ -141,13 +153,13 @@ export default function ImageLibrary() {
                             style={[styles.actionBtn, styles.saveBtnStyle]}
                             onPress={() => saveImage(item)}
                         >
-                            <Text style={styles.saveBtnText}>💾</Text>
+                            <Text style={styles.actionBtnIcon}>💾</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.actionBtn, styles.downloadBtnStyle]}
                             onPress={() => downloadImage(item)}
                         >
-                            <Text style={styles.downloadBtnText}>⬇️</Text>
+                            <Text style={styles.actionBtnIcon}>⬇️</Text>
                         </TouchableOpacity>
                     </>
                 ) : (
@@ -156,13 +168,13 @@ export default function ImageLibrary() {
                             style={[styles.actionBtn, styles.downloadBtnStyle]}
                             onPress={() => downloadImage(item)}
                         >
-                            <Text style={styles.downloadBtnText}>⬇️</Text>
+                            <Text style={styles.actionBtnIcon}>⬇️</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.actionBtn, styles.deleteBtnStyle]}
                             onPress={() => deleteImage(item.id)}
                         >
-                            <Text style={styles.deleteBtnText}>🗑️</Text>
+                            <Text style={styles.actionBtnIconDelete}>🗑️</Text>
                         </TouchableOpacity>
                     </>
                 )}
@@ -227,7 +239,12 @@ export default function ImageLibrary() {
                                 placeholder="Search legal images..."
                                 placeholderTextColor={colors.textSecondary}
                                 value={searchQuery}
-                                onChangeText={setSearchQuery}
+                                onChangeText={(t) => {
+                                    setSearchQuery(t);
+                                    setIsTyping(true);
+                                }}
+                                onFocus={() => setIsTyping(true)}
+                                onSubmitEditing={handleSearch}
                             />
                             <TouchableOpacity
                                 style={styles.searchBtn}
@@ -306,7 +323,7 @@ export default function ImageLibrary() {
                             />
                             <Text style={styles.loaderText}>Searching images...</Text>
                         </View>
-                    ) : searchResults.length > 0 ? (
+                    ) : (!isTyping && searchResults.length > 0) ? (
                         <FlatList
                             data={searchResults}
                             renderItem={(props) => renderImageCard({ ...props, isFromSearch: true })}
@@ -314,9 +331,10 @@ export default function ImageLibrary() {
                             numColumns={2}
                             columnWrapperStyle={styles.gridGap}
                             contentContainerStyle={styles.gridContainer}
+                            keyboardShouldPersistTaps="handled"
                             scrollEnabled
                         />
-                    ) : searchQuery ? (
+                    ) : (!isTyping && searchQuery) ? (
                         <View style={styles.emptyState}>
                             <Text style={styles.emptyStateIcon}>🔍</Text>
                             <Text style={styles.emptyStateText}>No images found</Text>
@@ -372,8 +390,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingHorizontal: 16,
         paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(212, 175, 55, 0.15)',
     },
     backBtn: {
         paddingHorizontal: 8,
@@ -393,8 +411,8 @@ const styles = StyleSheet.create({
     },
     tabContainer: {
         flexDirection: "row",
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(212, 175, 55, 0.15)',
         backgroundColor: colors.card,
     },
     tab: {
@@ -421,23 +439,23 @@ const styles = StyleSheet.create({
     },
     searchSection: {
         padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
+        borderBottomWidth: 0.5,
+        borderBottomColor: 'rgba(212, 175, 55, 0.15)',
     },
     searchInputContainer: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: colors.card,
-        borderRadius: 12,
+        backgroundColor: colors.background,
+        borderRadius: 14,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         paddingHorizontal: 12,
         marginBottom: 12,
     },
     searchInput: {
         flex: 1,
         paddingVertical: 12,
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 14,
         fontFamily: "Inter_400Regular",
     },
@@ -456,14 +474,14 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 10,
         paddingHorizontal: 12,
-        borderRadius: 8,
+        borderRadius: 10,
         borderWidth: 1,
-        borderColor: colors.borderGold,
-        backgroundColor: colors.card,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
+        backgroundColor: colors.background,
         alignItems: "center",
     },
     sourceBtnActive: {
-        backgroundColor: colors.gold,
+        backgroundColor: 'rgba(212, 175, 55, 0.10)',
         borderColor: colors.gold,
     },
     sourceBtnText: {
@@ -473,7 +491,7 @@ const styles = StyleSheet.create({
         fontFamily: "Inter_600SemiBold",
     },
     sourceBtnTextActive: {
-        color: colors.background,
+        color: colors.gold,
     },
     suggestionsContainer: {
         marginTop: 8,
@@ -489,9 +507,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 20,
-        backgroundColor: colors.card,
+        backgroundColor: colors.background,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         marginRight: 8,
     },
     suggestionTagText: {
@@ -510,57 +528,80 @@ const styles = StyleSheet.create({
     imageCardContainer: {
         flex: 1,
         backgroundColor: colors.card,
-        borderRadius: 12,
+        borderRadius: 14,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: 'rgba(212, 175, 55, 0.25)',
         overflow: "hidden",
+        marginBottom: 4,
+    },
+    imageWrapper: {
+        position: 'relative',
+        width: '100%',
     },
     imageCardThumbnail: {
         width: "100%",
         height: 200,
-        backgroundColor: colors.border,
+        backgroundColor: colors.background,
+    },
+    imageInfoOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.72)',
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+    },
+    photographerText: {
+        color: colors.ivory,
+        fontSize: 11,
+        fontFamily: 'Inter_500Medium',
+        opacity: 0.9,
     },
     imageCardActions: {
-        paddingHorizontal: 8,
-        paddingVertical: 8,
+        padding: 10,
         flexDirection: "row",
-        gap: 6,
+        gap: 8,
+        borderTopWidth: 0.5,
+        borderTopColor: 'rgba(212, 175, 55, 0.15)',
     },
     actionBtn: {
         flex: 1,
-        paddingVertical: 8,
-        borderRadius: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 8,
+        borderRadius: 10,
         alignItems: "center",
         justifyContent: "center",
+        gap: 4,
     },
     saveBtnStyle: {
         backgroundColor: colors.gold,
     },
-    saveBtnText: {
-        color: colors.background,
-        fontSize: 20,
+    actionBtnIcon: {
+        fontSize: 18,
+    },
+    actionBtnLabel: {
+        color: colors.textPrimary,
+        fontSize: 11,
         fontWeight: "600",
         fontFamily: "Inter_600SemiBold",
     },
     downloadBtnStyle: {
-        backgroundColor: colors.card,
+        backgroundColor: colors.background,
         borderWidth: 1,
-        borderColor: colors.borderGold,
-    },
-    downloadBtnText: {
-        color: colors.gold,
-        fontSize: 20,
-        fontWeight: "600",
-        fontFamily: "Inter_600SemiBold",
+        borderColor: 'rgba(212, 175, 55, 0.25)',
     },
     deleteBtnStyle: {
-        backgroundColor: colors.card,
+        backgroundColor: 'rgba(239, 68, 68, 0.08)',
         borderWidth: 1,
-        borderColor: "rgba(255, 0, 0, 0.3)",
+        borderColor: 'rgba(239, 68, 68, 0.4)',
     },
-    deleteBtnText: {
-        color: colors.text,
-        fontSize: 20,
+    actionBtnIconDelete: {
+        fontSize: 18,
+    },
+    actionBtnLabelDelete: {
+        color: '#ef4444',
+        fontSize: 11,
         fontWeight: "600",
         fontFamily: "Inter_600SemiBold",
     },
