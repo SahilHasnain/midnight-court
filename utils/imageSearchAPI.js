@@ -11,7 +11,7 @@ const PEXELS_KEY = process.env.EXPO_PUBLIC_PEXELS_KEY;
 const searchUnsplash = async (query) => {
     try {
         const response = await fetch(
-            `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=8&orientation=portrait`,
+            `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=20&orientation=portrait`,
             {
                 headers: {
                     Authorization: `Client-ID ${UNSPLASH_KEY}`,
@@ -43,7 +43,7 @@ const searchUnsplash = async (query) => {
 const searchPexels = async (query) => {
     try {
         const response = await fetch(
-            `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=8&orientation=portrait`,
+            `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=20&orientation=portrait`,
             {
                 headers: {
                     Authorization: PEXELS_KEY,

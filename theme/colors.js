@@ -6,4 +6,5 @@ export const colors = {
   textSecondary: "#D1D5DB",
   card: "#000",
   borderGold: "#E5C76B",
+  toast: "#1F2937",
 };

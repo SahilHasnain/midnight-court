@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import GoldButton from "@/components/GoldButton";
 import ImageSearchModal from "@/components/ImageSearchModal";
 import SaveTemplateModal from "@/components/SaveTemplateModal";
+import Toast from "@/components/Toast";
 import BlockPicker from "@/components/blocks/BlockPicker";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import { BLOCK_TYPES, createDefaultBlock } from "@/components/blocks/blockTypes";
@@ -70,9 +71,17 @@ export default function EditorScreen() {
     const [saveTemplateVisible, setSaveTemplateVisible] = useState(false);
     const [imageSearchVisible, setImageSearchVisible] = useState(false);
     const [selectedImageBlockId, setSelectedImageBlockId] = useState(null);
+    const [toastMessage, setToastMessage] = useState("");
+    const [showToast, setShowToast] = useState(false);
 
     // TEST MODE - Only in development, zero production impact
     const [testMode, setTestMode] = useState(false);
+
+    const showToastMessage = (message) => {
+        setToastMessage(message);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2500);
+    };
 
     const currentSlide = slides[currentSlideIndex];
 
@@ -201,34 +210,69 @@ export default function EditorScreen() {
     }
 
     const addSlide = () => {
-        setSlides([...slides, { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)] }]);
+        setSlides([...slides, { title: "", subtitle: "", blocks: [] }]);
         setCurrentSlideIndex(slides.length);
+        showToastMessage("✨ Slide added");
     }
 
     const insertSlideBefore = () => {
-        const newSlide = { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)] };
+        const newSlide = { title: "", subtitle: "", blocks: [] };
         const newSlides = [...slides];
         newSlides.splice(currentSlideIndex, 0, newSlide);
         setSlides(newSlides);
+        showToastMessage("⬆️ Slide inserted before");
         // Keep current index (new slide inserted before, so we're now on the new one)
     }
 
     const insertSlideAfter = () => {
-        const newSlide = { title: "", subtitle: "", blocks: [createDefaultBlock(BLOCK_TYPES.TEXT)] };
+        const newSlide = { title: "", subtitle: "", blocks: [] };
         const newSlides = [...slides];
         newSlides.splice(currentSlideIndex + 1, 0, newSlide);
         setSlides(newSlides);
         setCurrentSlideIndex(currentSlideIndex + 1);
+        showToastMessage("⬇️ Slide inserted after");
     }
 
     const deleteSlide = () => {
         if (slides.length > 1) {
             const newSlides = slides.filter((_, i) => i !== currentSlideIndex);
             setSlides(newSlides);
+            showToastMessage("🗑️ Slide deleted");
             // Adjust current index if needed
             if (currentSlideIndex >= newSlides.length) {
                 setCurrentSlideIndex(newSlides.length - 1);
             }
+        }
+    }
+
+    const duplicateSlide = () => {
+        const duplicatedSlide = JSON.parse(JSON.stringify(currentSlide));
+        const newSlides = [...slides];
+        newSlides.splice(currentSlideIndex + 1, 0, duplicatedSlide);
+        setSlides(newSlides);
+        setCurrentSlideIndex(currentSlideIndex + 1);
+        showToastMessage("📋 Slide duplicated");
+    }
+
+    const moveSlideUp = () => {
+        if (currentSlideIndex > 0) {
+            const newSlides = [...slides];
+            [newSlides[currentSlideIndex - 1], newSlides[currentSlideIndex]] =
+                [newSlides[currentSlideIndex], newSlides[currentSlideIndex - 1]];
+            setSlides(newSlides);
+            setCurrentSlideIndex(currentSlideIndex - 1);
+            showToastMessage("⬆️ Slide moved up");
+        }
+    }
+
+    const moveSlideDown = () => {
+        if (currentSlideIndex < slides.length - 1) {
+            const newSlides = [...slides];
+            [newSlides[currentSlideIndex], newSlides[currentSlideIndex + 1]] =
+                [newSlides[currentSlideIndex + 1], newSlides[currentSlideIndex]];
+            setSlides(newSlides);
+            setCurrentSlideIndex(currentSlideIndex + 1);
+            showToastMessage("⬇️ Slide moved down");
         }
     }
 
@@ -454,25 +498,57 @@ export default function EditorScreen() {
                             </TouchableOpacity>
                         </View>
 
+                        {slides.length > 1 && (
+                            <View style={styles.slideActionRow}>
+                                <TouchableOpacity
+                                    onPress={moveSlideUp}
+                                    style={[styles.slideActionButton, currentSlideIndex === 0 && styles.slideActionButtonDisabled]}
+                                    disabled={currentSlideIndex === 0}
+                                >
+                                    <Text style={styles.slideActionIcon}>⬆️</Text>
+                                    <Text style={styles.slideActionText}>Move Up</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    onPress={moveSlideDown}
+                                    style={[styles.slideActionButton, currentSlideIndex === slides.length - 1 && styles.slideActionButtonDisabled]}
+                                    disabled={currentSlideIndex === slides.length - 1}
+                                >
+                                    <Text style={styles.slideActionIcon}>⬇️</Text>
+                                    <Text style={styles.slideActionText}>Move Down</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+
                         <View style={styles.slideActionRow}>
                             <TouchableOpacity
+                                onPress={duplicateSlide}
+                                style={styles.slideActionButton}
+                            >
+                                <Text style={styles.slideActionIcon}>📋</Text>
+                                <Text style={styles.slideActionText}>Duplicate</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
                                 onPress={addSlide}
-                                style={[styles.slideActionButton, styles.slideActionButtonFull]}
+                                style={styles.slideActionButton}
                             >
                                 <Text style={styles.slideActionIcon}>➕</Text>
                                 <Text style={styles.slideActionText}>Add at End</Text>
                             </TouchableOpacity>
+                        </View>
 
-                            {slides.length > 1 && (
+                        {slides.length > 1 && (
+                            <View style={styles.slideActionRow}>
                                 <TouchableOpacity
                                     onPress={deleteSlide}
-                                    style={[styles.slideActionButton, styles.slideActionButtonDanger]}
+                                    style={[styles.slideActionButton, styles.slideActionButtonFull, styles.slideActionButtonDanger]}
                                 >
                                     <Text style={styles.slideActionIcon}>🗑️</Text>
                                     <Text style={styles.slideActionTextDanger}>Delete Slide</Text>
                                 </TouchableOpacity>
-                            )}
-                        </View>
+                            </View>
+                        )}
                     </View>
 
                     {/* Save as Template Button */}
@@ -532,6 +608,7 @@ export default function EditorScreen() {
                     }}
                 />
             </ScrollView>
+            <Toast message={toastMessage} visible={showToast} duration={2500} />
         </SafeAreaView>
     )
 }
@@ -936,6 +1013,10 @@ const styles = StyleSheet.create({
     slideActionButtonDanger: {
         borderColor: '#ef4444',
         backgroundColor: 'rgba(239, 68, 68, 0.05)',
+    },
+    slideActionButtonDisabled: {
+        opacity: 0.4,
+        borderColor: 'rgba(212, 175, 55, 0.15)',
     },
     slideActionIcon: {
         fontSize: 16,

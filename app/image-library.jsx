@@ -1,9 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import { Directory, File, Paths } from "expo-file-system";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 import { router } from "expo-router";
-import * as Sharing from "expo-sharing";
 import { useCallback, useState } from "react";
+
+import Toast from "@/components/Toast";
 import {
     ActivityIndicator,
     Alert,
@@ -39,6 +41,14 @@ export default function ImageLibrary() {
     const [selectedSource, setSelectedSource] = useState("pexels");
     const [activeTab, setActiveTab] = useState("search"); // 'search' or 'saved'
     const [isTyping, setIsTyping] = useState(false);
+    const [toastMessage, setToastMessage] = useState("");
+    const [showToast, setShowToast] = useState(false);
+
+    const showToastMessage = (message) => {
+        setToastMessage(message);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2500);
+    };
 
     // Load saved images on mount
     useFocusEffect(
@@ -88,8 +98,10 @@ export default function ImageLibrary() {
                 "saved_images",
                 JSON.stringify(updatedSavedImages)
             );
+            showToastMessage("✅ Image saved to collection");
         } catch (error) {
             console.error("Failed to save image:", error);
+            showToastMessage("❌ Failed to save image");
         }
     };
 
@@ -106,27 +118,40 @@ export default function ImageLibrary() {
         }
     };
 
+    const requestMediaLibraryPermission = async () => {
+        const { status } = await MediaLibrary.requestPermissionsAsync();
+        return status === "granted";
+    };
+
     const downloadImage = async (image) => {
         try {
-            const filename = `legal_image_${Date.now()}.jpg`;
-            const destinationDir = new Directory(Paths.document, "legal-images");
-            await destinationDir.create();
-            const targetFile = new File(destinationDir, filename);
+            const hasPermission = await requestMediaLibraryPermission();
+            if (!hasPermission) {
+                Alert.alert("Permission Denied", "Allow access to save images to your gallery");
+                return;
+            }
 
-            const output = await File.downloadFileAsync(image.url, targetFile);
-            if (!output.exists) {
+            const filename = `legal_image_${Date.now()}.jpg`;
+            const fileUri = FileSystem.Directory + filename;
+
+            // Download to temporary location
+            const downloadRes = await File.downloadFileAsync(
+                image.url || image.thumbnail,
+                fileUri
+            );
+
+            if (!downloadRes.uri) {
                 throw new Error("Download failed");
             }
 
-            const canShare = await Sharing.isAvailableAsync();
-            if (canShare) {
-                await Sharing.shareAsync(output.uri);
-            } else {
-                Alert.alert("Downloaded", "Image saved to app documents");
-            }
+            // Save to gallery
+            const asset = await MediaLibrary.createAssetAsync(downloadRes.uri);
+            await MediaLibrary.createAlbumAsync("Midnight Court", asset, false);
+
+            showToastMessage("📄 Image saved to gallery");
         } catch (error) {
             console.error("Download error:", error);
-            Alert.alert("Error", "Failed to download image");
+            showToastMessage("❌ Failed to download image");
         }
     };
 
@@ -183,199 +208,202 @@ export default function ImageLibrary() {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-                    <Text style={styles.backBtnText}>← Back</Text>
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Legal Images</Text>
-                <View style={{ width: 50 }} />
-            </View>
+        <>
+            <SafeAreaView style={styles.container}>
+                {/* Header */}
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+                        <Text style={styles.backBtnText}>← Back</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>Legal Images</Text>
+                    <View style={{ width: 50 }} />
+                </View>
 
-            {/* Tab Navigation */}
-            <View style={styles.tabContainer}>
-                <TouchableOpacity
-                    style={[
-                        styles.tab,
-                        activeTab === "search" && styles.activeTab,
-                    ]}
-                    onPress={() => setActiveTab("search")}
-                >
-                    <Text
+                {/* Tab Navigation */}
+                <View style={styles.tabContainer}>
+                    <TouchableOpacity
                         style={[
-                            styles.tabText,
-                            activeTab === "search" && styles.activeTabText,
+                            styles.tab,
+                            activeTab === "search" && styles.activeTab,
                         ]}
+                        onPress={() => setActiveTab("search")}
                     >
-                        🔍 Search Images
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[
-                        styles.tab,
-                        activeTab === "saved" && styles.activeTab,
-                    ]}
-                    onPress={() => setActiveTab("saved")}
-                >
-                    <Text
+                        <Text
+                            style={[
+                                styles.tabText,
+                                activeTab === "search" && styles.activeTabText,
+                            ]}
+                        >
+                            🔍 Search Images
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
                         style={[
-                            styles.tabText,
-                            activeTab === "saved" && styles.activeTabText,
+                            styles.tab,
+                            activeTab === "saved" && styles.activeTab,
                         ]}
+                        onPress={() => setActiveTab("saved")}
                     >
-                        💾 Saved ({savedImages.length})
-                    </Text>
-                </TouchableOpacity>
-            </View>
+                        <Text
+                            style={[
+                                styles.tabText,
+                                activeTab === "saved" && styles.activeTabText,
+                            ]}
+                        >
+                            💾 Saved ({savedImages.length})
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
-            {activeTab === "search" ? (
-                <View style={styles.content}>
-                    {/* Search Bar */}
-                    <View style={styles.searchSection}>
-                        <View style={styles.searchInputContainer}>
-                            <TextInput
-                                style={styles.searchInput}
-                                placeholder="Search legal images..."
-                                placeholderTextColor={colors.textSecondary}
-                                value={searchQuery}
-                                onChangeText={(t) => {
-                                    setSearchQuery(t);
-                                    setIsTyping(true);
-                                }}
-                                onFocus={() => setIsTyping(true)}
-                                onSubmitEditing={handleSearch}
-                            />
-                            <TouchableOpacity
-                                style={styles.searchBtn}
-                                onPress={handleSearch}
-                                disabled={isLoading}
-                            >
-                                <Text style={styles.searchBtnText}>🔍</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Source Toggle */}
-                        <View style={styles.sourceToggle}>
-                            <TouchableOpacity
-                                style={[
-                                    styles.sourceBtn,
-                                    selectedSource === "unsplash" && styles.sourceBtnActive,
-                                ]}
-                                onPress={() => setSelectedSource("unsplash")}
-                            >
-                                <Text
-                                    style={[
-                                        styles.sourceBtnText,
-                                        selectedSource === "unsplash" && styles.sourceBtnTextActive,
-                                    ]}
+                {activeTab === "search" ? (
+                    <View style={styles.content}>
+                        {/* Search Bar */}
+                        <View style={styles.searchSection}>
+                            <View style={styles.searchInputContainer}>
+                                <TextInput
+                                    style={styles.searchInput}
+                                    placeholder="Search legal images..."
+                                    placeholderTextColor={colors.textSecondary}
+                                    value={searchQuery}
+                                    onChangeText={(t) => {
+                                        setSearchQuery(t);
+                                        setIsTyping(true);
+                                    }}
+                                    onFocus={() => setIsTyping(true)}
+                                    onSubmitEditing={handleSearch}
+                                />
+                                <TouchableOpacity
+                                    style={styles.searchBtn}
+                                    onPress={handleSearch}
+                                    disabled={isLoading}
                                 >
-                                    Unsplash
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[
-                                    styles.sourceBtn,
-                                    selectedSource === "pexels" && styles.sourceBtnActive,
-                                ]}
-                                onPress={() => setSelectedSource("pexels")}
-                            >
-                                <Text
-                                    style={[
-                                        styles.sourceBtnText,
-                                        selectedSource === "pexels" && styles.sourceBtnTextActive,
-                                    ]}
-                                >
-                                    Pexels
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                                    <Text style={styles.searchBtnText}>🔍</Text>
+                                </TouchableOpacity>
+                            </View>
 
-                        {/* Quick Search Suggestions */}
-                        <View style={styles.suggestionsContainer}>
-                            <Text style={styles.suggestionsLabel}>Quick Search:</Text>
-                            <FlatList
-                                data={LEGAL_SEARCH_TERMS}
-                                renderItem={({ item }) => (
-                                    <TouchableOpacity
-                                        style={styles.suggestionTag}
-                                        onPress={() => {
-                                            setSearchQuery(item);
-                                        }}
+                            {/* Source Toggle */}
+                            <View style={styles.sourceToggle}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.sourceBtn,
+                                        selectedSource === "unsplash" && styles.sourceBtnActive,
+                                    ]}
+                                    onPress={() => setSelectedSource("unsplash")}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.sourceBtnText,
+                                            selectedSource === "unsplash" && styles.sourceBtnTextActive,
+                                        ]}
                                     >
-                                        <Text style={styles.suggestionTagText}>{item}</Text>
-                                    </TouchableOpacity>
-                                )}
-                                keyExtractor={(item) => item}
-                                horizontal
-                                scrollEnabled
-                                showsHorizontalScrollIndicator={false}
-                            />
-                        </View>
-                    </View>
+                                        Unsplash
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.sourceBtn,
+                                        selectedSource === "pexels" && styles.sourceBtnActive,
+                                    ]}
+                                    onPress={() => setSelectedSource("pexels")}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.sourceBtnText,
+                                            selectedSource === "pexels" && styles.sourceBtnTextActive,
+                                        ]}
+                                    >
+                                        Pexels
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
 
-                    {/* Results */}
-                    {isLoading ? (
-                        <View style={styles.loaderContainer}>
-                            <ActivityIndicator
-                                size="large"
-                                color={colors.gold}
+                            {/* Quick Search Suggestions */}
+                            <View style={styles.suggestionsContainer}>
+                                <Text style={styles.suggestionsLabel}>Quick Search:</Text>
+                                <FlatList
+                                    data={LEGAL_SEARCH_TERMS}
+                                    renderItem={({ item }) => (
+                                        <TouchableOpacity
+                                            style={styles.suggestionTag}
+                                            onPress={() => {
+                                                setSearchQuery(item);
+                                            }}
+                                        >
+                                            <Text style={styles.suggestionTagText}>{item}</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                    keyExtractor={(item) => item}
+                                    horizontal
+                                    scrollEnabled
+                                    showsHorizontalScrollIndicator={false}
+                                />
+                            </View>
+                        </View>
+
+                        {/* Results */}
+                        {isLoading ? (
+                            <View style={styles.loaderContainer}>
+                                <ActivityIndicator
+                                    size="large"
+                                    color={colors.gold}
+                                />
+                                <Text style={styles.loaderText}>Searching images...</Text>
+                            </View>
+                        ) : (!isTyping && searchResults.length > 0) ? (
+                            <FlatList
+                                data={searchResults}
+                                renderItem={(props) => renderImageCard({ ...props, isFromSearch: true })}
+                                keyExtractor={(item) => item.id}
+                                numColumns={2}
+                                columnWrapperStyle={styles.gridGap}
+                                contentContainerStyle={styles.gridContainer}
+                                keyboardShouldPersistTaps="handled"
+                                scrollEnabled
                             />
-                            <Text style={styles.loaderText}>Searching images...</Text>
-                        </View>
-                    ) : (!isTyping && searchResults.length > 0) ? (
-                        <FlatList
-                            data={searchResults}
-                            renderItem={(props) => renderImageCard({ ...props, isFromSearch: true })}
-                            keyExtractor={(item) => item.id}
-                            numColumns={2}
-                            columnWrapperStyle={styles.gridGap}
-                            contentContainerStyle={styles.gridContainer}
-                            keyboardShouldPersistTaps="handled"
-                            scrollEnabled
-                        />
-                    ) : (!isTyping && searchQuery) ? (
-                        <View style={styles.emptyState}>
-                            <Text style={styles.emptyStateIcon}>🔍</Text>
-                            <Text style={styles.emptyStateText}>No images found</Text>
-                            <Text style={styles.emptyStateSubtext}>
-                                Try different search terms
-                            </Text>
-                        </View>
-                    ) : (
-                        <View style={styles.emptyState}>
-                            <Text style={styles.emptyStateIcon}>📸</Text>
-                            <Text style={styles.emptyStateText}>Start Searching</Text>
-                            <Text style={styles.emptyStateSubtext}>
-                                Search for legal images and save them
-                            </Text>
-                        </View>
-                    )}
-                </View>
-            ) : (
-                <View style={styles.content}>
-                    {savedImages.length > 0 ? (
-                        <FlatList
-                            data={savedImages}
-                            renderItem={(props) => renderImageCard({ ...props, isFromSearch: false })}
-                            keyExtractor={(item) => item.id}
-                            numColumns={2}
-                            columnWrapperStyle={styles.gridGap}
-                            contentContainerStyle={styles.gridContainer}
-                            scrollEnabled
-                        />
-                    ) : (
-                        <View style={styles.emptyState}>
-                            <Text style={styles.emptyStateIcon}>💾</Text>
-                            <Text style={styles.emptyStateText}>No Saved Images</Text>
-                            <Text style={styles.emptyStateSubtext}>
-                                Search and save images to view them here
-                            </Text>
-                        </View>
-                    )}
-                </View>
-            )}
-        </SafeAreaView>
+                        ) : (!isTyping && searchQuery) ? (
+                            <View style={styles.emptyState}>
+                                <Text style={styles.emptyStateIcon}>🔍</Text>
+                                <Text style={styles.emptyStateText}>No images found</Text>
+                                <Text style={styles.emptyStateSubtext}>
+                                    Try different search terms
+                                </Text>
+                            </View>
+                        ) : (
+                            <View style={styles.emptyState}>
+                                <Text style={styles.emptyStateIcon}>📸</Text>
+                                <Text style={styles.emptyStateText}>Start Searching</Text>
+                                <Text style={styles.emptyStateSubtext}>
+                                    Search for legal images and save them
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                ) : (
+                    <View style={styles.content}>
+                        {savedImages.length > 0 ? (
+                            <FlatList
+                                data={savedImages}
+                                renderItem={(props) => renderImageCard({ ...props, isFromSearch: false })}
+                                keyExtractor={(item) => item.id}
+                                numColumns={2}
+                                columnWrapperStyle={styles.gridGap}
+                                contentContainerStyle={styles.gridContainer}
+                                scrollEnabled
+                            />
+                        ) : (
+                            <View style={styles.emptyState}>
+                                <Text style={styles.emptyStateIcon}>💾</Text>
+                                <Text style={styles.emptyStateText}>No Saved Images</Text>
+                                <Text style={styles.emptyStateSubtext}>
+                                    Search and save images to view them here
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                )}
+            </SafeAreaView>
+            <Toast message={toastMessage} visible={showToast} duration={2500} />
+        </>
     );
 }
 

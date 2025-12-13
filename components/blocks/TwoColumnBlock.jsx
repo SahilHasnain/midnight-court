@@ -1,6 +1,6 @@
 import { colors } from "@/theme/colors";
 import { useState } from "react";
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 /**
  * TwoColumnBlock - Arguments vs Counter-Arguments side-by-side
@@ -110,44 +110,51 @@ export default function TwoColumnBlock({ block, onUpdate, onDelete }) {
             </View>
 
             {showPreview ? (
-                // Preview Mode - Side by side on mobile (will stack if narrow)
-                <View style={styles.previewContainer}>
-                    <View style={styles.previewColumn}>
-                        <Text style={styles.previewColumnTitle}>
-                            {block.data.leftTitle || 'Arguments'}
-                        </Text>
-                        {block.data.leftPoints.filter(p => p.trim()).map((point, idx) => (
-                            <View key={idx} style={styles.previewPoint}>
-                                <Text style={styles.previewPointText}>
-                                    {parseFormattedText(point).map((part, i) => (
-                                        <Text key={i} style={{ color: part.color || colors.textSecondary }}>
-                                            {part.text}
-                                        </Text>
-                                    ))}
-                                </Text>
-                            </View>
-                        ))}
-                    </View>
+                // Preview Mode - Landscape horizontal scroll
+                <ScrollView
+                    horizontal
+                    scrollEnabled
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.previewScrollContainer}
+                >
+                    <View style={styles.previewContainer}>
+                        <View style={styles.previewColumn}>
+                            <Text style={styles.previewColumnTitle}>
+                                {block.data.leftTitle || 'Arguments'}
+                            </Text>
+                            {block.data.leftPoints.filter(p => p.trim()).map((point, idx) => (
+                                <View key={idx} style={styles.previewPoint}>
+                                    <Text style={styles.previewPointText}>
+                                        {parseFormattedText(point).map((part, i) => (
+                                            <Text key={i} style={{ color: part.color || colors.textSecondary }}>
+                                                {part.text}
+                                            </Text>
+                                        ))}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
 
-                    <View style={styles.previewDivider} />
+                        <View style={styles.previewDivider} />
 
-                    <View style={styles.previewColumn}>
-                        <Text style={[styles.previewColumnTitle, { color: '#ef4444' }]}>
-                            {block.data.rightTitle || 'Counter Arguments'}
-                        </Text>
-                        {block.data.rightPoints.filter(p => p.trim()).map((point, idx) => (
-                            <View key={idx} style={styles.previewPoint}>
-                                <Text style={styles.previewPointText}>
-                                    {parseFormattedText(point).map((part, i) => (
-                                        <Text key={i} style={{ color: part.color || colors.textSecondary }}>
-                                            {part.text}
-                                        </Text>
-                                    ))}
-                                </Text>
-                            </View>
-                        ))}
+                        <View style={styles.previewColumn}>
+                            <Text style={[styles.previewColumnTitle, styles.previewColumnTitleRight]}>
+                                {block.data.rightTitle || 'Counter Arguments'}
+                            </Text>
+                            {block.data.rightPoints.filter(p => p.trim()).map((point, idx) => (
+                                <View key={idx} style={[styles.previewPoint, styles.previewPointRight]}>
+                                    <Text style={styles.previewPointText}>
+                                        {parseFormattedText(point).map((part, i) => (
+                                            <Text key={i} style={{ color: part.color || colors.textSecondary }}>
+                                                {part.text}
+                                            </Text>
+                                        ))}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
                     </View>
-                </View>
+                </ScrollView>
             ) : (
                 // Edit Mode - Stacked vertically for easy mobile editing
                 <View style={styles.editContainer}>
@@ -369,33 +376,60 @@ const styles = StyleSheet.create({
         fontFamily: 'Inter_400Regular',
         textAlign: 'center',
     },
+    previewScrollContainer: {
+        paddingHorizontal: 8,
+        paddingVertical: 8,
+    },
     previewContainer: {
         flexDirection: 'row',
-        gap: 12,
+        gap: 16,
+        paddingVertical: 8,
     },
     previewColumn: {
-        flex: 1,
+        width: 320,
+        backgroundColor: 'rgba(212, 175, 55, 0.06)',
+        borderRadius: 12,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: 'rgba(212, 175, 55, 0.2)',
     },
     previewColumnTitle: {
         color: colors.gold,
-        fontSize: 15,
+        fontSize: 17,
         fontWeight: '700',
         fontFamily: 'Inter_700Bold',
-        marginBottom: 12,
+        marginBottom: 14,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(212, 175, 55, 0.3)',
+    },
+    previewColumnTitleRight: {
+        color: '#ef4444',
+        borderBottomColor: 'rgba(239, 68, 68, 0.3)',
     },
     previewPoint: {
-        marginBottom: 8,
+        marginBottom: 10,
         paddingLeft: 12,
-        borderLeftWidth: 2,
-        borderLeftColor: 'rgba(212, 175, 55, 0.25)',
+        paddingVertical: 10,
+        paddingRight: 8,
+        borderLeftWidth: 3,
+        borderLeftColor: colors.gold,
+        backgroundColor: 'rgba(212, 175, 55, 0.05)',
+        borderRadius: 8,
+    },
+    previewPointRight: {
+        borderLeftColor: '#ef4444',
+        backgroundColor: 'rgba(239, 68, 68, 0.05)',
     },
     previewPointText: {
-        fontSize: 14,
+        fontSize: 13,
         fontFamily: 'Inter_400Regular',
-        lineHeight: 20,
+        lineHeight: 19,
+        color: colors.textPrimary,
     },
     previewDivider: {
         width: 2,
-        backgroundColor: 'rgba(212, 175, 55, 0.25)',
+        backgroundColor: 'rgba(212, 175, 55, 0.3)',
+        borderRadius: 1,
     },
 });
