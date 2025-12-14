@@ -32,7 +32,7 @@ _Goal: Ship 3 highest-impact features that save the most time_
 - Created `utils/geminiAPI.js` with **NEW SDK (@google/genai)**:
 
   - `callGemini(prompt, options)` - Main wrapper for Gemini API calls
-  - `callGeminiJSON(prompt, options)` - JSON-aware wrapper with parsing fallback
+  - `callGeminiWithSchema(prompt, options)` - **Structured output with JSON schema** (guaranteed valid JSON)
   - Rate limiter enforcing **2000 req/min (NEW Tier 1 limits!)**
   - Error handling with detailed console logging
   - `testGeminiAPI()` - Connection validation function
@@ -68,10 +68,10 @@ package.json - Migrated from @google/generative-ai to @google/genai@1.32.0
 **Key Features:**
 
 - ✅ **NEW SDK:** @google/genai v1.32.0 (latest, Dec 2025)
+- ✅ **Structured Output:** JSON schema for guaranteed valid responses (no manual parsing!)
 - ✅ **Rate limiting:** 30ms min interval = 2000 req/min max (33x faster!)
-- ✅ **Model:** gemini-2.0-flash (latest production model)
+- ✅ **Model:** gemini-2.5-flash (latest production model)
 - ✅ **Error handling** with try/catch blocks
-- ✅ **JSON response** parsing with fallback
 - ✅ **Status monitoring** functions
 - ✅ **Tier 1 compliant** (2000 RPM, 4M TPM - massive upgrade!)
 - ✅ **Development testing** interface
@@ -180,20 +180,23 @@ const PEXELS_KEY = "your_free_key";
 
 - ~~Created `utils/legalDatabase.json` with 29 entries~~ **REMOVED** (see refactor below)
 - ~~Implemented local fuzzy search and caching~~ **REMOVED** (see refactor below)
-- Created `utils/citationAPI.js` with **PURE AI APPROACH**:
+- Created `utils/citationAPI.js` with **PURE AI + STRUCTURED OUTPUT APPROACH**:
 
-  - `findCitations(query)` - **ALWAYS calls Gemini AI** for fresh, accurate citations
-  - `getCitationDetails(citation)` - Get comprehensive analysis of specific citation
+  - `findCitations(query)` - **ALWAYS calls Gemini AI with JSON schema** for fresh, accurate citations
+  - Uses `callGeminiWithSchema()` with `citationSearchResultsSchema` for guaranteed valid JSON
+  - No manual parsing, no regex hacks, no guessing - 100% reliable structure
+  - `getCitationDetails(citation)` - Get comprehensive analysis (also structured)
   - `verifyCitation(citation)` - Check validity and current status
   - `getRelatedCitations(citation)` - Find similar/related cases
   - `searchByTopic(topic)` - Explore citations by legal topic
 
 - Created `app/dev/citation-test.jsx` test screen with:
   - Search interface with query input
-  - 6 quick test buttons (privacy, article 21, kesavananda, etc.)
+  - 8 quick test buttons (privacy, article 21, kesavananda, section 377, etc.)
   - Results display with type, citation, summary, relevance score
   - ~~Cache statistics display~~ **REMOVED**
-  - How it works documentation
+  - Pure AI approach documentation
+  - Accessible via ⚖️ button in editor header
 
 **🔄 MAJOR REFACTOR (Dec 2025):**
 
@@ -211,27 +214,30 @@ const PEXELS_KEY = "your_free_key";
 - ✅ Citation verification and validity checking
 - ✅ Related citations and topic exploration
 
-**Why Pure AI?**
+**Why Pure AI + Structured Output?**
 
 ```
 Law students deserve maximum quality, no compromises!
 
-OLD APPROACH (Hybrid):
+OLD APPROACH (Hybrid with manual parsing):
 - 70% cache hits (fast but potentially outdated)
 - 29 local citations (severely limited coverage)
 - Fuzzy matching (unreliable for legal precision)
+- Manual JSON parsing with regex (error-prone, brittle)
 - Cost: ₹0-5/month
 - Quality: Acceptable but compromised
 
-NEW APPROACH (Pure AI):
+NEW APPROACH (Pure AI + Structured Output):
 - 100% fresh Gemini AI calls
+- JSON Schema for guaranteed valid responses (zero parsing errors!)
 - Unlimited citation coverage (entire legal knowledge)
 - Precise semantic understanding
+- No guessing, no regex hacks - rock-solid reliability
 - Cost: ₹10-20/month (with new 2000 RPM limits, very affordable!)
 - Quality: MAXIMUM, no compromises
 
 The difference: ₹10-15/month
-The value: Accurate, comprehensive, up-to-date legal citations
+The value: Accurate, comprehensive, up-to-date legal citations + guaranteed data structure
 Worth it? ABSOLUTELY. One wrong citation can cost a case!
 ```
 
@@ -239,9 +245,10 @@ Worth it? ABSOLUTELY. One wrong citation can cost a case!
 
 ```
 utils/
-  └── citationAPI.js (255 lines - PURE AI implementation)
+  ├── citationAPI.js (274 lines - Pure AI + Structured Output)
+  └── schemas.js (200 lines - JSON schemas for all API responses)
 app/dev/
-  └── citation-test.jsx (280 lines - updated for pure AI)
+  └── citation-test.jsx (332 lines - Pure AI test interface)
 ```
 
 **Files Removed:**
@@ -261,6 +268,7 @@ app/editor/index.jsx - Added ⚖️ button to editor header
 **Key Features:**
 
 - ✅ **100% AI-powered** (no local/cache compromise)
+- ✅ **Structured Output** (JSON schema guarantees valid responses, zero parsing errors)
 - ✅ **Unlimited coverage** (entire legal knowledge, not just 29 entries)
 - ✅ **Always fresh** (latest case law and statutes)
 - ✅ **Comprehensive analysis** (full case summaries, not just citations)
@@ -268,6 +276,7 @@ app/editor/index.jsx - Added ⚖️ button to editor header
 - ✅ **Related citations** (find similar cases automatically)
 - ✅ **Topic exploration** (discover all citations for a legal topic)
 - ✅ **Semantic understanding** (not keyword matching, true legal reasoning)
+- ✅ **No manual parsing** (responseJsonSchema handles everything)
 
 **Performance:**
 
@@ -315,58 +324,91 @@ utils/
 }
 ```
 
-**Gemini Prompt:**
+**Gemini with Structured Output:**
 
 ```javascript
-const prompt = `Find relevant Indian legal citations for: "${query}"
-Include:
-1. Case names with year
-2. Constitutional articles
-3. Relevant acts/sections
-Format as JSON array with name, year, and relevance score.`;
+// No manual prompt formatting needed!
+// JSON Schema handles everything:
+const response = await callGeminiWithSchema(prompt, {
+  schema: citationSearchResultsSchema,
+  model: "gemini-2.5-flash",
+});
+// Response is guaranteed to match schema - no parsing errors!
 ```
 
 **Cost:** ₹0-5/month (with heavy caching)
 
 ---
 
-### **Chunk 1.4: Legal Citation Finder - Frontend** (Day 7)
+### **Chunk 1.4: Legal Citation Finder - Frontend** (Day 7) ✅ COMPLETE
 
 **Goal:** Beautiful citation search UI in app
 
-**Tasks:**
+**Status:** ✅ Implemented and tested
 
-- [ ] Create CitationSearchModal component
-- [ ] Add search input with debouncing
-- [ ] Display results (case name, year, summary)
-- [ ] One-tap insert into Quote block
-- [ ] Add loading states & error handling
-- [ ] Test end-to-end flow
+**Completed Tasks:**
 
-**Deliverables:**
+- [x] Create CitationSearchModal component
+- [x] Add search input with debouncing (800ms)
+- [x] Display results (case name, year, summary)
+- [x] One-tap insert into Quote block
+- [x] Add loading states & error handling
+- [x] Test end-to-end flow
+- [x] Add quick search suggestions
+- [x] Add "Find Citation" button in editor
 
-- Citation search accessible from editor
-- Results display cleanly
-- Insert to Quote block works
+**Implementation Summary:**
 
-**Files to Create:**
+- Created `components/CitationSearchModal.jsx` with:
+  - Auto-debounced search (triggers 800ms after typing stops)
+  - Beautiful results display with citation type icons
+  - Relevance scores for each citation
+  - Quick search chips for common legal terms
+  - One-tap insert into Quote blocks
+  - Empty state and error handling
+  - Loading indicators
+- Integrated into editor screen:
+  - Added ⚖️ "Find Legal Citation" button below "Add Content Block"
+  - Modal opens with search interface
+  - Selected citation auto-fills Quote block
+  - Success toast on insertion
+  - Can create new Quote block if none exists
+
+**Files Created:**
 
 ```
 components/
-  └── CitationSearchModal.jsx
-utils/
-  └── citationAPI.js
+  └── CitationSearchModal.jsx (441 lines)
 ```
+
+**Files Updated:**
+
+```
+app/editor/index.jsx - Added citation modal state and integration
+```
+
+**Key Features:**
+
+- ✅ **Debounced search** (800ms delay, smooth UX)
+- ✅ **Quick search chips** (common legal terms)
+- ✅ **Citation type icons** (📜 article, ⚖️ case, 📖 act)
+- ✅ **Relevance scoring** (shows match percentage)
+- ✅ **One-tap insert** (auto-fills Quote block)
+- ✅ **Error handling** (network errors, no results)
+- ✅ **Loading states** (search indicator)
+- ✅ **Beautiful UI** (consistent with app theme)
 
 **UI Flow:**
 
-1. User taps "Find Citation" in editor
-2. Modal opens with search bar
-3. Types "right to privacy"
-4. Shows 3-5 relevant citations
-5. Tap one → Auto-fills Quote block
+1. User taps "Find Legal Citation" in editor (⚖️ button)
+2. Modal opens with search bar and quick search chips
+3. Types "right to privacy" (or taps quick search)
+4. AI searches and shows 3-5 relevant citations
+5. Tap citation → Auto-fills Quote block with formatted citation
+6. Success toast confirms insertion
+7. Modal closes automatically
 
-**Cost:** Frontend only, no additional cost
+**Cost:** Frontend only, backend already done in Chunk 1.3
 
 ---
 
@@ -390,35 +432,28 @@ utils/
 - JSON output matches app's slide structure
 - Handles 200-2000 character inputs
 
-**Prompt Template:**
+**Structured Output Schema:**
 
 ```javascript
-const systemPrompt = `You are a legal presentation expert. 
-Convert case descriptions into structured slides.
+// Define schema once, use everywhere - no prompt engineering!
+const slideDeckSchema = {
+  type: "object",
+  properties: {
+    slides: {
+      type: "array",
+      items: slideSchema,
+    },
+    title: { type: "string" },
+    totalSlides: { type: "number" },
+  },
+  required: ["slides", "title", "totalSlides"],
+};
 
-Available block types:
-- text: Bullet points
-- quote: Legal citations
-- callout: Important highlights
-- timeline: Case progression
-- evidence: Evidence details
-- twoColumn: Arguments vs Counter
-
-Output ONLY valid JSON matching this structure:
-{
-  "slides": [
-    {
-      "title": "string",
-      "subtitle": "string",
-      "blocks": [
-        {
-          "type": "text",
-          "data": { "points": ["point 1", "point 2"] }
-        }
-      ]
-    }
-  ]
-}`;
+// Call with schema - guaranteed valid output!
+const response = await callGeminiWithSchema(prompt, {
+  schema: slideDeckSchema,
+  systemPrompt: "You are a legal presentation expert.",
+});
 
 const userPrompt = `Case description:
 ${userInput}

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import CitationSearchModal from "@/components/CitationSearchModal";
 import GoldButton from "@/components/GoldButton";
 import ImageSearchModal from "@/components/ImageSearchModal";
 import SaveTemplateModal from "@/components/SaveTemplateModal";
@@ -71,6 +72,8 @@ export default function EditorScreen() {
     const [saveTemplateVisible, setSaveTemplateVisible] = useState(false);
     const [imageSearchVisible, setImageSearchVisible] = useState(false);
     const [selectedImageBlockId, setSelectedImageBlockId] = useState(null);
+    const [citationSearchVisible, setCitationSearchVisible] = useState(false);
+    const [selectedQuoteBlockId, setSelectedQuoteBlockId] = useState(null);
     const [toastMessage, setToastMessage] = useState("");
     const [showToast, setShowToast] = useState(false);
 
@@ -324,7 +327,21 @@ export default function EditorScreen() {
                         <Text style={styles.slideCounter}>Slide {currentSlideIndex + 1} of {slides.length}</Text>
                     </View>
 
-                    {/* Dev controls removed for production */}
+                    {/* Dev controls */}
+                    <View style={styles.devButtonsContainer}>
+                        <TouchableOpacity
+                            style={styles.geminiTestButton}
+                            onPress={() => router.push('/dev/gemini-test')}
+                        >
+                            <Text style={styles.geminiTestText}>🔧</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.geminiTestButton}
+                            onPress={() => router.push('/dev/citation-test')}
+                        >
+                            <Text style={styles.geminiTestText}>⚖️</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Slide Navigation */}
@@ -476,6 +493,22 @@ export default function EditorScreen() {
                         <Text style={styles.addBlockArrow}>›</Text>
                     </TouchableOpacity>
 
+                    {/* Find Citation Button */}
+                    <TouchableOpacity
+                        onPress={() => {
+                            setSelectedQuoteBlockId(null);
+                            setCitationSearchVisible(true);
+                        }}
+                        style={styles.findCitationButton}
+                    >
+                        <Text style={styles.findCitationIcon}>⚖️</Text>
+                        <View style={styles.addBlockTextContainer}>
+                            <Text style={styles.addBlockTitle}>Find Legal Citation</Text>
+                            <Text style={styles.addBlockSubtitle}>Search cases, articles & laws with AI</Text>
+                        </View>
+                        <Text style={styles.addBlockArrow}>›</Text>
+                    </TouchableOpacity>
+
                     {/* Slide Management Section */}
                     <View style={styles.slideManagementSection}>
                         <Text style={styles.sectionLabel}>Slide Management</Text>
@@ -605,6 +638,47 @@ export default function EditorScreen() {
                             }
                         }
                         setSelectedImageBlockId(null);
+                    }}
+                />
+
+                {/* Citation Search Modal */}
+                <CitationSearchModal
+                    visible={citationSearchVisible}
+                    onClose={() => setCitationSearchVisible(false)}
+                    onSelectCitation={(citation) => {
+                        // citation has: text (name), author (fullTitle), year, summary
+                        const quoteText = citation.summary || citation.text || citation.author;
+                        const citationText = citation.year
+                            ? `${citation.author}, ${citation.year}`
+                            : citation.author;
+
+                        // Update the selected quote block or create a new one
+                        if (selectedQuoteBlockId) {
+                            const updatedBlock = currentSlide.blocks.find(
+                                (b) => b.id === selectedQuoteBlockId
+                            );
+                            if (updatedBlock) {
+                                updateBlock(selectedQuoteBlockId, {
+                                    ...updatedBlock,
+                                    data: {
+                                        quote: quoteText,
+                                        citation: citationText,
+                                    },
+                                });
+                                showToastMessage('✅ Citation inserted!');
+                            }
+                        } else {
+                            // Create new quote block with citation
+                            const newBlock = createDefaultBlock(BLOCK_TYPES.QUOTE);
+                            newBlock.data = {
+                                quote: quoteText,
+                                citation: citationText,
+                            };
+                            const updatedBlocks = [...currentSlide.blocks, newBlock];
+                            updateSlide("blocks", updatedBlocks);
+                            showToastMessage('✅ Citation added as new Quote block!');
+                        }
+                        setSelectedQuoteBlockId(null);
                     }}
                 />
             </ScrollView>
@@ -951,6 +1025,25 @@ const styles = StyleSheet.create({
         color: colors.gold,
         fontSize: 24,
         fontWeight: '300',
+    },
+    findCitationButton: {
+        backgroundColor: colors.card,
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 16,
+        borderWidth: 1.5,
+        borderColor: 'rgba(212, 175, 55, 0.6)',
+        flexDirection: 'row',
+        alignItems: 'center',
+        shadowColor: colors.gold,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 4,
+    },
+    findCitationIcon: {
+        fontSize: 28,
+        marginRight: 14,
     },
     insertButton: {
         alignSelf: 'center',

@@ -5,4 +5,4 @@
 5) Failed to download image
 6) while adding a new slide, the text-points -> no delete button [done]
 7) * cross button -> lags occasionally 
-8) Quick search -> image lib
+8) Quick search -> image library -> not working

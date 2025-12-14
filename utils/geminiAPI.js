@@ -95,7 +95,7 @@ export const callGemini = async (
  * @param {string} prompt - The prompt to send to Gemini
  * @param {object} options - Configuration options
  * @param {string} options.model - Model name
- * @param {object} options.schema - Zod schema for structured output
+ * @param {object} options.schema - JSON schema object for structured output
  * @param {number} options.temperature - Temperature for randomness
  * @param {number} options.maxOutputTokens - Max output tokens
  * @returns {Promise<object>} - Parsed JSON object matching schema
@@ -112,17 +112,13 @@ export const callGeminiWithSchema = async (
             model = "gemini-2.5-flash",
             schema = null,
             temperature = 0.7,
-            maxOutputTokens = 2048,
+            maxOutputTokens = 4000,
             systemPrompt = "",
         } = options;
 
         if (!schema) {
             throw new Error("Schema is required for structured output");
         }
-
-        // Import zod-to-json-schema dynamically to convert Zod schema
-        const { zodToJsonSchema } = await import("zod-to-json-schema");
-        const jsonSchema = zodToJsonSchema(schema);
 
         // Build contents
         let contents = prompt;
@@ -138,7 +134,7 @@ export const callGeminiWithSchema = async (
                 temperature,
                 maxOutputTokens,
                 responseMimeType: "application/json",
-                responseJsonSchema: jsonSchema,
+                responseJsonSchema: schema,
             },
         });
 
@@ -149,13 +145,11 @@ export const callGeminiWithSchema = async (
         // Parse JSON response
         try {
             const jsonResponse = JSON.parse(response.text);
-            // Validate against schema
-            const validatedData = schema.parse(jsonResponse);
-            return validatedData;
+            return jsonResponse;
         } catch (parseError) {
-            console.error("❌ JSON parsing or validation failed:", parseError);
+            console.error("❌ JSON parsing failed:", parseError);
             console.log("Raw response:", response.text);
-            throw new Error(`Failed to parse/validate response: ${parseError.message}`);
+            throw new Error(`Failed to parse response: ${parseError.message}`);
         }
     } catch (error) {
         console.error("❌ Gemini structured output error:", error);
