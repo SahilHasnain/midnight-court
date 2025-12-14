@@ -58,7 +58,7 @@ export const callGemini = async (
         const {
             model = "gemini-2.5-flash", // Updated to latest model
             temperature = 0.7,
-            maxOutputTokens = 1024,
+            maxOutputTokens = 4000,
             systemPrompt = "",
         } = options;
 
