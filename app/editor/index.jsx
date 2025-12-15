@@ -9,6 +9,7 @@ import CitationSearchModal from "@/components/CitationSearchModal";
 import GoldButton from "@/components/GoldButton";
 import ImageSearchModal from "@/components/ImageSearchModal";
 import SaveTemplateModal from "@/components/SaveTemplateModal";
+import SlideGeneratorModal from "@/components/SlideGeneratorModal";
 import Toast from "@/components/Toast";
 import BlockPicker from "@/components/blocks/BlockPicker";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
@@ -74,6 +75,7 @@ export default function EditorScreen() {
     const [selectedImageBlockId, setSelectedImageBlockId] = useState(null);
     const [citationSearchVisible, setCitationSearchVisible] = useState(false);
     const [selectedQuoteBlockId, setSelectedQuoteBlockId] = useState(null);
+    const [slideGeneratorVisible, setSlideGeneratorVisible] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
     const [showToast, setShowToast] = useState(false);
 
@@ -341,6 +343,12 @@ export default function EditorScreen() {
                         >
                             <Text style={styles.geminiTestText}>⚖️</Text>
                         </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.geminiTestButton}
+                            onPress={() => router.push('/dev/slide-gen-test')}
+                        >
+                            <Text style={styles.geminiTestText}>🎨</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
 
@@ -505,6 +513,19 @@ export default function EditorScreen() {
                         <View style={styles.addBlockTextContainer}>
                             <Text style={styles.addBlockTitle}>Find Legal Citation</Text>
                             <Text style={styles.addBlockSubtitle}>Search cases, articles & laws with AI</Text>
+                        </View>
+                        <Text style={styles.addBlockArrow}>›</Text>
+                    </TouchableOpacity>
+
+                    {/* Generate Slides Button */}
+                    <TouchableOpacity
+                        onPress={() => setSlideGeneratorVisible(true)}
+                        style={styles.generateSlidesButton}
+                    >
+                        <Text style={styles.generateSlidesIcon}>🎨</Text>
+                        <View style={styles.addBlockTextContainer}>
+                            <Text style={styles.addBlockTitle}>Generate Slides from Text</Text>
+                            <Text style={styles.addBlockSubtitle}>AI creates slides from case description</Text>
                         </View>
                         <Text style={styles.addBlockArrow}>›</Text>
                     </TouchableOpacity>
@@ -679,6 +700,18 @@ export default function EditorScreen() {
                             showToastMessage('✅ Citation added as new Quote block!');
                         }
                         setSelectedQuoteBlockId(null);
+                    }}
+                />
+
+                {/* Slide Generator Modal */}
+                <SlideGeneratorModal
+                    visible={slideGeneratorVisible}
+                    onClose={() => setSlideGeneratorVisible(false)}
+                    onUseSlides={(generatedSlides) => {
+                        // Replace current slides with generated ones
+                        setSlides(generatedSlides);
+                        setCurrentSlideIndex(0);
+                        showToastMessage(`✅ Loaded ${generatedSlides.length} generated slides!`);
                     }}
                 />
             </ScrollView>
@@ -1042,6 +1075,25 @@ const styles = StyleSheet.create({
         elevation: 4,
     },
     findCitationIcon: {
+        fontSize: 28,
+        marginRight: 14,
+    },
+    generateSlidesButton: {
+        backgroundColor: colors.card,
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 16,
+        borderWidth: 1.5,
+        borderColor: 'rgba(212, 175, 55, 0.6)',
+        flexDirection: 'row',
+        alignItems: 'center',
+        shadowColor: colors.gold,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 4,
+    },
+    generateSlidesIcon: {
         fontSize: 28,
         marginRight: 14,
     },

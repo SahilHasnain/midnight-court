@@ -119,65 +119,194 @@ export const citationDetailsSchema = {
 };
 
 /**
- * Slide Generation Schema - For AI-powered slide creation
+ * Slide Generation Schemas - For AI-powered slide creation
+ * Detailed schemas for each block type
  */
-export const slideBlockSchema = {
+
+// Text Block - Bullet points
+export const textBlockDataSchema = {
     type: "object",
     properties: {
+        points: {
+            type: "array",
+            description: "Array of bullet points (2-5 points recommended)",
+            items: {
+                type: "string"
+            },
+            minItems: 1,
+            maxItems: 6
+        }
+    },
+    required: ["points"],
+    additionalProperties: false
+};
+
+// Quote Block - Citations and quotes
+export const quoteBlockDataSchema = {
+    type: "object",
+    properties: {
+        quote: {
+            type: "string",
+            description: "The quoted text or legal principle"
+        },
+        citation: {
+            type: "string",
+            description: "Citation source (case name, article, etc.)"
+        }
+    },
+    required: ["quote", "citation"],
+    additionalProperties: false
+};
+
+// Callout Block - Important highlights
+export const calloutBlockDataSchema = {
+    type: "object",
+    properties: {
+        text: {
+            type: "string",
+            description: "Important text to highlight"
+        },
         type: {
             type: "string",
-            enum: ['text', 'quote', 'callout', 'timeline', 'evidence', 'twoColumn'],
-            description: "Block type"
-        },
-        data: {
-            type: "object",
-            description: "Block-specific data"
-        },
+            enum: ["info", "warning", "success", "error"],
+            description: "Callout type for visual styling"
+        }
     },
-    required: ["type", "data"],
+    required: ["text", "type"],
     additionalProperties: false
 };
 
-export const slideSchema = {
+// Timeline Block - Chronological events
+export const timelineBlockDataSchema = {
     type: "object",
     properties: {
-        title: {
-            type: "string",
-            description: "Slide title"
-        },
-        subtitle: {
-            type: "string",
-            description: "Slide subtitle"
-        },
-        blocks: {
+        events: {
             type: "array",
-            description: "Content blocks on the slide",
-            items: slideBlockSchema
-        },
+            description: "Array of timeline events (3-6 events recommended)",
+            items: {
+                type: "object",
+                properties: {
+                    date: {
+                        type: "string",
+                        description: "Date or time period"
+                    },
+                    title: {
+                        type: "string",
+                        description: "Event title"
+                    },
+                    description: {
+                        type: "string",
+                        description: "Brief event description"
+                    }
+                },
+                required: ["date", "title"],
+                additionalProperties: false
+            },
+            minItems: 2,
+            maxItems: 8
+        }
     },
-    required: ["title", "blocks"],
+    required: ["events"],
     additionalProperties: false
 };
 
+// Evidence Block - Case evidence
+export const evidenceBlockDataSchema = {
+    type: "object",
+    properties: {
+        items: {
+            type: "array",
+            description: "Array of evidence items (2-5 items recommended)",
+            items: {
+                type: "object",
+                properties: {
+                    label: {
+                        type: "string",
+                        description: "Evidence label or type"
+                    },
+                    description: {
+                        type: "string",
+                        description: "Evidence description"
+                    }
+                },
+                required: ["label", "description"],
+                additionalProperties: false
+            },
+            minItems: 1,
+            maxItems: 6
+        }
+    },
+    required: ["items"],
+    additionalProperties: false
+};
+
+// Two Column Block - Comparative arguments
+export const twoColumnBlockDataSchema = {
+    type: "object",
+    properties: {
+        leftTitle: {
+            type: "string",
+            description: "Title for left column"
+        },
+        leftPoints: {
+            type: "array",
+            description: "Points for left column (2-4 points recommended)",
+            items: {
+                type: "string"
+            },
+            minItems: 1,
+            maxItems: 5
+        },
+        rightTitle: {
+            type: "string",
+            description: "Title for right column"
+        },
+        rightPoints: {
+            type: "array",
+            description: "Points for right column (2-4 points recommended)",
+            items: {
+                type: "string"
+            },
+            minItems: 1,
+            maxItems: 5
+        }
+    },
+    required: ["leftTitle", "leftPoints", "rightTitle", "rightPoints"],
+    additionalProperties: false
+};
+
+// Simplified, flattened schema for Gemini API (avoids nesting depth limit)
+// Ultra-simplified schema to avoid nesting depth issues
 export const slideDeckSchema = {
     type: "object",
     properties: {
+        title: { type: "string" },
+        totalSlides: { type: "number" },
         slides: {
             type: "array",
-            description: "Array of slides",
-            items: slideSchema
-        },
-        title: {
-            type: "string",
-            description: "Presentation title"
-        },
-        totalSlides: {
-            type: "number",
-            description: "Total number of slides"
-        },
+            items: {
+                type: "object",
+                properties: {
+                    title: { type: "string" },
+                    subtitle: { type: "string" },
+                    blocks: {
+                        type: "array",
+                        items: {
+                            type: "object",
+                            properties: {
+                                type: { type: "string" },
+                                // Keep data as free-form to reduce schema complexity
+                                data: {}
+                            },
+                            required: ["type", "data"]
+                        }
+                    }
+                },
+                required: ["title", "blocks"]
+            }
+        }
     },
-    required: ["slides", "title", "totalSlides"],
-    additionalProperties: false
+    required: ["title", "totalSlides", "slides"]
 };
 
 /**
