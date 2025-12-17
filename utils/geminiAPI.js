@@ -56,7 +56,7 @@ export const callGemini = async (
         await rateLimiter();
 
         const {
-            model = "gemini-2.5-flash", // Updated to latest model
+            model = "gemini-2.5-flash-lite-lite", // Updated to latest model
             temperature = 0.7,
             maxOutputTokens = 4000,
             systemPrompt = "",
@@ -109,7 +109,7 @@ export const callGeminiWithSchema = async (
         await rateLimiter();
 
         const {
-            model = "gemini-2.5-flash",
+            model = "gemini-2.5-flash-lite-lite",
             schema = null,
             temperature = 0.7,
             maxOutputTokens = 4000,

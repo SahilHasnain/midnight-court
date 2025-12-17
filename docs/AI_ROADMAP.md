@@ -70,7 +70,7 @@ package.json - Migrated from @google/generative-ai to @google/genai@1.32.0
 - ✅ **NEW SDK:** @google/genai v1.32.0 (latest, Dec 2025)
 - ✅ **Structured Output:** JSON schema for guaranteed valid responses (no manual parsing!)
 - ✅ **Rate limiting:** 30ms min interval = 2000 req/min max (33x faster!)
-- ✅ **Model:** gemini-2.5-flash (latest production model)
+- ✅ **Model:** gemini-2.5-flash-lite (latest production model)
 - ✅ **Error handling** with try/catch blocks
 - ✅ **Status monitoring** functions
 - ✅ **Tier 1 compliant** (2000 RPM, 4M TPM - massive upgrade!)
@@ -331,7 +331,7 @@ utils/
 // JSON Schema handles everything:
 const response = await callGeminiWithSchema(prompt, {
   schema: citationSearchResultsSchema,
-  model: "gemini-2.5-flash",
+  model: "gemini-2.5-flash-lite",
 });
 // Response is guaranteed to match schema - no parsing errors!
 ```

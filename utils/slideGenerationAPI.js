@@ -20,35 +20,69 @@ const SYSTEM_PROMPT = `You are an expert legal presentation designer specializin
 
 Your task is to convert case descriptions into clear, professional presentation slides.
 
+**MARKDOWN FORMATTING:**
+Use these markdown styles in text content (bullet points, descriptions, etc.):
+- *text* for GOLD/emphasis (use for: key terms, legal concepts, important names)
+- ~text~ for RED/warning (use for: violations, crimes, penalties)
+- _text_ for BLUE/info (use for: articles, sections, statutory references)
+
+**IMPORTANT: Do NOT use markdown formatting in:**
+- Slide titles (keep plain text)
+
+Examples:
+- "The *Right to Privacy* under _Article 21_ is a fundamental right"
+- "~Murder under Section 302 IPC~ carries life imprisonment"
+- "Petitioner cited *Kesavananda Bharati* case for _basic structure doctrine_"
+
 **BLOCK TYPES YOU CAN USE:**
 
 1. **text** - Bullet points (2-5 points)
    - Use for: Facts, arguments, key points
    - Data: { points: ["point 1", "point 2", ...] }
+   - Apply markdown formatting wherever required.
 
 2. **quote** - Legal citations and quotes
    - Use for: Case citations, constitutional articles, legal principles
    - Data: { quote: "quoted text", citation: "Source (Year)" }
+   - Use markdown in quote text
 
 3. **callout** - Important highlights
    - Use for: Key rulings, critical points, warnings
    - Data: { text: "important message", type: "info|warning|success|error" }
+   - Use markdown for emphasis
 
 4. **timeline** - Chronological events
    - Use for: Case progression, procedural history
    - Data: { events: [{ date: "Jan 2020", title: "Event", description: "Details" }, ...] }
+   - Use markdown in title and description
 
 5. **evidence** - Case evidence items
    - Use for: Evidence list, exhibits, witness testimony
    - Data: { items: [{ label: "Exhibit A", description: "Blood sample" }, ...] }
+   - Use markdown in descriptions
 
 6. **twoColumn** - Comparative arguments
    - Use for: Pros vs Cons, Plaintiff vs Defendant arguments
    - Data: { leftTitle: "For", leftPoints: [...], rightTitle: "Against", rightPoints: [...] }
+   - Use markdown in points
+
+**IMAGE SUGGESTIONS:**
+
+For each slide, suggest 1-3 relevant image search keywords in the "suggestedImages" array.
+- Suggest images that would visually enhance the slide content
+- Use clear, searchable keywords (e.g., "indian supreme court", "judge gavel", "justice scales")
+- Think about what visuals would help users understand the legal concepts
+- Suggest contextually relevant images (court scenes, legal symbols, constitutional imagery)
+- User will search and import these images manually using the app's image search
+
+Examples:
+- For constitutional rights slide: ["indian constitution book", "fundamental rights india"]
+- For criminal case: ["courtroom india", "judge bench", "legal documents"]
+- For evidence slide: ["forensic evidence", "legal documents folder"]
 
 **SLIDE DESIGN PRINCIPLES:**
 
-- Generate 1-5 slides (based on content complexity)
+- Generate 1-10 slides (based on content complexity)
 - Each slide should focus on ONE main topic
 - Use 1-3 blocks per slide (avoid clutter)
 - First slide: Overview/Introduction
@@ -56,8 +90,10 @@ Your task is to convert case descriptions into clear, professional presentation 
 - Last slide: Conclusion/Ruling (if applicable)
 - Keep text concise and scannable
 - Use appropriate block types for content
+- Provide suggestedImages array for every slide (1-3 keywords per slide)
 
 **IMPORTANT:**
+- Use markdown formatting (*gold*, ~red~, _blue_) throughout all the contents wherever required
 - Always return valid JSON matching the schema
 - Choose block types that best fit the content
 - Don't overload slides with too many blocks
@@ -242,7 +278,7 @@ Generate a professional legal presentation with 1-5 slides. Choose appropriate b
         const response = await callGeminiWithSchema(userPrompt, {
             schema: slideDeckSchema,
             systemPrompt: SYSTEM_PROMPT,
-            model: options.model || 'gemini-2.5-flash',
+            model: options.model || 'gemini-2.5-flash-lite',
             temperature: options.temperature || 0.7,
             maxOutputTokens: options.maxOutputTokens || 3000,
         });

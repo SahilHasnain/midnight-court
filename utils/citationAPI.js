@@ -75,7 +75,7 @@ Return EXACTLY in the JSON structure specified in the system prompt.`;
         const response = await callGeminiWithSchema(
             userPrompt,
             {
-                model: "gemini-2.5-flash",
+                model: "gemini-2.5-flash-lite",
                 schema: citationSearchResultsSchema,
                 temperature: 0.3, // Lower for consistency
                 maxOutputTokens: 4096,
@@ -138,7 +138,7 @@ Include:
         const response = await callGeminiWithSchema(
             userPrompt,
             {
-                model: "gemini-2.5-flash",
+                model: "gemini-2.5-flash-lite",
                 schema: citationDetailsSchema,
                 temperature: 0.2,
                 maxOutputTokens: 1500,
@@ -178,7 +178,7 @@ Respond with validation details including current status (active/overruled/modif
         const response = await callGeminiWithSchema(
             userPrompt,
             {
-                model: "gemini-2.5-flash",
+                model: "gemini-2.5-flash-lite",
                 schema: citationDetailsSchema,
                 temperature: 0.1,
                 maxOutputTokens: 800,
@@ -218,7 +218,7 @@ Provide 5-8 most relevant related citations with full details.`;
         const response = await callGeminiWithSchema(
             userPrompt,
             {
-                model: "gemini-2.5-flash",
+                model: "gemini-2.5-flash-lite",
                 schema: citationSearchResultsSchema,
                 temperature: 0.2,
                 maxOutputTokens: 1500,
@@ -253,7 +253,7 @@ Provide 8-12 most important citations with full details.`;
         const response = await callGeminiWithSchema(
             userPrompt,
             {
-                model: "gemini-2.5-flash",
+                model: "gemini-2.5-flash-lite",
                 schema: citationSearchResultsSchema,
                 temperature: 0.2,
                 maxOutputTokens: 2500,

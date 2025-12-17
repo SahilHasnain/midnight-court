@@ -347,8 +347,32 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                         {slide.subtitle && (
                                             <Text style={styles.slideSubtitle}>{slide.subtitle}</Text>
                                         )}
+
+                                        {/* Image Suggestions */}
+                                        {slide.suggestedImages && slide.suggestedImages.length > 0 && (
+                                            <View style={styles.imageSuggestions}>
+                                                <Text style={styles.imageSuggestionsTitle}>
+                                                    🖼️ Suggested Images:
+                                                </Text>
+                                                <View style={styles.imageKeywords}>
+                                                    {slide.suggestedImages.map((keyword, idx) => (
+                                                        <View key={idx} style={styles.imageKeywordChip}>
+                                                            <Text style={styles.imageKeywordText}>{keyword}</Text>
+                                                        </View>
+                                                    ))}
+                                                </View>
+                                                <Text style={styles.imageInstructions}>
+                                                    💡 Tap a keyword to search and add an image using the image library
+                                                </Text>
+                                            </View>
+                                        )}
+
                                         <View style={styles.blocksPreview}>
-                                            {slide.blocks?.map((block) => renderBlockPreview(block))}
+                                            {slide.blocks?.map((block, blockIdx) => (
+                                                <View key={blockIdx}>
+                                                    {renderBlockPreview(block)}
+                                                </View>
+                                            ))}
                                         </View>
                                     </View>
                                 ))}
@@ -581,6 +605,46 @@ const styles = StyleSheet.create({
     blocksPreview: {
         marginTop: 8,
         gap: 8,
+    },
+    imageSuggestions: {
+        backgroundColor: colors.background,
+        borderWidth: 1,
+        borderColor: colors.gold + '40',
+        borderRadius: 10,
+        padding: 12,
+        marginTop: 12,
+        marginBottom: 8,
+    },
+    imageSuggestionsTitle: {
+        color: colors.gold,
+        fontSize: 12,
+        fontWeight: '600',
+        marginBottom: 8,
+    },
+    imageKeywords: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 6,
+        marginBottom: 8,
+    },
+    imageKeywordChip: {
+        backgroundColor: colors.card,
+        borderWidth: 1,
+        borderColor: colors.gold,
+        borderRadius: 16,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+    },
+    imageKeywordText: {
+        color: colors.gold,
+        fontSize: 11,
+        fontWeight: '500',
+    },
+    imageInstructions: {
+        color: colors.textSecondary,
+        fontSize: 10,
+        fontStyle: 'italic',
+        marginTop: 4,
     },
     blockPreview: {
         backgroundColor: colors.background,

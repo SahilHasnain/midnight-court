@@ -289,6 +289,11 @@ export const slideDeckSchema = {
                 properties: {
                     title: { type: "string" },
                     subtitle: { type: "string" },
+                    suggestedImages: {
+                        type: "array",
+                        description: "Array of suggested image search keywords for this slide",
+                        items: { type: "string" }
+                    },
                     blocks: {
                         type: "array",
                         items: {

@@ -152,6 +152,24 @@ export default function ImageBlock({ block, onUpdate, onDelete, onOpenImageSearc
             ) : (
                 // Edit Mode
                 <View style={styles.editContainer}>
+                    {/* Image Placeholder with Suggestions */}
+                    {block.data.placeholder && block.data.suggestedKeywords && (
+                        <View style={styles.placeholderSuggestion}>
+                            <Text style={styles.placeholderIcon}>🎨</Text>
+                            <Text style={styles.placeholderTitle}>AI Suggested Images</Text>
+                            <Text style={styles.placeholderSubtitle}>
+                                Click "Search Photos" and try these keywords:
+                            </Text>
+                            <View style={styles.keywordChips}>
+                                {block.data.suggestedKeywords.map((keyword, idx) => (
+                                    <View key={idx} style={styles.keywordChip}>
+                                        <Text style={styles.keywordText}>"{keyword}"</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                    )}
+
                     {/* Image Picker */}
                     <TouchableOpacity onPress={pickImage} style={styles.imagePickerButton}>
                         {block.data.uri ? (
@@ -484,6 +502,51 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 10,
         marginVertical: 12,
+    },
+    placeholderSuggestion: {
+        backgroundColor: colors.card,
+        borderWidth: 2,
+        borderColor: colors.gold,
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+        alignItems: 'center',
+    },
+    placeholderIcon: {
+        fontSize: 32,
+        marginBottom: 8,
+    },
+    placeholderTitle: {
+        color: colors.gold,
+        fontSize: 16,
+        fontWeight: '700',
+        marginBottom: 6,
+        textAlign: 'center',
+    },
+    placeholderSubtitle: {
+        color: colors.textSecondary,
+        fontSize: 13,
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    keywordChips: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        justifyContent: 'center',
+    },
+    keywordChip: {
+        backgroundColor: colors.background,
+        borderWidth: 1,
+        borderColor: colors.gold,
+        borderRadius: 20,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+    },
+    keywordText: {
+        color: colors.gold,
+        fontSize: 12,
+        fontWeight: '600',
     },
     searchButton: {
         flex: 1,

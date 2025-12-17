@@ -708,10 +708,32 @@ export default function EditorScreen() {
                     visible={slideGeneratorVisible}
                     onClose={() => setSlideGeneratorVisible(false)}
                     onUseSlides={(generatedSlides) => {
-                        // Replace current slides with generated ones
-                        setSlides(generatedSlides);
+                        // Process slides and add image placeholder blocks for suggested images
+                        const processedSlides = generatedSlides.map(slide => {
+                            // If slide has suggestedImages, inject an image block at the top
+                            if (slide.suggestedImages && slide.suggestedImages.length > 0) {
+                                const imageBlock = {
+                                    id: Date.now() + Math.random(),
+                                    type: 'image',
+                                    data: {
+                                        url: null,
+                                        placeholder: true,
+                                        suggestedKeywords: slide.suggestedImages
+                                    }
+                                };
+
+                                return {
+                                    ...slide,
+                                    blocks: [imageBlock, ...slide.blocks]
+                                };
+                            }
+                            return slide;
+                        });
+
+                        // Replace current slides with processed ones
+                        setSlides(processedSlides);
                         setCurrentSlideIndex(0);
-                        showToastMessage(`✅ Loaded ${generatedSlides.length} generated slides!`);
+                        showToastMessage(`✅ Loaded ${processedSlides.length} slides! Tap image placeholders to add images.`);
                     }}
                 />
             </ScrollView>
