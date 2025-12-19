@@ -286,7 +286,11 @@ export default function SlideGenerationTestScreen() {
                                     )}
 
                                     <View style={styles.blocksContainer}>
-                                        {slide.blocks.map((block) => renderBlockPreview(block))}
+                                        {slide.blocks.map((block, blockIdx) => (
+                                            <View key={blockIdx}>
+                                                {renderBlockPreview(block)}
+                                            </View>
+                                        ))}
                                     </View>
                                 </View>
                             ))}
@@ -368,7 +372,7 @@ const styles = StyleSheet.create({
         borderColor: colors.borderGold,
         borderRadius: 12,
         padding: 14,
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 14,
         minHeight: 120,
         textAlignVertical: 'top',
@@ -420,7 +424,7 @@ const styles = StyleSheet.create({
         minWidth: 160,
     },
     testCaseTitle: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 13,
         fontWeight: '600',
         marginBottom: 4,
@@ -470,7 +474,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     validationLabel: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 13,
         fontWeight: '600',
         marginTop: 8,
@@ -511,7 +515,7 @@ const styles = StyleSheet.create({
         marginTop: 4,
     },
     statsSubtitle: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 13,
         fontWeight: '600',
         marginBottom: 8,
@@ -530,7 +534,7 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
     },
     blockTypeText: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 12,
     },
     slideCard: {
@@ -556,7 +560,7 @@ const styles = StyleSheet.create({
         fontSize: 11,
     },
     slideTitle: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 16,
         fontWeight: '700',
         marginBottom: 4,
@@ -597,7 +601,7 @@ const styles = StyleSheet.create({
         maxHeight: 300,
     },
     jsonText: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 11,
         fontFamily: 'monospace',
     },

@@ -709,16 +709,21 @@ export default function EditorScreen() {
                     onClose={() => setSlideGeneratorVisible(false)}
                     onUseSlides={(generatedSlides) => {
                         // Process slides and add image placeholder blocks for suggested images
-                        const processedSlides = generatedSlides.map(slide => {
+                        const processedSlides = generatedSlides.map((slide, slideIndex) => {
                             // If slide has suggestedImages, inject an image block at the top
                             if (slide.suggestedImages && slide.suggestedImages.length > 0) {
+                                // Alternate layout: even slides (0, 2, 4...) = right, odd slides (1, 3, 5...) = left
+                                const layout = slideIndex % 2 === 0 ? 'floatRight' : 'floatLeft';
+
                                 const imageBlock = {
                                     id: Date.now() + Math.random(),
                                     type: 'image',
                                     data: {
                                         url: null,
                                         placeholder: true,
-                                        suggestedKeywords: slide.suggestedImages
+                                        suggestedKeywords: slide.suggestedImages,
+                                        layout: layout,
+                                        size: 'small'
                                     }
                                 };
 

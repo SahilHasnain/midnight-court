@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
         borderColor: colors.borderGold,
         borderRadius: 10,
         padding: 12,
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 14,
     },
     searchButton: {
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     resultName: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 13,
         fontWeight: "600",
         marginBottom: 4,
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
         padding: 12,
     },
     instructionText: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 12,
         marginBottom: 8,
         lineHeight: 18,

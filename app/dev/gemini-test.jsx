@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
         padding: 12,
     },
     infoLabel: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 13,
         marginBottom: 8,
     },
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
         color: "#ef4444",
     },
     resultMessage: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 13,
         lineHeight: 18,
     },
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
         fontWeight: "600",
     },
     instructionText: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 12,
         marginTop: 4,
         lineHeight: 16,

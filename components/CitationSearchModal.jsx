@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
         borderColor: colors.borderGold,
         borderRadius: 12,
         padding: 14,
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 15,
     },
     searchLoading: {
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     citationFullTitle: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 13,
         fontWeight: "600",
         marginBottom: 6,
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     emptyStateText: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 16,
         fontWeight: "600",
         marginBottom: 8,

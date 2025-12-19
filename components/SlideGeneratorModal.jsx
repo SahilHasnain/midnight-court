@@ -4,6 +4,8 @@
  */
 
 import { colors } from '@/theme/colors';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import {
     ActivityIndicator,
@@ -14,7 +16,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { generateSlides } from '../utils/slideGenerationAPI';
 
@@ -203,7 +205,10 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.quickPromptsScroll}>
                                     <TouchableOpacity
                                         style={styles.quickPromptChip}
-                                        onPress={() => setInput('Article 21 case about right to privacy. Supreme Court held that privacy is a fundamental right. Key judgment: K.S. Puttaswamy v. Union of India (2017). The nine-judge bench unanimously ruled that privacy is protected under Article 21.')}
+                                        onPress={() => {
+                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                            setInput('Article 21 case about right to privacy. Supreme Court held that privacy is a fundamental right. Key judgment: K.S. Puttaswamy v. Union of India (2017). The nine-judge bench unanimously ruled that privacy is protected under Article 21.');
+                                        }}
                                         disabled={loading}
                                     >
                                         <Text style={styles.quickPromptTitle}>📜 Right to Privacy</Text>
@@ -212,7 +217,10 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
 
                                     <TouchableOpacity
                                         style={styles.quickPromptChip}
-                                        onPress={() => setInput('Murder case under Section 302 IPC. Prosecution presented 15 witnesses including eyewitnesses, forensic evidence (blood samples, fingerprints), and CCTV footage. Defense argued alibi and questioned credibility of witnesses. Key evidence: 1) CCTV showed accused near crime scene at 11:45 PM, 2) Forensic report matched blood type with victim, 3) Two eyewitnesses identified accused. Court found accused guilty beyond reasonable doubt.')}
+                                        onPress={() => {
+                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                            setInput('Murder case under Section 302 IPC. Prosecution presented 15 witnesses including eyewitnesses, forensic evidence (blood samples, fingerprints), and CCTV footage. Defense argued alibi and questioned credibility of witnesses. Key evidence: 1) CCTV showed accused near crime scene at 11:45 PM, 2) Forensic report matched blood type with victim, 3) Two eyewitnesses identified accused. Court found accused guilty beyond reasonable doubt.');
+                                        }}
                                         disabled={loading}
                                     >
                                         <Text style={styles.quickPromptTitle}>⚖️ Criminal Case</Text>
@@ -221,7 +229,10 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
 
                                     <TouchableOpacity
                                         style={styles.quickPromptChip}
-                                        onPress={() => setInput('Section 377 IPC challenged on grounds of violating Article 14, 15, and 21. Petitioners argued that criminalizing consensual homosexual acts between adults is discriminatory and violates the right to privacy and dignity. The Supreme Court in Navtej Singh Johar v. Union of India (2018) decriminalized homosexuality, holding that Section 377 is unconstitutional.')}
+                                        onPress={() => {
+                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                            setInput('Section 377 IPC challenged on grounds of violating Article 14, 15, and 21. Petitioners argued that criminalizing consensual homosexual acts between adults is discriminatory and violates the right to privacy and dignity. The Supreme Court in Navtej Singh Johar v. Union of India (2018) decriminalized homosexuality, holding that Section 377 is unconstitutional.');
+                                        }}
                                         disabled={loading}
                                     >
                                         <Text style={styles.quickPromptTitle}>🏳️‍🌈 Section 377</Text>
@@ -230,7 +241,10 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
 
                                     <TouchableOpacity
                                         style={styles.quickPromptChip}
-                                        onPress={() => setInput('Breach of contract case with timeline: Jan 2020 - Contract signed for delivery of goods worth ₹50 lakhs, March 2020 - First payment of ₹20 lakhs made, June 2020 - Delivery due but not received, July 2020 - Legal notice sent demanding performance, Sept 2020 - Suit filed for specific performance and damages, Dec 2020 - Interim order passed, March 2021 - Final judgment with damages of ₹15 lakhs awarded to plaintiff.')}
+                                        onPress={() => {
+                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                            setInput('Breach of contract case with timeline: Jan 2020 - Contract signed for delivery of goods worth ₹50 lakhs, March 2020 - First payment of ₹20 lakhs made, June 2020 - Delivery due but not received, July 2020 - Legal notice sent demanding performance, Sept 2020 - Suit filed for specific performance and damages, Dec 2020 - Interim order passed, March 2021 - Final judgment with damages of ₹15 lakhs awarded to plaintiff.');
+                                        }}
                                         disabled={loading}
                                     >
                                         <Text style={styles.quickPromptTitle}>📝 Contract Breach</Text>
@@ -239,7 +253,10 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
 
                                     <TouchableOpacity
                                         style={styles.quickPromptChip}
-                                        onPress={() => setInput('Custody battle between divorced parents. Mother\'s argument: Child\'s primary caregiver since birth, stable home environment with grandparents nearby, better educational facilities in her city, child\'s medical needs met regularly. Father\'s argument: Higher income of ₹2.5 lakhs/month, extended family support, child expressed preference to live with father. Court\'s consideration: Best interest of child as paramount, child\'s age (12 years old), psychological report recommending joint custody with primary residence with mother.')}
+                                        onPress={() => {
+                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                            setInput('Custody battle between divorced parents. Mother\'s argument: Child\'s primary caregiver since birth, stable home environment with grandparents nearby, better educational facilities in her city, child\'s medical needs met regularly. Father\'s argument: Higher income of ₹2.5 lakhs/month, extended family support, child expressed preference to live with father. Court\'s consideration: Best interest of child as paramount, child\'s age (12 years old), psychological report recommending joint custody with primary residence with mother.');
+                                        }}
                                         disabled={loading}
                                     >
                                         <Text style={styles.quickPromptTitle}>👨‍👩‍👧 Child Custody</Text>
@@ -255,8 +272,12 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                         styles.generateButton,
                                         (loading || input.length < 50) && styles.generateButtonDisabled,
                                     ]}
-                                    onPress={handleGenerate}
+                                    onPress={() => {
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                                        handleGenerate();
+                                    }}
                                     disabled={loading || input.length < 50}
+                                    activeOpacity={0.8}
                                 >
                                     {loading ? (
                                         <View style={styles.buttonContent}>
@@ -272,7 +293,12 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                             {/* Info Section */}
                             <View style={styles.section}>
                                 <Text style={styles.infoTitle}>💡 How It Works</Text>
-                                <View style={styles.infoCard}>
+                                <LinearGradient
+                                    colors={[colors.card, colors.background]}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.infoCard}
+                                >
                                     <Text style={styles.infoText}>
                                         • AI analyzes your case description{'\n'}
                                         • Structures content into 1-5 professional slides{'\n'}
@@ -280,10 +306,15 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                         • Takes 2-3 seconds to generate{'\n'}
                                         • Results are cached for instant re-use
                                     </Text>
-                                </View>
+                                </LinearGradient>
 
                                 <Text style={styles.infoTitle}>📝 Tips for Best Results</Text>
-                                <View style={styles.infoCard}>
+                                <LinearGradient
+                                    colors={[colors.card, colors.background]}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.infoCard}
+                                >
                                     <Text style={styles.infoText}>
                                         • Include key facts, dates, and parties{'\n'}
                                         • Mention relevant laws, articles, or cases{'\n'}
@@ -291,7 +322,7 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                         • Add timeline of events if applicable{'\n'}
                                         • Include evidence and witness details
                                     </Text>
-                                </View>
+                                </LinearGradient>
                             </View>
                         </>
                     ) : (
@@ -322,12 +353,6 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                             {generatedSlides.slides.reduce((sum, s) => sum + (s.blocks?.length || 0), 0)}
                                         </Text>
                                         <Text style={styles.statLabel}>Blocks</Text>
-                                    </View>
-                                    <View style={styles.statBadge}>
-                                        <Text style={styles.statValue}>
-                                            {generatedSlides.generationTime || 0}ms
-                                        </Text>
-                                        <Text style={styles.statLabel}>Generated</Text>
                                     </View>
                                 </View>
                             </View>
@@ -442,12 +467,14 @@ const styles = StyleSheet.create({
     },
     section: {
         padding: 16,
+        paddingBottom: 8,
     },
     sectionTitle: {
         color: colors.gold,
         fontSize: 16,
         fontWeight: '700',
         marginBottom: 8,
+        letterSpacing: 0.3,
     },
     sectionHint: {
         color: colors.textSecondary,
@@ -457,14 +484,15 @@ const styles = StyleSheet.create({
     },
     textInput: {
         backgroundColor: colors.card,
-        borderWidth: 1,
+        borderWidth: 1.5,
         borderColor: colors.borderGold,
         borderRadius: 12,
-        padding: 14,
-        color: colors.text,
+        padding: 16,
+        color: colors.textPrimary,
         fontSize: 14,
         minHeight: 200,
         textAlignVertical: 'top',
+        lineHeight: 20,
     },
     charCountContainer: {
         marginTop: 8,
@@ -473,12 +501,15 @@ const styles = StyleSheet.create({
     charCount: {
         color: colors.textSecondary,
         fontSize: 12,
+        fontWeight: '500',
     },
     charCountWarning: {
         color: '#ffaa00',
+        fontWeight: '600',
     },
     charCountError: {
         color: '#ff4444',
+        fontWeight: '700',
     },
     actionContainer: {
         paddingHorizontal: 16,
@@ -490,6 +521,11 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 16,
         alignItems: 'center',
+        shadowColor: colors.gold,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
     },
     generateButtonDisabled: {
         opacity: 0.5,
@@ -504,7 +540,7 @@ const styles = StyleSheet.create({
         fontWeight: '700',
     },
     infoTitle: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 14,
         fontWeight: '600',
         marginTop: 16,
@@ -513,14 +549,16 @@ const styles = StyleSheet.create({
     infoCard: {
         backgroundColor: colors.card,
         borderWidth: 1,
-        borderColor: colors.borderGold,
+        borderColor: colors.borderGold + '60',
         borderRadius: 12,
-        padding: 12,
+        padding: 16,
+        overflow: 'hidden',
     },
     infoText: {
         color: colors.textSecondary,
         fontSize: 13,
-        lineHeight: 20,
+        lineHeight: 22,
+        letterSpacing: 0.2,
     },
     previewHeader: {
         flexDirection: 'row',
@@ -592,7 +630,7 @@ const styles = StyleSheet.create({
         fontSize: 11,
     },
     slideTitle: {
-        color: colors.text,
+        color: colors.textPrimary,
         fontSize: 16,
         fontWeight: '700',
         marginBottom: 4,
@@ -703,5 +741,33 @@ const styles = StyleSheet.create({
         color: colors.gold,
         fontSize: 14,
         fontWeight: '600',
+    },
+    quickPromptsScroll: {
+        marginTop: 4,
+    },
+    quickPromptChip: {
+        backgroundColor: colors.card,
+        borderWidth: 1.5,
+        borderColor: colors.borderGold + '80',
+        borderRadius: 12,
+        padding: 14,
+        marginRight: 12,
+        minWidth: 160,
+        shadowColor: colors.gold,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    quickPromptTitle: {
+        color: colors.gold,
+        fontSize: 13,
+        fontWeight: '700',
+        marginBottom: 4,
+    },
+    quickPromptSubtitle: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        fontWeight: '500',
     },
 });

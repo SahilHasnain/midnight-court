@@ -1,14 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
-import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from "expo-media-library";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
+import Share from 'react-native-share';
 
 import Toast from "@/components/Toast";
 import {
     ActivityIndicator,
-    Alert,
     FlatList,
     Image,
     Keyboard,
@@ -16,7 +14,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
@@ -118,40 +116,22 @@ export default function ImageLibrary() {
         }
     };
 
-    const requestMediaLibraryPermission = async () => {
-        const { status } = await MediaLibrary.requestPermissionsAsync();
-        return status === "granted";
-    };
-
     const downloadImage = async (image) => {
         try {
-            const hasPermission = await requestMediaLibraryPermission();
-            if (!hasPermission) {
-                Alert.alert("Permission Denied", "Allow access to save images to your gallery");
-                return;
-            }
+            const shareOptions = {
+                title: 'Share Image',
+                message: image.photographer ? `Photo by ${image.photographer}` : 'Legal Image',
+                url: image.url || image.thumbnail,
+                type: 'image/*',
+            };
 
-            const filename = `legal_image_${Date.now()}.jpg`;
-            const fileUri = FileSystem.Directory + filename;
-
-            // Download to temporary location
-            const downloadRes = await File.downloadFileAsync(
-                image.url || image.thumbnail,
-                fileUri
-            );
-
-            if (!downloadRes.uri) {
-                throw new Error("Download failed");
-            }
-
-            // Save to gallery
-            const asset = await MediaLibrary.createAssetAsync(downloadRes.uri);
-            await MediaLibrary.createAlbumAsync("Midnight Court", asset, false);
-
-            showToastMessage("📄 Image saved to gallery");
+            await Share.open(shareOptions);
+            showToastMessage("✅ Shared successfully");
         } catch (error) {
-            console.error("Download error:", error);
-            showToastMessage("❌ Failed to download image");
+            if (error.message !== 'User did not share') {
+                console.error("Share error:", error);
+                showToastMessage("❌ Failed to share image");
+            }
         }
     };
 
@@ -184,7 +164,7 @@ export default function ImageLibrary() {
                             style={[styles.actionBtn, styles.downloadBtnStyle]}
                             onPress={() => downloadImage(item)}
                         >
-                            <Text style={styles.actionBtnIcon}>⬇️</Text>
+                            <Text style={styles.actionBtnIcon}>📤</Text>
                         </TouchableOpacity>
                     </>
                 ) : (
@@ -193,7 +173,7 @@ export default function ImageLibrary() {
                             style={[styles.actionBtn, styles.downloadBtnStyle]}
                             onPress={() => downloadImage(item)}
                         >
-                            <Text style={styles.actionBtnIcon}>⬇️</Text>
+                            <Text style={styles.actionBtnIcon}>📤</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.actionBtn, styles.deleteBtnStyle]}
@@ -325,8 +305,19 @@ export default function ImageLibrary() {
                                     renderItem={({ item }) => (
                                         <TouchableOpacity
                                             style={styles.suggestionTag}
-                                            onPress={() => {
+                                            onPress={async () => {
                                                 setSearchQuery(item);
+                                                setIsTyping(false);
+                                                Keyboard.dismiss();
+                                                setIsLoading(true);
+                                                try {
+                                                    const results = await searchImages(item, selectedSource);
+                                                    setSearchResults(results);
+                                                } catch (error) {
+                                                    console.error("Search failed:", error);
+                                                } finally {
+                                                    setIsLoading(false);
+                                                }
                                             }}
                                         >
                                             <Text style={styles.suggestionTagText}>{item}</Text>
