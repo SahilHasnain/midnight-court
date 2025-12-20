@@ -19,7 +19,7 @@ export default function ImageSearchModal({ visible, onClose, onSelectImage }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [selectedSource, setSelectedSource] = useState("pexels");
+    const [selectedSource, setSelectedSource] = useState("unsplash");
     const [isTyping, setIsTyping] = useState(false);
 
     const handleSearch = async () => {
@@ -61,7 +61,7 @@ export default function ImageSearchModal({ visible, onClose, onSelectImage }) {
     const resetModal = () => {
         setSearchQuery("");
         setSearchResults([]);
-        setSelectedSource("pexels");
+        setSelectedSource("unsplash");
     };
 
     const handleClose = () => {

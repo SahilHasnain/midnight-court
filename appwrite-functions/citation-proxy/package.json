@@ -1,0 +1,12 @@
+{
+  "name": "citation-proxy",
+  "version": "1.0.0",
+  "description": "Appwrite function to proxy citation search via Gemini",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"No tests\" && exit 0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

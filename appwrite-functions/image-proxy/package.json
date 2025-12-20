@@ -1,0 +1,12 @@
+{
+  "name": "image-proxy",
+  "version": "1.0.0",
+  "description": "Appwrite function to proxy image search (Unsplash/Pexels)",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"No tests\" && exit 0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

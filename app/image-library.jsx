@@ -38,7 +38,7 @@ export default function ImageLibrary() {
     const [searchResults, setSearchResults] = useState([]);
     const [savedImages, setSavedImages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedSource, setSelectedSource] = useState("pexels");
+    const [selectedSource, setSelectedSource] = useState("unsplash");
     const [activeTab, setActiveTab] = useState("search"); // 'search' or 'saved'
     const [isTyping, setIsTyping] = useState(false);
     const [toastMessage, setToastMessage] = useState("");

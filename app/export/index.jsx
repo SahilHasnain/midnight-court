@@ -1,5 +1,6 @@
 import { BLOCK_TYPES } from "@/components/blocks/blockTypes";
 import GoldButton from "@/components/GoldButton";
+import Toast from "@/components/Toast";
 import { colors } from "@/theme/colors";
 import { renderBlockToHTML } from "@/utils/blockRenderer";
 import * as Print from 'expo-print';
@@ -40,6 +41,14 @@ export default function ExportScreen() {
     const { slides: slidesParam } = useLocalSearchParams();
     const slides = slidesParam ? JSON.parse(slidesParam) : [];
     const [isGenerating, setIsGenerating] = useState(false);
+    const [toastMessage, setToastMessage] = useState("");
+    const [showToast, setShowToast] = useState(false);
+
+    const showToastMessage = (message) => {
+        setToastMessage(message);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2500);
+    };
 
     // Helper to group floatLeft/floatRight images with following content
     const renderBlocksWithGrouping = (blocks) => {
@@ -308,14 +317,7 @@ export default function ExportScreen() {
                 UTI: 'com.adobe.pdf'
             });
 
-            Alert.alert(
-                "Success! 🎉",
-                "Your presentation has been generated successfully!",
-                [
-                    { text: "Create Another", onPress: () => router.push("/templates") },
-                    { text: "Done", style: "cancel" }
-                ]
-            );
+            showToastMessage("🎉 PDF generated successfully!");
         } catch (error) {
             Alert.alert("Error", "Failed to generate PDF. Please try again.");
             console.error(error);
@@ -334,6 +336,7 @@ export default function ExportScreen() {
     }
 
     return (
+        <>
         <ScrollView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
@@ -526,6 +529,8 @@ export default function ExportScreen() {
                 </Text>
             </View>
         </ScrollView>
+        <Toast message={toastMessage} visible={showToast} duration={2500} />
+        </>
     );
 }
 

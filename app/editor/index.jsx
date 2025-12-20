@@ -19,7 +19,7 @@ import { getCustomTemplateById, getTemplateById, saveCustomTemplate } from "@/ut
 
 // Parse markdown-style text: *gold*, ~red~, _blue_
 const parseFormattedText = (text) => {
-    if (!text) return null;
+    if (!text) return [{ text: '', color: null }];
 
     const parts = [];
     let currentIndex = 0;
@@ -88,7 +88,7 @@ export default function EditorScreen() {
         setTimeout(() => setShowToast(false), 2500);
     };
 
-    const currentSlide = slides[currentSlideIndex];
+    const currentSlide = slides[currentSlideIndex] || { title: "", subtitle: "", blocks: [] };
 
     // Load template or saved presentation on mount
     useEffect(() => {
@@ -208,10 +208,8 @@ export default function EditorScreen() {
     }
 
     const deleteBlock = (blockId) => {
-        if (currentSlide.blocks.length > 1) {
-            const newBlocks = currentSlide.blocks.filter(block => block.id !== blockId);
-            updateSlide("blocks", newBlocks);
-        }
+        const newBlocks = currentSlide.blocks.filter(block => block.id !== blockId);
+        updateSlide("blocks", newBlocks);
     }
 
     const addSlide = () => {
@@ -245,8 +243,13 @@ export default function EditorScreen() {
             showToastMessage("🗑️ Slide deleted");
             // Adjust current index if needed
             if (currentSlideIndex >= newSlides.length) {
-                setCurrentSlideIndex(newSlides.length - 1);
+                setCurrentSlideIndex(Math.max(0, newSlides.length - 1));
             }
+        } else {
+            // Last slide - reset to empty
+            setSlides([{ title: "", subtitle: "", blocks: [] }]);
+            setCurrentSlideIndex(0);
+            showToastMessage("🗑️ Slide cleared");
         }
     }
 
@@ -401,8 +404,13 @@ export default function EditorScreen() {
                         {showHeadingPreview ? (
                             <View style={styles.headingPreview}>
                                 <Text style={styles.headingPreviewText}>
-                                    {currentSlide.title || 'Preview: Your heading will appear here'}
+                                    {currentSlide.title || ''}
                                 </Text>
+                                {!currentSlide.title && (
+                                    <Text style={[styles.headingPreviewText, { opacity: 0.4 }]}>
+                                        Preview: Your heading will appear here
+                                    </Text>
+                                )}
                             </View>
                         ) : (
                             <TextInput
@@ -434,13 +442,19 @@ export default function EditorScreen() {
 
                         {showSubtitlePreview ? (
                             <View style={styles.subtitlePreview}>
-                                <Text style={styles.subtitlePreviewText}>
-                                    {parseFormattedText(currentSlide.subtitle || "").map((part, idx) => (
-                                        <Text key={idx} style={{ color: part.color || colors.textSecondary, fontWeight: '500' }}>
-                                            {part.text}
-                                        </Text>
-                                    ))}
-                                </Text>
+                                {currentSlide.subtitle ? (
+                                    <Text style={styles.subtitlePreviewText}>
+                                        {parseFormattedText(currentSlide.subtitle).map((part, idx) => (
+                                            <Text key={idx} style={{ color: part.color || colors.textSecondary, fontWeight: '500' }}>
+                                                {part.text}
+                                            </Text>
+                                        ))}
+                                    </Text>
+                                ) : (
+                                    <Text style={[styles.subtitlePreviewText, { opacity: 0.4, color: colors.textSecondary }]}>
+                                        Preview: Your subtitle will appear here
+                                    </Text>
+                                )}
                             </View>
                         ) : (
                             <TextInput
@@ -455,7 +469,8 @@ export default function EditorScreen() {
 
                     {/* Content Blocks */}
                     <Text style={styles.label}>Content Blocks</Text>
-                    {currentSlide.blocks.map((block, index) => (
+                    {currentSlide.blocks && currentSlide.blocks.length > 0 ? (
+                        currentSlide.blocks.map((block, index) => (
                         <View key={block.id}>
                             {/* Insert button before first block and between blocks */}
                             {index === 0 && (
@@ -470,7 +485,7 @@ export default function EditorScreen() {
                             <BlockRenderer
                                 block={block}
                                 onUpdate={(updatedBlock) => updateBlock(block.id, updatedBlock)}
-                                onDelete={currentSlide.blocks.length > 1 ? () => deleteBlock(block.id) : null}
+                                onDelete={() => deleteBlock(block.id)}
                                 onOpenImageSearch={(blockId) => {
                                     setSelectedImageBlockId(blockId);
                                     setImageSearchVisible(true);
@@ -487,7 +502,13 @@ export default function EditorScreen() {
                                 </TouchableOpacity>
                             )}
                         </View>
-                    ))}
+                    )))
+                     : (
+                        <View style={styles.emptyBlocksContainer}>
+                            <Text style={styles.emptyBlocksText}>No content blocks yet</Text>
+                            <Text style={styles.emptyBlocksHint}>Add your first block below</Text>
+                        </View>
+                    )}
 
                     <TouchableOpacity
                         onPress={() => setBlockPickerVisible(true)}
@@ -522,7 +543,7 @@ export default function EditorScreen() {
                         onPress={() => setSlideGeneratorVisible(true)}
                         style={styles.generateSlidesButton}
                     >
-                        <Text style={styles.generateSlidesIcon}>🎨</Text>
+                        <Text style={styles.generateSlidesIcon}>🤖</Text>
                         <View style={styles.addBlockTextContainer}>
                             <Text style={styles.addBlockTitle}>Generate Slides from Text</Text>
                             <Text style={styles.addBlockSubtitle}>AI creates slides from case description</Text>
@@ -1226,5 +1247,28 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: '600',
         fontFamily: 'Inter_600SemiBold',
+    },
+    emptyBlocksContainer: {
+        backgroundColor: colors.card,
+        padding: 32,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        borderColor: 'rgba(212, 175, 55, 0.3)',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    emptyBlocksText: {
+        color: colors.textSecondary,
+        fontSize: 15,
+        fontWeight: '600',
+        fontFamily: 'Inter_600SemiBold',
+        marginBottom: 4,
+    },
+    emptyBlocksHint: {
+        color: colors.textSecondary,
+        fontSize: 12,
+        fontFamily: 'Inter_400Regular',
+        opacity: 0.7,
     },
 })
