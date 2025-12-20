@@ -4,7 +4,7 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-nativ
 
 // Parse markdown-style text: *gold*, ~red~, _blue_
 const parseFormattedText = (text) => {
-    if (!text) return null;
+    if (!text) return [{ text: '', color: colors.ivory }];
 
     const parts = [];
     let currentIndex = 0;

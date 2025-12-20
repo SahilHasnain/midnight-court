@@ -471,7 +471,7 @@ export default function EditorScreen() {
                     <Text style={styles.label}>Content Blocks</Text>
                     {currentSlide.blocks && currentSlide.blocks.length > 0 ? (
                         currentSlide.blocks.map((block, index) => (
-                        <View key={block.id}>
+                        <View key={block.id || `block-${index}`}>
                             {/* Insert button before first block and between blocks */}
                             {index === 0 && (
                                 <TouchableOpacity
