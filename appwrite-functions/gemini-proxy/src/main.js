@@ -4,7 +4,16 @@ export default async ({ req, res, log, error }) => {
   }
 
   try {
-    const { prompt, schema, model = 'gemini-2.5-flash-lite' } = JSON.parse(req.body);
+    // Parse body - Appwrite sends it as string
+    let payload;
+    try {
+      payload = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    } catch (parseError) {
+      error(`Body parse error: ${parseError.message}`);
+      return res.json({ error: 'Invalid JSON in request body' }, 400);
+    }
+
+    const { prompt, schema, model = 'gemini-2.5-flash-lite' } = payload;
 
     if (!prompt) {
       return res.json({ error: 'Prompt is required' }, 400);

@@ -3,30 +3,22 @@
  * Call Appwrite function proxy
  */
 const callAppwriteFunction = async (payload) => {
-    const url = ""
+    const url = "https://6946fabd00348ef83af0.fra.appwrite.run"
 
     const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            body: JSON.stringify(payload),
-            async: false,
-        }),
+        body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-        throw new Error(`Appwrite function call failed: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Appwrite function call failed: ${response.status} - ${errorText}`);
     }
 
-    const execution = await response.json();
-
-    if (execution.status === 'failed') {
-        throw new Error(`Function execution failed: ${execution.stderr}`);
-    }
-
-    return JSON.parse(execution.responseBody);
+    return await response.json();
 };
 
 /**
