@@ -1,0 +1,536 @@
+{
+  "SLP": {
+    "full": "Special Leave Petition",
+    "meaning": "An appeal to the Supreme Court of India under Article 136 of the Constitution",
+    "example": "SLP filed against the High Court's dismissal order",
+    "category": "Constitutional"
+  },
+  "PIL": {
+    "full": "Public Interest Litigation",
+    "meaning": "Legal action initiated for the protection of public interest",
+    "example": "PIL filed for environmental protection",
+    "category": "Constitutional"
+  },
+  "FIR": {
+    "full": "First Information Report",
+    "meaning": "Written document prepared by police when they receive information about a cognizable offense",
+    "example": "FIR registered under Section 302 IPC",
+    "category": "Criminal"
+  },
+  "IPC": {
+    "full": "Indian Penal Code",
+    "meaning": "Main criminal code of India, enacted in 1860",
+    "example": "Charged under Section 420 IPC for cheating",
+    "category": "Criminal"
+  },
+  "CrPC": {
+    "full": "Code of Criminal Procedure",
+    "meaning": "Procedural law for administration of criminal law in India",
+    "example": "Bail granted under Section 437 CrPC",
+    "category": "Criminal"
+  },
+  "CPC": {
+    "full": "Code of Civil Procedure",
+    "meaning": "Procedural law governing civil litigation in India",
+    "example": "Suit filed under Order VII Rule 11 CPC",
+    "category": "Civil"
+  },
+  "AIR": {
+    "full": "All India Reporter",
+    "meaning": "Legal reporter publishing Supreme Court and High Court judgments",
+    "example": "Kesavananda Bharati case reported in AIR 1973 SC 1461",
+    "category": "General"
+  },
+  "SCC": {
+    "full": "Supreme Court Cases",
+    "meaning": "Official law reporter of the Supreme Court of India",
+    "example": "Vishaka case reported in (1997) 6 SCC 241",
+    "category": "General"
+  },
+  "SC": {
+    "full": "Supreme Court",
+    "meaning": "Apex court of India, highest judicial authority",
+    "example": "Matter pending before SC",
+    "category": "General"
+  },
+  "HC": {
+    "full": "High Court",
+    "meaning": "Principal civil court of original jurisdiction in each state",
+    "example": "Appeal filed in Delhi HC",
+    "category": "General"
+  },
+  "CJI": {
+    "full": "Chief Justice of India",
+    "meaning": "Head of the judiciary and Supreme Court of India",
+    "example": "Bench headed by CJI",
+    "category": "General"
+  },
+  "AG": {
+    "full": "Attorney General",
+    "meaning": "Chief legal advisor to the Government of India",
+    "example": "AG appeared for the Union",
+    "category": "General"
+  },
+  "SG": {
+    "full": "Solicitor General",
+    "meaning": "Second-highest law officer of India, assists the Attorney General",
+    "example": "SG argued on behalf of the State",
+    "category": "General"
+  },
+  "ASG": {
+    "full": "Additional Solicitor General",
+    "meaning": "Law officer who assists the Attorney General and Solicitor General",
+    "example": "ASG represented the government",
+    "category": "General"
+  },
+  "DRT": {
+    "full": "Debt Recovery Tribunal",
+    "meaning": "Tribunal for expeditious adjudication of debt recovery",
+    "example": "Bank filed case in DRT",
+    "category": "Civil"
+  },
+  "NCLT": {
+    "full": "National Company Law Tribunal",
+    "meaning": "Quasi-judicial body adjudicating corporate disputes",
+    "example": "Insolvency petition filed in NCLT",
+    "category": "Civil"
+  },
+  "NCLAT": {
+    "full": "National Company Law Appellate Tribunal",
+    "meaning": "Appellate tribunal for NCLT orders",
+    "example": "Appeal preferred to NCLAT",
+    "category": "Civil"
+  },
+  "CAT": {
+    "full": "Central Administrative Tribunal",
+    "meaning": "Tribunal for service matters of central government employees",
+    "example": "Service dispute filed in CAT",
+    "category": "Procedural"
+  },
+  "ITAT": {
+    "full": "Income Tax Appellate Tribunal",
+    "meaning": "Appellate tribunal for income tax disputes",
+    "example": "Tax appeal pending before ITAT",
+    "category": "Civil"
+  },
+  "CESTAT": {
+    "full": "Customs, Excise and Service Tax Appellate Tribunal",
+    "meaning": "Appellate tribunal for indirect tax matters",
+    "example": "Customs duty dispute in CESTAT",
+    "category": "Civil"
+  },
+  "NGT": {
+    "full": "National Green Tribunal",
+    "meaning": "Specialized tribunal for environmental disputes",
+    "example": "Environmental case filed in NGT",
+    "category": "Constitutional"
+  },
+  "NHRC": {
+    "full": "National Human Rights Commission",
+    "meaning": "Statutory body for protection of human rights",
+    "example": "Complaint filed with NHRC",
+    "category": "Constitutional"
+  },
+  "SHRC": {
+    "full": "State Human Rights Commission",
+    "meaning": "State-level body for human rights protection",
+    "example": "Matter referred to SHRC",
+    "category": "Constitutional"
+  },
+  "NCW": {
+    "full": "National Commission for Women",
+    "meaning": "Statutory body for women's rights and safeguards",
+    "example": "Complaint lodged with NCW",
+    "category": "Constitutional"
+  },
+  "NCSC": {
+    "full": "National Commission for Scheduled Castes",
+    "meaning": "Constitutional body for SC welfare",
+    "example": "Representation made to NCSC",
+    "category": "Constitutional"
+  },
+  "NCST": {
+    "full": "National Commission for Scheduled Tribes",
+    "meaning": "Constitutional body for ST welfare",
+    "example": "Petition filed with NCST",
+    "category": "Constitutional"
+  },
+  "CBI": {
+    "full": "Central Bureau of Investigation",
+    "meaning": "Premier investigating agency of India",
+    "example": "Case transferred to CBI",
+    "category": "Criminal"
+  },
+  "ED": {
+    "full": "Enforcement Directorate",
+    "meaning": "Law enforcement agency for economic crimes",
+    "example": "ED conducted raids",
+    "category": "Criminal"
+  },
+  "NIA": {
+    "full": "National Investigation Agency",
+    "meaning": "Central agency for terrorism-related offenses",
+    "example": "NIA took over the case",
+    "category": "Criminal"
+  },
+  "PMLA": {
+    "full": "Prevention of Money Laundering Act",
+    "meaning": "Act to prevent money laundering and confiscate proceeds of crime",
+    "example": "Charged under PMLA",
+    "category": "Criminal"
+  },
+  "NDPS": {
+    "full": "Narcotic Drugs and Psychotropic Substances Act",
+    "meaning": "Act to control and regulate narcotic drugs",
+    "example": "Arrested under NDPS Act",
+    "category": "Criminal"
+  },
+  "POCSO": {
+    "full": "Protection of Children from Sexual Offences Act",
+    "meaning": "Act to protect children from sexual abuse",
+    "example": "Case registered under POCSO",
+    "category": "Criminal"
+  },
+  "SC/ST Act": {
+    "full": "Scheduled Castes and Scheduled Tribes (Prevention of Atrocities) Act",
+    "meaning": "Act to prevent atrocities against SC/ST communities",
+    "example": "FIR under SC/ST Act",
+    "category": "Criminal"
+  },
+  "DV Act": {
+    "full": "Protection of Women from Domestic Violence Act",
+    "meaning": "Civil law to protect women from domestic violence",
+    "example": "Protection order under DV Act",
+    "category": "Civil"
+  },
+  "RTI": {
+    "full": "Right to Information",
+    "meaning": "Act empowering citizens to request government information",
+    "example": "RTI application filed",
+    "category": "Constitutional"
+  },
+  "UAPA": {
+    "full": "Unlawful Activities (Prevention) Act",
+    "meaning": "Act to prevent unlawful activities and terrorism",
+    "example": "Charged under UAPA",
+    "category": "Criminal"
+  },
+  "NI Act": {
+    "full": "Negotiable Instruments Act",
+    "meaning": "Act governing negotiable instruments like cheques",
+    "example": "Complaint under Section 138 NI Act",
+    "category": "Civil"
+  },
+  "TP Act": {
+    "full": "Transfer of Property Act",
+    "meaning": "Act regulating transfer of property in India",
+    "example": "Sale deed under TP Act",
+    "category": "Civil"
+  },
+  "IEA": {
+    "full": "Indian Evidence Act",
+    "meaning": "Act governing admissibility of evidence in courts",
+    "example": "Evidence admitted under Section 32 IEA",
+    "category": "Procedural"
+  },
+  "CA": {
+    "full": "Constitution of India / Chartered Accountant",
+    "meaning": "Supreme law of India or professional accountant",
+    "example": "Rights under Article 21 of CA",
+    "category": "Constitutional"
+  },
+  "IA": {
+    "full": "Interlocutory Application",
+    "meaning": "Application filed during pendency of main suit",
+    "example": "IA filed for interim relief",
+    "category": "Procedural"
+  },
+  "MA": {
+    "full": "Miscellaneous Application",
+    "meaning": "Application for miscellaneous relief",
+    "example": "MA for condonation of delay",
+    "category": "Procedural"
+  },
+  "WP": {
+    "full": "Writ Petition",
+    "meaning": "Petition filed under Article 226 or 32 for constitutional remedies",
+    "example": "WP filed in High Court",
+    "category": "Constitutional"
+  },
+  "SLP(C)": {
+    "full": "Special Leave Petition (Civil)",
+    "meaning": "Civil appeal to Supreme Court under Article 136",
+    "example": "SLP(C) filed against HC order",
+    "category": "Constitutional"
+  },
+  "SLP(Crl)": {
+    "full": "Special Leave Petition (Criminal)",
+    "meaning": "Criminal appeal to Supreme Court under Article 136",
+    "example": "SLP(Crl) against conviction",
+    "category": "Constitutional"
+  },
+  "CA": {
+    "full": "Civil Appeal",
+    "meaning": "Appeal in civil matters",
+    "example": "CA filed in Supreme Court",
+    "category": "Civil"
+  },
+  "Crl.A": {
+    "full": "Criminal Appeal",
+    "meaning": "Appeal in criminal matters",
+    "example": "Crl.A against acquittal",
+    "category": "Criminal"
+  },
+  "RFA": {
+    "full": "Regular First Appeal",
+    "meaning": "First appeal from decree of civil court",
+    "example": "RFA filed in High Court",
+    "category": "Civil"
+  },
+  "RSA": {
+    "full": "Regular Second Appeal",
+    "meaning": "Second appeal on substantial question of law",
+    "example": "RSA admitted by HC",
+    "category": "Civil"
+  },
+  "Crl.Rev": {
+    "full": "Criminal Revision",
+    "meaning": "Revision petition in criminal matters",
+    "example": "Crl.Rev filed in HC",
+    "category": "Criminal"
+  },
+  "Crl.MP": {
+    "full": "Criminal Miscellaneous Petition",
+    "meaning": "Miscellaneous petition in criminal matters",
+    "example": "Crl.MP for bail",
+    "category": "Criminal"
+  },
+  "Crl.MC": {
+    "full": "Criminal Miscellaneous Case",
+    "meaning": "Miscellaneous criminal case",
+    "example": "Crl.MC for quashing FIR",
+    "category": "Criminal"
+  },
+  "Arb.P": {
+    "full": "Arbitration Petition",
+    "meaning": "Petition under Arbitration Act",
+    "example": "Arb.P for appointment of arbitrator",
+    "category": "Civil"
+  },
+  "CS": {
+    "full": "Civil Suit",
+    "meaning": "Suit filed in civil court",
+    "example": "CS for recovery of money",
+    "category": "Civil"
+  },
+  "OS": {
+    "full": "Original Suit",
+    "meaning": "Original civil suit",
+    "example": "OS for declaration",
+    "category": "Civil"
+  },
+  "CC": {
+    "full": "Criminal Case / Civil Case",
+    "meaning": "Case filed in criminal or civil court",
+    "example": "CC pending in trial court",
+    "category": "General"
+  },
+  "RC": {
+    "full": "Regular Case",
+    "meaning": "Regular criminal case",
+    "example": "RC registered by police",
+    "category": "Criminal"
+  },
+  "GR": {
+    "full": "General Register",
+    "meaning": "Register of criminal cases",
+    "example": "GR Case No. 123/2023",
+    "category": "Criminal"
+  },
+  "PRC": {
+    "full": "Police Report Case",
+    "meaning": "Case based on police report",
+    "example": "PRC filed in magistrate court",
+    "category": "Criminal"
+  },
+  "CMP": {
+    "full": "Civil Miscellaneous Petition",
+    "meaning": "Miscellaneous petition in civil matters",
+    "example": "CMP for stay of execution",
+    "category": "Civil"
+  },
+  "EA": {
+    "full": "Execution Application",
+    "meaning": "Application for execution of decree",
+    "example": "EA filed for recovery",
+    "category": "Civil"
+  },
+  "EP": {
+    "full": "Execution Petition",
+    "meaning": "Petition for execution of decree",
+    "example": "EP for attachment of property",
+    "category": "Civil"
+  },
+  "OP": {
+    "full": "Original Petition",
+    "meaning": "Original petition filed",
+    "example": "OP under Arbitration Act",
+    "category": "Civil"
+  },
+  "CP": {
+    "full": "Company Petition / Contempt Petition",
+    "meaning": "Petition under Companies Act or for contempt",
+    "example": "CP filed for winding up",
+    "category": "Civil"
+  },
+  "TP": {
+    "full": "Transfer Petition",
+    "meaning": "Petition for transfer of case",
+    "example": "TP filed in Supreme Court",
+    "category": "Procedural"
+  },
+  "Review Petition": {
+    "full": "Review Petition",
+    "meaning": "Petition to review court's own judgment",
+    "example": "Review petition dismissed",
+    "category": "Procedural"
+  },
+  "Curative Petition": {
+    "full": "Curative Petition",
+    "meaning": "Last remedy after review petition",
+    "example": "Curative petition filed",
+    "category": "Procedural"
+  },
+  "Suo Motu": {
+    "full": "Suo Motu (On its own motion)",
+    "meaning": "Court taking cognizance on its own",
+    "example": "Suo motu case registered",
+    "category": "Procedural"
+  },
+  "Ex Parte": {
+    "full": "Ex Parte (One-sided)",
+    "meaning": "Proceeding in absence of one party",
+    "example": "Ex parte decree passed",
+    "category": "Procedural"
+  },
+  "Ad Interim": {
+    "full": "Ad Interim (In the meantime)",
+    "meaning": "Temporary order pending final hearing",
+    "example": "Ad interim injunction granted",
+    "category": "Procedural"
+  },
+  "Prima Facie": {
+    "full": "Prima Facie (At first sight)",
+    "meaning": "On the face of it, without detailed examination",
+    "example": "Prima facie case established",
+    "category": "General"
+  },
+  "Res Judicata": {
+    "full": "Res Judicata (Matter already judged)",
+    "meaning": "Principle that decided matters cannot be relitigated",
+    "example": "Suit barred by res judicata",
+    "category": "Procedural"
+  },
+  "Habeas Corpus": {
+    "full": "Habeas Corpus (Produce the body)",
+    "meaning": "Writ to produce person before court",
+    "example": "Habeas corpus petition filed",
+    "category": "Constitutional"
+  },
+  "Mandamus": {
+    "full": "Mandamus (We command)",
+    "meaning": "Writ commanding performance of public duty",
+    "example": "Writ of mandamus issued",
+    "category": "Constitutional"
+  },
+  "Certiorari": {
+    "full": "Certiorari (To be informed)",
+    "meaning": "Writ to quash order of lower court/tribunal",
+    "example": "Writ of certiorari granted",
+    "category": "Constitutional"
+  },
+  "Prohibition": {
+    "full": "Prohibition",
+    "meaning": "Writ to prohibit lower court from exceeding jurisdiction",
+    "example": "Writ of prohibition issued",
+    "category": "Constitutional"
+  },
+  "Quo Warranto": {
+    "full": "Quo Warranto (By what authority)",
+    "meaning": "Writ to question person's right to hold public office",
+    "example": "Quo warranto petition filed",
+    "category": "Constitutional"
+  },
+  "Amicus Curiae": {
+    "full": "Amicus Curiae (Friend of the court)",
+    "meaning": "Person assisting court with information",
+    "example": "Amicus curiae appointed",
+    "category": "Procedural"
+  },
+  "Caveat": {
+    "full": "Caveat (Let him beware)",
+    "meaning": "Notice to court not to pass order without hearing",
+    "example": "Caveat filed in Supreme Court",
+    "category": "Procedural"
+  },
+  "Vakalatnama": {
+    "full": "Vakalatnama (Authorization)",
+    "meaning": "Document authorizing lawyer to represent client",
+    "example": "Vakalatnama filed on record",
+    "category": "Procedural"
+  },
+  "Plaint": {
+    "full": "Plaint",
+    "meaning": "Written statement of plaintiff's cause of action",
+    "example": "Plaint filed in civil court",
+    "category": "Civil"
+  },
+  "Written Statement": {
+    "full": "Written Statement",
+    "meaning": "Defendant's reply to plaint",
+    "example": "Written statement filed",
+    "category": "Civil"
+  },
+  "Rejoinder": {
+    "full": "Rejoinder",
+    "meaning": "Plaintiff's reply to written statement",
+    "example": "Rejoinder filed by plaintiff",
+    "category": "Civil"
+  },
+  "Charge Sheet": {
+    "full": "Charge Sheet",
+    "meaning": "Final report by police after investigation",
+    "example": "Charge sheet filed in court",
+    "category": "Criminal"
+  },
+  "Cognizance": {
+    "full": "Cognizance",
+    "meaning": "Court taking notice of an offense",
+    "example": "Cognizance taken by magistrate",
+    "category": "Criminal"
+  },
+  "Compoundable": {
+    "full": "Compoundable Offense",
+    "meaning": "Offense that can be settled between parties",
+    "example": "Offense is compoundable",
+    "category": "Criminal"
+  },
+  "Non-Compoundable": {
+    "full": "Non-Compoundable Offense",
+    "meaning": "Offense that cannot be settled between parties",
+    "example": "Murder is non-compoundable",
+    "category": "Criminal"
+  },
+  "Bailable": {
+    "full": "Bailable Offense",
+    "meaning": "Offense where bail is a matter of right",
+    "example": "Offense is bailable",
+    "category": "Criminal"
+  },
+  "Non-Bailable": {
+    "full": "Non-Bailable Offense",
+    "meaning": "Offense where bail is at court's discretion",
+    "example": "Murder is non-bailable",
+    "category": "Criminal"
+  }
+}

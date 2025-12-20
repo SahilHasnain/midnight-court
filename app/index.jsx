@@ -69,6 +69,16 @@ export default function Index() {
 
           <TouchableOpacity
             style={styles.actionButton}
+            onPress={() => router.push("/abbreviations")}
+            activeOpacity={0.82}
+          >
+            <Text style={styles.actionIcon}>📖</Text>
+            <Text style={styles.actionTitle}>Legal Dictionary</Text>
+            <Text style={styles.actionSubtitle}>88+ legal abbreviations</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
             onPress={() => router.push("/image-library")}
             activeOpacity={0.82}
           >
