@@ -132,6 +132,19 @@ export default function TemplateScreen() {
     
                             </TouchableOpacity>
 
+                            {/* Preview button for non-blank templates */}
+                            {item.id !== 'blank' && item.slides && (
+                                <TouchableOpacity
+                                    style={styles.previewButton}
+                                    onPress={() => router.push({
+                                        pathname: "/export",
+                                        params: { slides: JSON.stringify(item.slides) }
+                                    })}
+                                >
+                                    <Text style={styles.previewIcon}>👁️</Text>
+                                </TouchableOpacity>
+                            )}
+
                             {/* Delete button for custom templates */}
                             {item.type === 'custom' && (
                                 <TouchableOpacity
@@ -294,10 +307,26 @@ const styles = StyleSheet.create({
         position: 'relative',
         marginBottom: 14,
     },
-    deleteButton: {
+    previewButton: {
         position: 'absolute',
         top: 10,
         right: 10,
+        backgroundColor: 'rgba(203, 164, 74, 0.1)',
+        width: 34,
+        height: 34,
+        borderRadius: 17,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: colors.gold,
+    },
+    previewIcon: {
+        fontSize: 16,
+    },
+    deleteButton: {
+        position: 'absolute',
+        top: 10,
+        right: 50,
         backgroundColor: 'rgba(239, 68, 68, 0.08)',
         width: 34,
         height: 34,

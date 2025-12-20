@@ -2,7 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
 import { useCallback, useState } from "react";
-import Share from 'react-native-share';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system/legacy';
 
 import Toast from "@/components/Toast";
 import {
@@ -10,6 +11,7 @@ import {
     FlatList,
     Image,
     Keyboard,
+    ScrollView,
     StyleSheet,
     Text,
     TextInput,
@@ -118,20 +120,19 @@ export default function ImageLibrary() {
 
     const downloadImage = async (image) => {
         try {
-            const shareOptions = {
-                title: 'Share Image',
-                message: image.photographer ? `Photo by ${image.photographer}` : 'Legal Image',
-                url: image.url || image.thumbnail,
-                type: 'image/*',
-            };
-
-            await Share.open(shareOptions);
+            if (!(await Sharing.isAvailableAsync())) {
+                showToastMessage("❌ Sharing not available");
+                return;
+            }
+            const uri = image.url || image.thumbnail;
+            const filename = `image_${Date.now()}.jpg`;
+            const localUri = FileSystem.cacheDirectory + filename;
+            await FileSystem.downloadAsync(uri, localUri);
+            await Sharing.shareAsync(localUri);
             showToastMessage("✅ Shared successfully");
         } catch (error) {
-            if (error.message !== 'User did not share') {
-                console.error("Share error:", error);
-                showToastMessage("❌ Failed to share image");
-            }
+            console.error("Share error:", error);
+            showToastMessage("❌ Failed to share image");
         }
     };
 

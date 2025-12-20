@@ -95,7 +95,7 @@ const renderParagraphBlock = (block) => {
 
     return `
         <div class="paragraph">
-            <p style="color: #F5F5DC;">${formattedText}</p>
+            <p style="color: #D1D5DB; font-size: 20px; line-height: 1.8; margin: 12px 0;">${formattedText}</p>
         </div>
     `;
 };
@@ -255,9 +255,11 @@ const renderSectionHeaderBlock = (block) => {
 
     if (!title || title.trim().length === 0) return '';
 
+    const formattedTitle = parseMarkdownToHTML(title);
+
     return `
         <div class="section-header-block" style="text-align: center; padding: 40px 20px; margin: 24px 0;">
-            <h2 style="color: #CBA44A; font-size: 28px; font-weight: 700; margin: 0; line-height: 1.4;">${title}</h2>
+            <h2 style="color: #CBA44A; font-size: 28px; font-weight: 700; margin: 0; line-height: 1.4;">${formattedTitle}</h2>
         </div>
     `;
 };
