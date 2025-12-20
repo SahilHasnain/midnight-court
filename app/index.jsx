@@ -79,6 +79,16 @@ export default function Index() {
 
           <TouchableOpacity
             style={styles.actionButton}
+            onPress={() => router.push("/citation-formatter")}
+            activeOpacity={0.82}
+          >
+            <Text style={styles.actionIcon}>📝</Text>
+            <Text style={styles.actionTitle}>Citation Formatter</Text>
+            <Text style={styles.actionSubtitle}>Format citations instantly</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
             onPress={() => router.push("/image-library")}
             activeOpacity={0.82}
           >
