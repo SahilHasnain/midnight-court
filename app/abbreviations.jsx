@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     },
     categoryChipText: {
         fontSize: 14,
-        color: colors.text,
+        color: colors.textSecondary,
         fontWeight: '500',
     },
     categoryChipTextActive: {
@@ -329,14 +329,14 @@ const styles = StyleSheet.create({
         color: colors.gold,
     },
     categoryBadge: {
-        backgroundColor: colors.background,
+        backgroundColor: colors.gold + '20',
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 6,
     },
     categoryText: {
         fontSize: 11,
-        color: colors.textSecondary,
+        color: colors.gold,
         fontWeight: '600',
     },
     full: {

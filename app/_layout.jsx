@@ -5,6 +5,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
 import { StatusBar } from "react-native"
 import { colors } from "../theme/colors"
+import { pinAuth } from "../utils/pinAuth"
 
 // Prevent auto-hiding splash screen
 SplashScreen.preventAutoHideAsync()
@@ -23,6 +24,10 @@ export default function RootLayout() {
       SplashScreen.hideAsync()
     }
   }, [fontsLoaded])
+
+  useEffect(() => {
+    pinAuth.lock() // Lock AI features on app restart
+  }, [])
 
   if (!fontsLoaded) {
     return null

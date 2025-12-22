@@ -6,7 +6,7 @@
 import { colors } from '@/theme/colors';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -19,12 +19,31 @@ import {
     View
 } from 'react-native';
 import { generateSlides } from '../utils/slideGenerationAPI';
+import { pinAuth } from '../utils/pinAuth';
+import PinModal from './PinModal';
 
 export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [generatedSlides, setGeneratedSlides] = useState(null);
     const [fromCache, setFromCache] = useState(false);
+    const [showPinModal, setShowPinModal] = useState(false);
+    const [isUnlocked, setIsUnlocked] = useState(false);
+
+    useEffect(() => {
+        if (visible) {
+            checkPinStatus();
+        }
+    }, [visible]);
+
+    const checkPinStatus = async () => {
+        const unlocked = await pinAuth.isUnlocked();
+        if (!unlocked) {
+            setShowPinModal(true);
+        } else {
+            setIsUnlocked(true);
+        }
+    };
 
     const handleGenerate = async () => {
         if (!input.trim()) {
@@ -145,8 +164,9 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
     };
 
     return (
+        <>
         <Modal
-            visible={visible}
+            visible={visible && isUnlocked}
             animationType="slide"
             transparent={false}
             onRequestClose={handleClose}
@@ -427,6 +447,19 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                 </ScrollView>
             </View>
         </Modal>
+
+        <PinModal
+            visible={showPinModal}
+            onSuccess={() => {
+                setShowPinModal(false);
+                setIsUnlocked(true);
+            }}
+            onCancel={() => {
+                setShowPinModal(false);
+                onClose();
+            }}
+        />
+        </>
     );
 }
 

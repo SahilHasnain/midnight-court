@@ -12,6 +12,7 @@ import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import Toast from '../components/Toast';
+import CitationSearchModal from '../components/CitationSearchModal';
 
 export default function CitationFormatterScreen() {
     const [caseName, setCaseName] = useState('Kesavananda Bharati v. State of Kerala');
@@ -21,6 +22,7 @@ export default function CitationFormatterScreen() {
     const [volume, setVolume] = useState('4');
     const [page, setPage] = useState('1461');
     const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
+    const [showCitationSearch, setShowCitationSearch] = useState(false);
 
     const showToast = (message, type = 'success') => {
         setToast({ visible: true, message, type });
@@ -56,6 +58,12 @@ export default function CitationFormatterScreen() {
         setPage('');
     };
 
+    const handleSelectCitation = (citation) => {
+        setCaseName(citation.author || citation.text || '');
+        setYear(citation.year || '');
+        showToast('Citation loaded! Edit and format as needed.', 'success');
+    };
+
     const hasInput = caseName || year || court || reporter || volume || page;
 
     return (
@@ -65,6 +73,14 @@ export default function CitationFormatterScreen() {
                 <View style={styles.header}>
                     <Text style={styles.title}>Citation Formatter</Text>
                     <Text style={styles.subtitle}>Format legal citations instantly</Text>
+                    
+                    <TouchableOpacity 
+                        style={styles.aiSearchButton}
+                        onPress={() => setShowCitationSearch(true)}
+                    >
+                        <Ionicons name="search" size={18} color={colors.background} />
+                        <Text style={styles.aiSearchText}>🤖 AI Citation Search</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Input Form */}
@@ -214,6 +230,12 @@ export default function CitationFormatterScreen() {
                 message={toast.message}
                 type={toast.type}
             />
+
+            <CitationSearchModal
+                visible={showCitationSearch}
+                onClose={() => setShowCitationSearch(false)}
+                onSelectCitation={handleSelectCitation}
+            />
         </SafeAreaView>
     );
 }
@@ -238,6 +260,23 @@ const styles = StyleSheet.create({
     subtitle: {
         fontSize: 14,
         color: colors.textSecondary,
+        marginBottom: 16,
+    },
+    aiSearchButton: {
+        backgroundColor: colors.gold,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 10,
+        marginTop: 8,
+    },
+    aiSearchText: {
+        color: colors.background,
+        fontSize: 15,
+        fontWeight: '600',
     },
     formCard: {
         backgroundColor: colors.cardBackground,

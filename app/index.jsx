@@ -4,10 +4,12 @@ import { useEffect, useState } from "react"
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { colors } from "../theme/colors"
+import SlideGeneratorModal from "../components/SlideGeneratorModal"
 
 export default function Index() {
   const [hasSavedPresentation, setHasSavedPresentation] = useState(false);
   const [savedData, setSavedData] = useState(null);
+  const [showSlideGenerator, setShowSlideGenerator] = useState(false);
 
   useEffect(() => {
     const checkSaved = async () => {
@@ -31,6 +33,23 @@ export default function Index() {
         pathname: "/editor",
         params: { template: savedData.template }
       });
+    }
+  };
+
+  const handleUseGeneratedSlides = async (slides) => {
+    try {
+      const presentationData = {
+        slides,
+        template: 'custom',
+        lastModified: new Date().toISOString()
+      };
+      await AsyncStorage.setItem('current_presentation', JSON.stringify(presentationData));
+      router.push({
+        pathname: "/editor",
+        params: { template: 'custom' }
+      });
+    } catch (error) {
+      console.error('Failed to save generated slides:', error);
     }
   };
 
@@ -68,6 +87,16 @@ export default function Index() {
           </TouchableOpacity>
 
           <TouchableOpacity
+            style={[styles.actionButton, styles.aiButton]}
+            onPress={() => setShowSlideGenerator(true)}
+            activeOpacity={0.82}
+          >
+            <Text style={styles.actionIcon}>✨</Text>
+            <Text style={styles.actionTitle}>AI Slide Generator</Text>
+            <Text style={styles.actionSubtitle}>Generate slides from case description</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={styles.actionButton}
             onPress={() => router.push("/abbreviations")}
             activeOpacity={0.82}
@@ -83,8 +112,8 @@ export default function Index() {
             activeOpacity={0.82}
           >
             <Text style={styles.actionIcon}>📝</Text>
-            <Text style={styles.actionTitle}>Citation Formatter</Text>
-            <Text style={styles.actionSubtitle}>Format citations instantly</Text>
+            <Text style={styles.actionTitle}>Citation Tools</Text>
+            <Text style={styles.actionSubtitle}>AI search & format citations</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -100,6 +129,12 @@ export default function Index() {
 
         <Text style={styles.helper}>Professional slides. Anywhere. Anytime.</Text>
       </ScrollView>
+
+      <SlideGeneratorModal
+        visible={showSlideGenerator}
+        onClose={() => setShowSlideGenerator(false)}
+        onUseSlides={handleUseGeneratedSlides}
+      />
     </SafeAreaView>
   )
 }
@@ -270,6 +305,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     opacity: 0.75,
     fontFamily: "Inter_400Regular",
+  },
+  aiButton: {
+    borderColor: colors.gold,
+    borderWidth: 2,
+    backgroundColor: colors.card,
   },
 
 })

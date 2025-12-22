@@ -12,15 +12,34 @@ import {
     View,
 } from "react-native";
 import { findCitations } from "../utils/citationAPI";
+import { pinAuth } from "../utils/pinAuth";
+import PinModal from "./PinModal";
 
 export default function CitationSearchModal({ visible, onClose, onSelectCitation }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [showPinModal, setShowPinModal] = useState(false);
+    const [isUnlocked, setIsUnlocked] = useState(false);
     const debounceTimer = useRef(null);
 
+    useEffect(() => {
+        if (visible) {
+            checkPinStatus();
+        }
+    }, [visible]);
+
+    const checkPinStatus = async () => {
+        const unlocked = await pinAuth.isUnlocked();
+        if (!unlocked) {
+            setShowPinModal(true);
+        } else {
+            setIsUnlocked(true);
+        }
+    };
+
     const handleSearch = useCallback(async () => {
-        if (!searchQuery.trim()) return;
+        if (!searchQuery.trim() || !isUnlocked) return;
 
         setLoading(true);
         try {
@@ -36,7 +55,7 @@ export default function CitationSearchModal({ visible, onClose, onSelectCitation
         } finally {
             setLoading(false);
         }
-    }, [searchQuery]);
+    }, [searchQuery, isUnlocked]);
 
     // Debounced search - triggers 800ms after user stops typing
     useEffect(() => {
@@ -169,8 +188,9 @@ export default function CitationSearchModal({ visible, onClose, onSelectCitation
     };
 
     return (
+        <>
         <Modal
-            visible={visible}
+            visible={visible && isUnlocked}
             animationType="slide"
             transparent={false}
             onRequestClose={handleClose}
@@ -242,6 +262,19 @@ export default function CitationSearchModal({ visible, onClose, onSelectCitation
                 </View>
             </View>
         </Modal>
+
+        <PinModal
+            visible={showPinModal}
+            onSuccess={() => {
+                setShowPinModal(false);
+                setIsUnlocked(true);
+            }}
+            onCancel={() => {
+                setShowPinModal(false);
+                onClose();
+            }}
+        />
+        </>
     );
 }
 
