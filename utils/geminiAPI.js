@@ -3,7 +3,7 @@
  * Call Appwrite function proxy
  */
 const callAppwriteFunction = async (payload) => {
-    const url = "https://6946fabd00348ef83af0.fra.appwrite.run"
+    const url = process.env.EXPO_PUBLIC_GEMINI_FUNCTION_URL; // Will be set from env
 
     const response = await fetch(url, {
         method: 'POST',

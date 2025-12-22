@@ -99,22 +99,6 @@ export default function Index() {
         </View>
 
         <Text style={styles.helper}>Professional slides. Anywhere. Anytime.</Text>
-
-        {/* Dev Menu - Remove before production */}
-        {/* <View style={styles.devMenu}>
-          <TouchableOpacity
-            style={styles.devButton}
-            onPress={() => router.push("/dev/gemini-test")}
-          >
-            <Text style={styles.devButtonText}>🔧 Gemini Test</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.devButton}
-            onPress={() => router.push("/dev/citation-test")}
-          >
-            <Text style={styles.devButtonText}>⚖️ Citation Test</Text>
-          </TouchableOpacity>
-        </View> */}
       </ScrollView>
     </SafeAreaView>
   )
@@ -287,23 +271,5 @@ const styles = StyleSheet.create({
     opacity: 0.75,
     fontFamily: "Inter_400Regular",
   },
-  devMenu: {
-    marginTop: 10,
-    flexDirection: "row",
-    gap: 8,
-  },
-  devButton: {
-    flex: 1,
-    padding: 8,
-    borderRadius: 6,
-    backgroundColor: "rgba(212, 175, 55, 0.08)",
-    borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.4)',
-  },
-  devButtonText: {
-    color: colors.gold,
-    fontSize: 11,
-    textAlign: "center",
-    fontFamily: "Inter_400Regular",
-  },
+
 })

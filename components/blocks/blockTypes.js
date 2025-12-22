@@ -11,7 +11,6 @@ export const BLOCK_TYPES = {
     DIVIDER: 'divider',              // Visual separator
     SECTION_HEADER: 'sectionHeader', // Big title section break
     IMAGE: 'image',                  // Single image with caption
-    IMAGE_GRID: 'imageGrid',         // 2x2 or 2x3 image grid
 };
 
 // Block metadata for UI display
@@ -75,12 +74,6 @@ export const BLOCK_METADATA = {
         icon: '📷',
         description: 'Image with caption',
         category: 'layout'
-    },
-    [BLOCK_TYPES.IMAGE_GRID]: {
-        name: 'Image Grid',
-        icon: '🖼️',
-        description: '2x2 image layout',
-        category: 'advanced'
     },
 };
 
@@ -190,21 +183,6 @@ export const createDefaultBlock = (type) => {
                     caption: '',
                     layout: 'center', // 'center', 'floatLeft', 'floatRight'
                     size: 'medium' // 'small', 'medium', 'large'
-                }
-            };
-
-        case BLOCK_TYPES.IMAGE_GRID:
-            return {
-                id: blockId,
-                type: BLOCK_TYPES.IMAGE_GRID,
-                data: {
-                    images: [
-                        { uri: null, caption: '' },
-                        { uri: null, caption: '' },
-                        { uri: null, caption: '' },
-                        { uri: null, caption: '' }
-                    ],
-                    layout: '2x2' // '2x2' or '2x3'
                 }
             };
 

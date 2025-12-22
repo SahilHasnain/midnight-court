@@ -47,7 +47,7 @@ const parseFormattedText = (text) => {
 };
 
 export default function TextBlock({ block, onUpdate, onDelete }) {
-    const { points } = block.data;
+    const { points = [''] } = block.data || {};
     const [showPreview, setShowPreview] = useState(false);
 
     const updatePoint = (index, text) => {

@@ -3,7 +3,7 @@
  */
 
 const callImageFunction = async (payload) => {
-  const url = ""; // Will be set from env
+  const url = process.env.EXPO_PUBLIC_IMAGE_FUNCTION_URL; // Will be set from env
 
   const response = await fetch(url, {
     method: 'POST',
