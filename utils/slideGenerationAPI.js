@@ -1,6 +1,7 @@
 /**
- * Slide Generation API - AI-powered slide creation with OpenAI
+ * Slide Generation API - AI-powered slide creation with OpenAI Responses API
  * Converts case descriptions into structured legal presentation slides
+ * Uses modern client.responses.create() with structured outputs
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';

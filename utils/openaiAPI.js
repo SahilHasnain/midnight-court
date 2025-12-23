@@ -1,7 +1,7 @@
 /**
- * OpenAI API Integration
- * Replaces Gemini AI with OpenAI for all AI features
- * Maintains the same interface for backward compatibility
+ * OpenAI API Integration using Responses API
+ * Modern approach using client.responses.create()
+ * Maintains backward compatibility with legacy code
  */
 import { Alert } from 'react-native';
 
@@ -42,13 +42,13 @@ const callAppwriteFunction = async (payload) => {
 };
 
 /**
- * Main OpenAI API call wrapper (via Appwrite)
- * Compatible with previous Gemini API interface
+ * Main OpenAI API call wrapper using Responses API
+ * Uses modern client.responses.create() method
  * 
- * @param {string} prompt - The prompt to send to OpenAI
+ * @param {string} prompt - The input/prompt to send to OpenAI
  * @param {object} options - Configuration options
  * @param {string} options.model - OpenAI model to use (default: "gpt-4o-mini")
- * @param {string} options.systemPrompt - System prompt for the conversation
+ * @param {string} options.systemPrompt - Instructions for the AI (system-level context)
  * @param {number} options.temperature - Temperature for response randomness (0-2)
  * @param {number} options.maxTokens - Maximum tokens in response
  * @returns {Promise<string>} - The response text from OpenAI
@@ -82,15 +82,15 @@ export const callOpenAI = async (prompt, options = {}) => {
 };
 
 /**
- * Call OpenAI with structured JSON output using JSON Schema
- * Uses OpenAI's native structured output support
+ * Call OpenAI Responses API with structured JSON output
+ * Uses modern text.format with JSON schema for type-safe outputs
  * 
- * @param {string} prompt - The prompt to send to OpenAI
+ * @param {string} prompt - The input/prompt to send to OpenAI
  * @param {object} options - Configuration options
- * @param {string} options.model - OpenAI model to use (must support structured outputs)
- * @param {object} options.schema - JSON Schema for structured output
+ * @param {string} options.model - OpenAI model to use (default: "gpt-4o-mini")
+ * @param {object} options.schema - JSON Schema for structured output (required)
  * @param {string} options.schemaName - Name for the response schema
- * @param {string} options.systemPrompt - System prompt for the conversation
+ * @param {string} options.systemPrompt - Instructions for the AI
  * @param {number} options.temperature - Temperature for response randomness (0-2)
  * @param {number} options.maxTokens - Maximum tokens in response
  * @returns {Promise<object>} - Parsed JSON object matching schema

@@ -68,69 +68,66 @@ export default async ({ req, res, log, error }) => {
 
         const openai = new OpenAI({ apiKey });
 
-        log(`Calling OpenAI API with model: ${model}`);
+        log(`Calling OpenAI Responses API with model: ${model}`);
 
-        // Build messages array
-        const messages = [];
-        if (systemPrompt) {
-            messages.push({ role: 'system', content: systemPrompt });
-        }
-        messages.push({ role: 'user', content: prompt });
-
-        // Prepare API call options
-        const apiOptions = {
-            model,
-            messages,
-            temperature,
-            max_tokens: maxTokens,
-        };
-
-        // Add structured output support if schema provided
-        if (useStructuredOutput && schema) {
-            // OpenAI structured outputs using response_format
-            apiOptions.response_format = {
-                type: 'json_schema',
-                json_schema: {
-                    name: schemaName,
-                    strict: true,
-                    schema: schema
-                }
-            };
-        } else if (schema) {
-            // Legacy JSON mode - less strict
-            apiOptions.response_format = { type: 'json_object' };
-
-            // Add schema to system prompt for guidance
-            const schemaPrompt = `You must respond with valid JSON matching this schema:\n${JSON.stringify(schema, null, 2)}`;
-            if (messages[0]?.role === 'system') {
-                messages[0].content += `\n\n${schemaPrompt}`;
-            } else {
-                messages.unshift({ role: 'system', content: schemaPrompt });
-            }
-        }
-
-        // Call OpenAI API
+        // Call OpenAI Responses API
         let data;
         try {
-            const response = await openai.chat.completions.create(apiOptions);
-
-            log('OpenAI API call successful');
-
-            // Parse structured output if using json_schema mode
             if (useStructuredOutput && schema) {
-                const content = response.choices[0]?.message?.content;
-                if (content) {
-                    try {
-                        const parsed = JSON.parse(content);
-                        // Add parsed field for compatibility
-                        response.choices[0].message.parsed = parsed;
-                    } catch (parseErr) {
-                        error(`Failed to parse structured output: ${parseErr.message}`);
+                // Use Responses API with structured JSON output
+                const response = await openai.responses.create({
+                    model,
+                    input: prompt,
+                    instructions: systemPrompt || undefined,
+                    temperature,
+                    max_output_tokens: maxTokens,
+                    text: {
+                        format: {
+                            type: 'json_schema',
+                            json_schema: {
+                                name: schemaName,
+                                strict: true,
+                                schema: schema
+                            }
+                        }
                     }
-                }
-            }
+                });
 
-            data = response;
+                log('OpenAI Responses API call successful (structured)');
+
+                // Format response to maintain compatibility with chat API
+                data = {
+                    choices: [{
+                        message: {
+                            content: response.output_text,
+                            parsed: response.output_parsed || JSON.parse(response.output_text)
+                        }
+                    }],
+                    output_text: response.output_text,
+                    output_parsed: response.output_parsed
+                };
+            } else {
+                // Use Responses API for simple text generation
+                const response = await openai.responses.create({
+                    model,
+                    input: prompt,
+                    instructions: systemPrompt || undefined,
+                    temperature,
+                    max_output_tokens: maxTokens
+                });
+
+                log('OpenAI Responses API call successful');
+
+                // Format response to maintain compatibility with chat API
+                data = {
+                    choices: [{
+                        message: {
+                            content: response.output_text
+                        }
+                    }],
+                    output_text: response.output_text
+                };
+            }
         } catch (apiError) {
             error(`OpenAI API error: ${apiError.message}`);
             return res.json(

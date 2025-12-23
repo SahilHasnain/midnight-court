@@ -138,36 +138,30 @@ Include full citation, year, summary, legal significance, and key principles.`;
       }
     };
 
-    // Call OpenAI with structured output
+    // Call OpenAI Responses API with structured output
     let data;
     try {
-      const messages = [];
-      if (systemPrompt) {
-        messages.push({ role: 'system', content: systemPrompt });
-      }
-      messages.push({ role: 'user', content: userPrompt });
-
-      const completion = await openai.chat.completions.create({
+      const response = await openai.responses.create({
         model: 'gpt-4o-mini',
-        messages,
+        input: userPrompt,
+        instructions: systemPrompt || undefined,
         temperature: 0.3,
-        response_format: {
-          type: 'json_schema',
-          json_schema: {
-            name: `citation_${action}`,
-            strict: true,
-            schema
+        text: {
+          format: {
+            type: 'json_schema',
+            json_schema: {
+              name: `citation_${action}`,
+              strict: true,
+              schema
+            }
           }
         }
       });
 
-      const content = completion.choices[0]?.message?.content;
-      if (!content) {
-        throw new Error('No response from OpenAI');
-      }
+      log('Citation search successful');
 
       // Parse the JSON response
-      const parsedData = JSON.parse(content);
+      const parsedData = response.output_parsed || JSON.parse(response.output_text);
 
       // Format response to match Gemini's structure for compatibility
       data = {
@@ -177,14 +171,14 @@ Include full citation, year, summary, legal significance, and key principles.`;
               text: JSON.stringify(parsedData)
             }]
           }
-        }]
+        }],
+        output_parsed: parsedData,
+        output_text: response.output_text
       };
     } catch (apiError) {
       error(`OpenAI API error: ${apiError.message}`);
       return res.json({ error: 'Citation search failed', details: apiError.message }, 500);
     }
-
-    log('Citation search successful');
 
     // Increment usage counter
     try {
