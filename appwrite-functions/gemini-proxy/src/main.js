@@ -1,9 +1,32 @@
+import { Client, Databases } from 'node-appwrite';
+
+const client = new Client()
+  .setEndpoint(process.env.APPWRITE_ENDPOINT)
+  .setProject(process.env.APPWRITE_PROJECT_ID)
+  .setKey(process.env.APPWRITE_API_KEY);
+
+const databases = new Databases(client);
+const dbId = process.env.APPWRITE_DATABASE_ID;
+const collectionId = 'ai_usage';
+
 export default async ({ req, res, log, error }) => {
   if (req.method !== 'POST') {
     return res.json({ error: 'Method not allowed' }, 405);
   }
 
   try {
+    let usage;
+    try {
+      usage = await databases.getDocument(dbId, collectionId, 'single_user');
+    } catch (e) {
+      error(`Failed to get usage: ${e.message}`);
+      return res.json({ error: 'Usage tracking error' }, 500);
+    }
+
+    if (usage.used >= usage.limit) {
+      return res.json({ error: 'AI_LIMIT_EXCEEDED', message: 'AI usage limit reached. You have used all your AI requests.' }, 429);
+    }
+
     // Parse body - Appwrite sends it as string
     let payload;
     try {
@@ -55,7 +78,18 @@ export default async ({ req, res, log, error }) => {
 
     const data = await response.json();
     log('Gemini API call successful');
-    
+
+    // Increment usage counter
+    try {
+      const usage = await databases.getDocument(dbId, collectionId, 'single_user');
+      await databases.updateDocument(dbId, collectionId, 'single_user', {
+        used: usage.used + 1
+      });
+      log(`Usage incremented: ${usage.used + 1}/${usage.limit}`);
+    } catch (e) {
+      error(`Failed to update usage: ${e.message}`);
+    }
+
     return res.json(data);
   } catch (err) {
     error(`Exception: ${err.message}`);

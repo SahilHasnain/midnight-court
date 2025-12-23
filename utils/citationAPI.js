@@ -1,6 +1,7 @@
 /**
  * Citation API - Proxy via Appwrite Functions
  */
+import { Alert } from 'react-native';
 
 const callCitationFunction = async (payload) => {
   const url = process.env.EXPO_PUBLIC_CITATION_FUNCTION_URL; // Will be set from env
@@ -14,6 +15,11 @@ const callCitationFunction = async (payload) => {
   });
 
   if (!response.ok) {
+    const errorData = await response.json();
+    if (errorData.error === 'AI_LIMIT_EXCEEDED') {
+      Alert.alert('Usage Limit Reached', errorData.message || 'You have reached your AI usage limit.');
+      throw new Error('AI_LIMIT_EXCEEDED');
+    }
     throw new Error(`Citation function failed: ${response.status}`);
   }
 
@@ -53,16 +59,16 @@ export const findCitations = async (query) => {
     }
 
     const result = JSON.parse(response.candidates[0].content.parts[0].text);
-    
+
     // Filter valid citations
-    const validCitations = result.citations.filter(citation => 
+    const validCitations = result.citations.filter(citation =>
       citation.name && citation.fullTitle && citation.summary && typeof citation.relevance === 'number'
     );
 
     const searchTime = `${Date.now() - startTime}ms`;
 
     console.log(`✅ Found ${validCitations.length} citations in ${searchTime}`);
-    
+
     return {
       query: result.query || query,
       citations: validCitations,

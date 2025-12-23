@@ -7,6 +7,8 @@
   "scripts": {
     "test": "echo \"No tests\" && exit 0"
   },
-  "dependencies": {},
+  "dependencies": {
+    
+  },
   "devDependencies": {}
 }

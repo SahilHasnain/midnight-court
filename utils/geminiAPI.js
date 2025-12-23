@@ -2,6 +2,8 @@
 /**
  * Call Appwrite function proxy
  */
+import { Alert } from 'react-native';
+
 const callAppwriteFunction = async (payload) => {
     const url = process.env.EXPO_PUBLIC_GEMINI_FUNCTION_URL; // Will be set from env
 
@@ -14,6 +16,11 @@ const callAppwriteFunction = async (payload) => {
     });
 
     if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.error === 'AI_LIMIT_EXCEEDED') {
+            Alert.alert('Usage Limit Reached', errorData.message || 'You have reached your AI usage limit.');
+            throw new Error('AI_LIMIT_EXCEEDED');
+        }
         const errorText = await response.text();
         throw new Error(`Appwrite function call failed: ${response.status} - ${errorText}`);
     }
