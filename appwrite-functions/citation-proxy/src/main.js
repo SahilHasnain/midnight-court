@@ -1,5 +1,5 @@
 import { Client, Databases } from 'node-appwrite';
-
+import OpenAI from 'openai';
 
 const client = new Client()
   .setEndpoint(process.env.APPWRITE_ENDPOINT)
@@ -36,11 +36,13 @@ export default async ({ req, res, log, error }) => {
       return res.json({ error: 'Query is required' }, 400);
     }
 
-    const apiKey = process.env.GEMINI_KEY;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      error('GEMINI_KEY not configured');
+      error('OPENAI_API_KEY not configured');
       return res.json({ error: 'Server configuration error' }, 500);
     }
+
+    const openai = new OpenAI({ apiKey });
 
     log(`Citation ${action}: ${query}`);
 
@@ -136,22 +138,52 @@ Include full citation, year, summary, legal significance, and key principles.`;
       }
     };
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
+    // Call OpenAI with structured output
+    let data;
+    try {
+      const messages = [];
+      if (systemPrompt) {
+        messages.push({ role: 'system', content: systemPrompt });
       }
-    );
+      messages.push({ role: 'user', content: userPrompt });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      error(`Gemini API error: ${response.status} - ${errorData}`);
-      return res.json({ error: 'Citation search failed', details: errorData }, response.status);
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages,
+        temperature: 0.3,
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: `citation_${action}`,
+            strict: true,
+            schema
+          }
+        }
+      });
+
+      const content = completion.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error('No response from OpenAI');
+      }
+
+      // Parse the JSON response
+      const parsedData = JSON.parse(content);
+
+      // Format response to match Gemini's structure for compatibility
+      data = {
+        candidates: [{
+          content: {
+            parts: [{
+              text: JSON.stringify(parsedData)
+            }]
+          }
+        }]
+      };
+    } catch (apiError) {
+      error(`OpenAI API error: ${apiError.message}`);
+      return res.json({ error: 'Citation search failed', details: apiError.message }, 500);
     }
 
-    const data = await response.json();
     log('Citation search successful');
 
     // Increment usage counter

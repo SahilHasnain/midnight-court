@@ -1,10 +1,10 @@
 /**
- * Slide Generation API - AI-powered slide creation with Gemini
+ * Slide Generation API - AI-powered slide creation with OpenAI
  * Converts case descriptions into structured legal presentation slides
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { callGeminiWithSchema } from './geminiAPI';
+import { callOpenAIWithSchema } from './openaiAPI';
 import { slideDeckSchema } from './schemas';
 
 // Cache configuration
@@ -328,17 +328,18 @@ ${trimmedInput}
 
 Generate a professional legal presentation with 1-5 slides. Choose appropriate block types for the content. Focus on clarity and visual appeal.`;
 
-        console.log('🎨 Generating slides with Gemini AI...');
+        console.log('🎨 Generating slides with OpenAI...');
         console.log(`📝 Input length: ${trimmedInput.length} characters`);
 
-        // Call Gemini with structured output
+        // Call OpenAI with structured output
         const startTime = Date.now();
-        const response = await callGeminiWithSchema(userPrompt, {
+        const response = await callOpenAIWithSchema(userPrompt, {
             schema: slideDeckSchema,
+            schemaName: 'legal_slides',
             systemPrompt: SYSTEM_PROMPT,
-            model: options.model || 'gemini-2.5-flash-lite',
+            model: options.model || 'gpt-4o-mini',
             temperature: options.temperature || 0.7,
-            maxOutputTokens: options.maxOutputTokens || 3000,
+            maxTokens: options.maxTokens || 4096,
         });
 
         const duration = Date.now() - startTime;
@@ -376,8 +377,8 @@ Generate a professional legal presentation with 1-5 slides. Choose appropriate b
         console.error('❌ Slide generation failed:', error);
 
         // Provide helpful error messages
-        if (error.message.includes('API key')) {
-            throw new Error('Gemini API key not configured. Please check your .env file.');
+        if (error.message.includes('API key') || error.message.includes('configuration')) {
+            throw new Error('OpenAI API key not configured. Please check your .env file.');
         }
 
         if (error.message.includes('rate limit')) {
