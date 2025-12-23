@@ -10,6 +10,43 @@ const databases = new Databases(client);
 const dbId = process.env.APPWRITE_DATABASE_ID;
 const collectionId = 'ai_usage';
 
+// Daily limit per service
+const DAILY_LIMIT = 10;
+
+/**
+ * Get today's usage document ID in format: daily_YYYY-MM-DD
+ */
+const getTodayUsageDocId = () => {
+  const today = new Date();
+  const year = today.getUTCFullYear();
+  const month = String(today.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(today.getUTCDate()).padStart(2, '0');
+  return `daily_${year}-${month}-${day}`;
+};
+
+/**
+ * Get or create today's usage document
+ */
+const getDailyUsage = async (databases, dbId, collectionId, docId, log) => {
+  try {
+    return await databases.getDocument(dbId, collectionId, docId);
+  } catch (e) {
+    // Document doesn't exist, create it
+    if (e.code === 404) {
+      log(`Creating new daily usage document: ${docId}`);
+      try {
+        return await databases.createDocument(dbId, collectionId, docId, {
+          used: 0,
+          limit: DAILY_LIMIT,
+          date: docId.replace('daily_', '')
+        });
+      } catch (createError) {
+        throw new Error(`Failed to create daily usage: ${createError.message}`);
+      }
+    }
+    throw e;
+  }
+};
 
 export default async ({ req, res, log, error }) => {
   if (req.method !== 'POST') {
@@ -17,17 +54,26 @@ export default async ({ req, res, log, error }) => {
   }
 
   try {
+    // Get today's usage document ID
+    const todayDocId = getTodayUsageDocId();
 
+    // Check daily usage limits
     let usage;
     try {
-      usage = await databases.getDocument(dbId, collectionId, 'single_user');
+      usage = await getDailyUsage(databases, dbId, collectionId, todayDocId, log);
     } catch (e) {
-      error(`Failed to get usage: ${e.message}`);
+      error(`Failed to get daily usage: ${e.message}`);
       return res.json({ error: 'Usage tracking error' }, 500);
     }
 
     if (usage.used >= usage.limit) {
-      return res.json({ error: 'AI_LIMIT_EXCEEDED', message: 'AI usage limit reached. You have used all your AI requests.' }, 429);
+      return res.json(
+        {
+          error: 'AI_LIMIT_EXCEEDED',
+          message: `Daily AI usage limit reached. You have used all ${usage.limit} requests today. Resets at midnight UTC.`
+        },
+        429
+      );
     }
 
     const { query, action = 'search' } = JSON.parse(req.body);
@@ -180,13 +226,13 @@ Include full citation, year, summary, legal significance, and key principles.`;
       return res.json({ error: 'Citation search failed', details: apiError.message }, 500);
     }
 
-    // Increment usage counter
+    // Increment daily usage counter
     try {
-      const usage = await databases.getDocument(dbId, collectionId, 'single_user');
-      await databases.updateDocument(dbId, collectionId, 'single_user', {
-        used: usage.used + 1
+      const currentUsage = await databases.getDocument(dbId, collectionId, todayDocId);
+      await databases.updateDocument(dbId, collectionId, todayDocId, {
+        used: currentUsage.used + 1
       });
-      log(`Usage incremented: ${usage.used + 1}/${usage.limit}`);
+      log(`Daily usage incremented: ${currentUsage.used + 1}/${currentUsage.limit} (${todayDocId})`);
     } catch (e) {
       error(`Failed to update usage: ${e.message}`);
     }
