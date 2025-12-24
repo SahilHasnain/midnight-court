@@ -3,42 +3,43 @@
  * Ensures predictable JSON structure from Gemini API
  */
 export const citationSchema = {
-    type: "object",
-    properties: {
-        type: {
-            type: "string",
-            enum: ['article', 'case', 'act', 'section'],
-            description: "Type of citation"
-        },
-        name: {
-            type: "string",
-            description: "Name of the citation (e.g., 'Article 21', 'K.S. Puttaswamy v. Union of India')"
-        },
-        year: {
-            type: "string",
-            description: "Year of case/statute"
-        },
-        fullTitle: {
-            type: "string",
-            description: "Full title or description"
-        },
-        summary: {
-            type: "string",
-            description: "Brief summary of the citation"
-        },
-        relevance: {
-            type: "number",
-            description: "Relevance score (0-100)",
-            minimum: 0,
-            maximum: 100
-        },
-        url: {
-            type: "string",
-            description: "URL to full text if available"
-        },
+  type: "object",
+  properties: {
+    type: {
+      type: "string",
+      enum: ["article", "case", "act", "section"],
+      description: "Type of citation",
     },
-    required: ["type", "name", "fullTitle", "summary", "relevance"],
-    additionalProperties: false
+    name: {
+      type: "string",
+      description:
+        "Name of the citation (e.g., 'Article 21', 'K.S. Puttaswamy v. Union of India')",
+    },
+    year: {
+      type: "string",
+      description: "Year of case/statute",
+    },
+    fullTitle: {
+      type: "string",
+      description: "Full title or description",
+    },
+    summary: {
+      type: "string",
+      description: "Brief summary of the citation",
+    },
+    relevance: {
+      type: "number",
+      description: "Relevance score (0-100)",
+      minimum: 0,
+      maximum: 100,
+    },
+    url: {
+      type: "string",
+      description: "URL to full text if available",
+    },
+  },
+  required: ["type", "name", "fullTitle", "summary", "relevance"],
+  additionalProperties: false,
 };
 
 /**
@@ -46,76 +47,82 @@ export const citationSchema = {
  * Returns array of citations matching the search query
  */
 export const citationSearchResultsSchema = {
-    type: "object",
-    properties: {
-        query: {
-            type: "string",
-            description: "The search query"
-        },
-        citations: {
-            type: "array",
-            description: "Array of relevant citations",
-            items: citationSchema
-        },
-        totalFound: {
-            type: "number",
-            description: "Total number of citations found"
-        },
-        searchTime: {
-            type: "string",
-            description: "Time taken for search"
-        },
+  type: "object",
+  properties: {
+    query: {
+      type: "string",
+      description: "The search query",
     },
-    required: ["query", "citations", "totalFound", "searchTime"],
-    additionalProperties: false
+    citations: {
+      type: "array",
+      description: "Array of relevant citations",
+      items: citationSchema,
+    },
+    totalFound: {
+      type: "number",
+      description: "Total number of citations found",
+    },
+    searchTime: {
+      type: "string",
+      description: "Time taken for search",
+    },
+  },
+  required: ["query", "citations", "totalFound", "searchTime"],
+  additionalProperties: false,
 };
 
 /**
  * Citation Details Schema - Comprehensive information about a single citation
  */
 export const citationDetailsSchema = {
-    type: "object",
-    properties: {
-        citation: citationSchema,
-        fullText: {
-            type: "string",
-            description: "Full text of the citation if available"
-        },
-        keyPoints: {
-            type: "array",
-            description: "Key points from the citation",
-            items: {
-                type: "string"
-            }
-        },
-        relatedCitations: {
-            type: "array",
-            description: "Related citations",
-            items: {
-                type: "object",
-                properties: {
-                    name: { type: "string" },
-                    relevance: { type: "number" }
-                },
-                required: ["name", "relevance"],
-                additionalProperties: false
-            }
-        },
-        currentStatus: {
-            type: "string",
-            enum: ['active', 'overruled', 'modified', 'unknown'],
-            description: "Current legal status"
-        },
-        applicableJurisdictions: {
-            type: "array",
-            description: "Jurisdictions where this citation applies",
-            items: {
-                type: "string"
-            }
-        },
+  type: "object",
+  properties: {
+    citation: citationSchema,
+    fullText: {
+      type: "string",
+      description: "Full text of the citation if available",
     },
-    required: ["citation", "keyPoints", "relatedCitations", "currentStatus", "applicableJurisdictions"],
-    additionalProperties: false
+    keyPoints: {
+      type: "array",
+      description: "Key points from the citation",
+      items: {
+        type: "string",
+      },
+    },
+    relatedCitations: {
+      type: "array",
+      description: "Related citations",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          relevance: { type: "number" },
+        },
+        required: ["name", "relevance"],
+        additionalProperties: false,
+      },
+    },
+    currentStatus: {
+      type: "string",
+      enum: ["active", "overruled", "modified", "unknown"],
+      description: "Current legal status",
+    },
+    applicableJurisdictions: {
+      type: "array",
+      description: "Jurisdictions where this citation applies",
+      items: {
+        type: "string",
+      },
+    },
+  },
+  required: [
+    "citation",
+    "keyPoints",
+    "relatedCitations",
+    "currentStatus",
+    "applicableJurisdictions",
+  ],
+  additionalProperties: false,
 };
 
 /**
@@ -125,304 +132,312 @@ export const citationDetailsSchema = {
 
 // Text Block - Bullet points
 export const textBlockDataSchema = {
-    type: "object",
-    properties: {
-        points: {
-            type: "array",
-            description: "Array of bullet points (2-5 points recommended)",
-            items: {
-                type: "string"
-            },
-            minItems: 1,
-            maxItems: 6
-        }
+  type: "object",
+  properties: {
+    points: {
+      type: "array",
+      description: "Array of bullet points (2-5 points recommended)",
+      items: {
+        type: "string",
+      },
+      minItems: 1,
+      maxItems: 6,
     },
-    required: ["points"],
-    additionalProperties: false
+  },
+  required: ["points"],
+  additionalProperties: false,
 };
 
 // Quote Block - Citations and quotes
 export const quoteBlockDataSchema = {
-    type: "object",
-    properties: {
-        quote: {
-            type: "string",
-            description: "The quoted text or legal principle"
-        },
-        citation: {
-            type: "string",
-            description: "Citation source (case name, article, etc.)"
-        }
+  type: "object",
+  properties: {
+    quote: {
+      type: "string",
+      description: "The quoted text or legal principle",
     },
-    required: ["quote", "citation"],
-    additionalProperties: false
+    citation: {
+      type: "string",
+      description: "Citation source (case name, article, etc.)",
+    },
+  },
+  required: ["quote", "citation"],
+  additionalProperties: false,
 };
 
 // Callout Block - Important highlights
 export const calloutBlockDataSchema = {
-    type: "object",
-    properties: {
-        text: {
-            type: "string",
-            description: "Important text to highlight"
-        },
-        type: {
-            type: "string",
-            enum: ["info", "warning", "success", "error"],
-            description: "Callout type for visual styling"
-        }
+  type: "object",
+  properties: {
+    text: {
+      type: "string",
+      description: "Important text to highlight",
     },
-    required: ["text", "type"],
-    additionalProperties: false
+    type: {
+      type: "string",
+      enum: ["info", "warning", "success", "error"],
+      description: "Callout type for visual styling",
+    },
+  },
+  required: ["text", "type"],
+  additionalProperties: false,
 };
 
 // Timeline Block - Chronological events
 export const timelineBlockDataSchema = {
-    type: "object",
-    properties: {
-        events: {
-            type: "array",
-            description: "Array of timeline events (3-6 events recommended)",
-            items: {
-                type: "object",
-                properties: {
-                    date: {
-                        type: "string",
-                        description: "Date or time period"
-                    },
-                    title: {
-                        type: "string",
-                        description: "Event title"
-                    },
-                    description: {
-                        type: "string",
-                        description: "Brief event description"
-                    }
-                },
-                required: ["date", "title"],
-                additionalProperties: false
-            },
-            minItems: 2,
-            maxItems: 8
-        }
+  type: "object",
+  properties: {
+    events: {
+      type: "array",
+      description: "Array of timeline events (3-6 events recommended)",
+      items: {
+        type: "object",
+        properties: {
+          date: {
+            type: "string",
+            description: "Date or time period",
+          },
+          title: {
+            type: "string",
+            description: "Event title",
+          },
+          description: {
+            type: "string",
+            description: "Brief event description",
+          },
+        },
+        required: ["date", "title", "description"],
+        additionalProperties: false,
+      },
+      minItems: 2,
+      maxItems: 8,
     },
-    required: ["events"],
-    additionalProperties: false
+  },
+  required: ["events"],
+  additionalProperties: false,
 };
 
 // Evidence Block - Case evidence
 export const evidenceBlockDataSchema = {
-    type: "object",
-    properties: {
-        items: {
-            type: "array",
-            description: "Array of evidence items (2-5 items recommended)",
-            items: {
-                type: "object",
-                properties: {
-                    label: {
-                        type: "string",
-                        description: "Evidence label or type"
-                    },
-                    description: {
-                        type: "string",
-                        description: "Evidence description"
-                    }
-                },
-                required: ["label", "description"],
-                additionalProperties: false
-            },
-            minItems: 1,
-            maxItems: 6
-        }
+  type: "object",
+  properties: {
+    items: {
+      type: "array",
+      description: "Array of evidence items (2-5 items recommended)",
+      items: {
+        type: "object",
+        properties: {
+          label: {
+            type: "string",
+            description: "Evidence label or type",
+          },
+          description: {
+            type: "string",
+            description: "Evidence description",
+          },
+        },
+        required: ["label", "description"],
+        additionalProperties: false,
+      },
+      minItems: 1,
+      maxItems: 6,
     },
-    required: ["items"],
-    additionalProperties: false
+  },
+  required: ["items"],
+  additionalProperties: false,
 };
 
 // Two Column Block - Comparative arguments
 export const twoColumnBlockDataSchema = {
-    type: "object",
-    properties: {
-        leftTitle: {
-            type: "string",
-            description: "Title for left column"
-        },
-        leftPoints: {
-            type: "array",
-            description: "Points for left column (2-4 points recommended)",
-            items: {
-                type: "string"
-            },
-            minItems: 1,
-            maxItems: 5
-        },
-        rightTitle: {
-            type: "string",
-            description: "Title for right column"
-        },
-        rightPoints: {
-            type: "array",
-            description: "Points for right column (2-4 points recommended)",
-            items: {
-                type: "string"
-            },
-            minItems: 1,
-            maxItems: 5
-        }
+  type: "object",
+  properties: {
+    leftTitle: {
+      type: "string",
+      description: "Title for left column",
     },
-    required: ["leftTitle", "leftPoints", "rightTitle", "rightPoints"],
-    additionalProperties: false
+    leftPoints: {
+      type: "array",
+      description: "Points for left column (2-4 points recommended)",
+      items: {
+        type: "string",
+      },
+      minItems: 1,
+      maxItems: 5,
+    },
+    rightTitle: {
+      type: "string",
+      description: "Title for right column",
+    },
+    rightPoints: {
+      type: "array",
+      description: "Points for right column (2-4 points recommended)",
+      items: {
+        type: "string",
+      },
+      minItems: 1,
+      maxItems: 5,
+    },
+  },
+  required: ["leftTitle", "leftPoints", "rightTitle", "rightPoints"],
+  additionalProperties: false,
 };
 
 // Simplified, flattened schema for OpenAI API with strict mode
 // Defines all possible block data structures using oneOf
 export const slideDeckSchema = {
-    type: "object",
-    properties: {
-        title: { type: "string" },
-        totalSlides: { type: "number" },
-        slides: {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    totalSlides: { type: "number" },
+    slides: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          subtitle: { type: "string" },
+          suggestedImages: {
+            type: "array",
+            description:
+              "Array of suggested image search keywords for this slide",
+            items: { type: "string" },
+          },
+          blocks: {
             type: "array",
             items: {
-                type: "object",
-                properties: {
-                    title: { type: "string" },
-                    subtitle: { type: "string" },
-                    suggestedImages: {
-                        type: "array",
-                        description: "Array of suggested image search keywords for this slide",
-                        items: { type: "string" }
-                    },
-                    blocks: {
-                        type: "array",
-                        items: {
-                            type: "object",
-                            properties: {
-                                type: { 
-                                    type: "string",
-                                    enum: ["text", "quote", "callout", "timeline", "evidence", "twoColumn"]
-                                },
-                                data: { 
-                                    type: "object",
-                                    properties: {
-                                        // Text block
-                                        points: {
-                                            type: "array",
-                                            items: { type: "string" }
-                                        },
-                                        // Quote block
-                                        quote: { type: "string" },
-                                        citation: { type: "string" },
-                                        // Callout block
-                                        text: { type: "string" },
-                                        // Timeline block
-                                        events: {
-                                            type: "array",
-                                            items: {
-                                                type: "object",
-                                                properties: {
-                                                    date: { type: "string" },
-                                                    title: { type: "string" },
-                                                    description: { type: "string" }
-                                                },
-                                                required: ["date", "title"],
-                                                additionalProperties: false
-                                            }
-                                        },
-                                        // Evidence block
-                                        items: {
-                                            type: "array",
-                                            items: {
-                                                type: "object",
-                                                properties: {
-                                                    label: { type: "string" },
-                                                    description: { type: "string" }
-                                                },
-                                                required: ["label", "description"],
-                                                additionalProperties: false
-                                            }
-                                        },
-                                        // Two column block
-                                        leftTitle: { type: "string" },
-                                        leftPoints: {
-                                            type: "array",
-                                            items: { type: "string" }
-                                        },
-                                        rightTitle: { type: "string" },
-                                        rightPoints: {
-                                            type: "array",
-                                            items: { type: "string" }
-                                        }
-                                    },
-                                    additionalProperties: false
-                                }
-                            },
-                            required: ["type", "data"],
-                            additionalProperties: false
-                        }
-                    }
+              type: "object",
+              properties: {
+                type: {
+                  type: "string",
+                  enum: [
+                    "text",
+                    "quote",
+                    "callout",
+                    "timeline",
+                    "evidence",
+                    "twoColumn",
+                  ],
                 },
-                required: ["title", "blocks"],
-                additionalProperties: false
-            }
-        }
+                data: {
+                  type: "object",
+                  properties: {
+                    // Text block
+                    points: {
+                      type: "array",
+                      items: { type: "string" },
+                    },
+                    // Quote block
+                    quote: { type: "string" },
+                    citation: { type: "string" },
+                    // Callout block
+                    text: { type: "string" },
+                    // Timeline block
+                    events: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          date: { type: "string" },
+                          title: { type: "string" },
+                          description: { type: "string" },
+                        },
+                        required: ["date", "title", "description"],
+                        additionalProperties: false,
+                      },
+                    },
+                    // Evidence block
+                    items: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          label: { type: "string" },
+                          description: { type: "string" },
+                        },
+                        required: ["label", "description"],
+                        additionalProperties: false,
+                      },
+                    },
+                    // Two column block
+                    leftTitle: { type: "string" },
+                    leftPoints: {
+                      type: "array",
+                      items: { type: "string" },
+                    },
+                    rightTitle: { type: "string" },
+                    rightPoints: {
+                      type: "array",
+                      items: { type: "string" },
+                    },
+                  },
+                  additionalProperties: false,
+                },
+              },
+              required: ["type", "data"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["title", "blocks"],
+        additionalProperties: false,
+      },
     },
-    required: ["title", "totalSlides", "slides"],
-    additionalProperties: false
+  },
+  required: ["title", "totalSlides", "slides"],
+  additionalProperties: false,
 };
 
 /**
  * Image Search Results Schema
  */
 export const imageSchema = {
-    type: "object",
-    properties: {
-        url: {
-            type: "string",
-            description: "Image URL"
-        },
-        title: {
-            type: "string",
-            description: "Image title"
-        },
-        attribution: {
-            type: "string",
-            description: "Attribution text"
-        },
-        source: {
-            type: "string",
-            enum: ['unsplash', 'pexels', 'pixabay'],
-            description: "Image source"
-        },
-        relevance: {
-            type: "number",
-            description: "Relevance score",
-            minimum: 0,
-            maximum: 100
-        }
+  type: "object",
+  properties: {
+    url: {
+      type: "string",
+      description: "Image URL",
     },
-    required: ["url", "title", "attribution", "source", "relevance"],
-    additionalProperties: false
+    title: {
+      type: "string",
+      description: "Image title",
+    },
+    attribution: {
+      type: "string",
+      description: "Attribution text",
+    },
+    source: {
+      type: "string",
+      enum: ["unsplash", "pexels", "pixabay"],
+      description: "Image source",
+    },
+    relevance: {
+      type: "number",
+      description: "Relevance score",
+      minimum: 0,
+      maximum: 100,
+    },
+  },
+  required: ["url", "title", "attribution", "source", "relevance"],
+  additionalProperties: false,
 };
 
 export const imageSearchResultsSchema = {
-    type: "object",
-    properties: {
-        query: {
-            type: "string",
-            description: "Search query"
-        },
-        images: {
-            type: "array",
-            description: "Array of relevant images",
-            items: imageSchema
-        },
-        totalFound: {
-            type: "number",
-            description: "Total images found"
-        },
+  type: "object",
+  properties: {
+    query: {
+      type: "string",
+      description: "Search query",
     },
-    required: ["query", "images", "totalFound"],
-    additionalProperties: false
+    images: {
+      type: "array",
+      description: "Array of relevant images",
+      items: imageSchema,
+    },
+    totalFound: {
+      type: "number",
+      description: "Total images found",
+    },
+  },
+  required: ["query", "images", "totalFound"],
+  additionalProperties: false,
 };
