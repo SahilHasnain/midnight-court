@@ -125,7 +125,19 @@ This document outlines the requirements for improving the AI slide generation fe
 4. WHERE legal principles are stated, THE AI Slide Generator SHALL attribute them to authoritative sources
 5. IF the AI is uncertain about legal accuracy, THEN THE AI Slide Generator SHALL flag the content for user verification
 
-### Requirement 10: Accessibility and Usability
+### Requirement 10: User Control Over Generation Parameters
+
+**User Story:** As a law student, I want to control how many slides are generated, so that I can create presentations that match my time constraints and presentation requirements.
+
+#### Acceptance Criteria
+
+1. THE User Interface SHALL provide a slide count selector allowing the User to choose between 3-8 slides
+2. WHEN the User selects a slide count, THE AI Slide Generator SHALL generate exactly that number of slides
+3. WHERE a template is selected, THE User Interface SHALL suggest an optimal slide count based on template structure
+4. THE User Interface SHALL display estimated presentation time based on selected slide count
+5. WHEN the User changes slide count preference, THE User Interface SHALL preserve this preference for future generations
+
+### Requirement 11: Accessibility and Usability
 
 **User Story:** As a law student with limited technical knowledge, I want the slide generator to be intuitive and self-explanatory, so that I can focus on content rather than learning the tool.
 

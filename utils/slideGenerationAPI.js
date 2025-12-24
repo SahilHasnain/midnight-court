@@ -608,6 +608,7 @@ export const clearSlideCache = async () => {
  * @param {string} input - Case description (50-3000 characters)
  * @param {object} options - Generation options
  * @param {boolean} options.useCache - Whether to use cache (default: true)
+ * @param {number} options.desiredSlideCount - Desired number of slides (3-8, default: based on input)
  * @returns {Promise<object>} - Generated slide deck with slides array
  */
 export const generateSlides = async (input, options = {}) => {
@@ -631,6 +632,17 @@ export const generateSlides = async (input, options = {}) => {
       );
     }
 
+    // Get desired slide count (default to null to let AI decide based on content)
+    const desiredSlideCount = options.desiredSlideCount || null;
+
+    // Validate slide count if provided
+    if (
+      desiredSlideCount !== null &&
+      (desiredSlideCount < 3 || desiredSlideCount > 8)
+    ) {
+      throw new Error("Desired slide count must be between 3 and 8");
+    }
+
     // Check cache first (unless disabled)
     const useCache = options.useCache !== false;
     if (useCache) {
@@ -644,14 +656,21 @@ export const generateSlides = async (input, options = {}) => {
       }
     }
 
-    // Build user prompt
-    const userPrompt = `Case Description:
-${trimmedInput}
+    // Build user prompt with slide count instruction
+    let userPrompt = `Case Description:
+${trimmedInput}`;
 
-Generate a professional legal presentation with 3-8 slides following the mandatory slide flow pattern. Apply strict structural limits and Indian legal citation standards.`;
+    if (desiredSlideCount) {
+      userPrompt += `\n\nIMPORTANT: Generate EXACTLY ${desiredSlideCount} slides. No more, no less.`;
+    }
+
+    userPrompt += `\n\nGenerate a professional legal presentation following the mandatory slide flow pattern. Apply strict structural limits and Indian legal citation standards.`;
 
     console.log("🎨 Generating slides with OpenAI...");
     console.log(`📝 Input length: ${trimmedInput.length} characters`);
+    if (desiredSlideCount) {
+      console.log(`📊 Requested slide count: ${desiredSlideCount}`);
+    }
 
     // Call OpenAI with structured output
     const startTime = Date.now();
@@ -683,11 +702,19 @@ Generate a professional legal presentation with 3-8 slides following the mandato
       response.totalSlides = 8;
     }
 
+    // Log warning if slide count doesn't match request
+    if (desiredSlideCount && response.slides.length !== desiredSlideCount) {
+      console.warn(
+        `⚠️ Slide count mismatch: requested ${desiredSlideCount}, got ${response.slides.length}`
+      );
+    }
+
     // Add metadata
     response.generatedAt = new Date().toISOString();
     response.inputLength = trimmedInput.length;
     response.generationTime = duration;
     response.fromCache = false;
+    response.requestedSlideCount = desiredSlideCount;
 
     // Cache the result
     if (useCache) {

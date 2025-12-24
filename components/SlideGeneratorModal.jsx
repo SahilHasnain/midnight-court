@@ -6,7 +6,7 @@
 import { colors } from '@/theme/colors';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -18,8 +18,9 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { generateSlides } from '../utils/slideGenerationAPI';
+import { inputProcessor } from '../utils/inputProcessor';
 import { pinAuth } from '../utils/pinAuth';
+import { generateSlides } from '../utils/slideGenerationAPI';
 import PinModal from './PinModal';
 
 export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
@@ -29,12 +30,43 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
     const [fromCache, setFromCache] = useState(false);
     const [showPinModal, setShowPinModal] = useState(false);
     const [isUnlocked, setIsUnlocked] = useState(false);
+    const [inputAnalysis, setInputAnalysis] = useState(null);
+    const [desiredSlideCount, setDesiredSlideCount] = useState(5);
+    
+    // Debounce timer ref
+    const debounceTimerRef = useRef(null);
 
     useEffect(() => {
         if (visible) {
             checkPinStatus();
+            loadSavedSlideCountPreference();
         }
     }, [visible]);
+
+    // Debounced input analysis
+    useEffect(() => {
+        // Clear existing timer
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        // Set new timer for analysis (500ms debounce)
+        debounceTimerRef.current = setTimeout(() => {
+            if (input.trim().length > 0) {
+                const analysis = inputProcessor.analyzeInput(input);
+                setInputAnalysis(analysis);
+            } else {
+                setInputAnalysis(null);
+            }
+        }, 500);
+
+        // Cleanup
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, [input]);
 
     const checkPinStatus = async () => {
         const unlocked = await pinAuth.isUnlocked();
@@ -45,23 +77,63 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
         }
     };
 
+    const loadSavedSlideCountPreference = async () => {
+        try {
+            const saved = await AsyncStorage.getItem('preferredSlideCount');
+            if (saved) {
+                const count = parseInt(saved, 10);
+                if (count >= 3 && count <= 8) {
+                    setDesiredSlideCount(count);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load slide count preference:', error);
+        }
+    };
+
+    const saveSlideCountPreference = async (count) => {
+        try {
+            await AsyncStorage.setItem('preferredSlideCount', count.toString());
+        } catch (error) {
+            console.error('Failed to save slide count preference:', error);
+        }
+    };
+
+    const handleSlideCountChange = (count) => {
+        setDesiredSlideCount(count);
+        saveSlideCountPreference(count);
+    };
+
     const handleGenerate = async () => {
         if (!input.trim()) {
             Alert.alert('Error', 'Please enter a case description');
             return;
         }
 
-        if (input.trim().length < 50) {
-            Alert.alert('Too Short', 'Please provide at least 50 characters for better slide generation.');
+        if (input.trim().length < 100) {
+            Alert.alert(
+                'Input Too Short', 
+                'Please provide at least 100 characters for quality results.\n\nMore details help the AI generate better, more accurate slides with proper legal structure.'
+            );
             return;
         }
 
         setLoading(true);
         try {
             console.log('🎨 Generating slides from modal...');
-            const result = await generateSlides(input.trim());
+            console.log(`📊 Requested slide count: ${desiredSlideCount}`);
+            
+            const result = await generateSlides(input.trim(), {
+                desiredSlideCount: desiredSlideCount
+            });
 
             console.log('✅ Slides generated:', result);
+            
+            // Validate slide count matches request
+            if (result.slides && result.slides.length !== desiredSlideCount) {
+                console.warn(`⚠️ Slide count mismatch: requested ${desiredSlideCount}, got ${result.slides.length}`);
+            }
+            
             setGeneratedSlides(result);
             setFromCache(result.fromCache || false);
 
@@ -206,13 +278,141 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                 <View style={styles.charCountContainer}>
                                     <Text style={[
                                         styles.charCount,
-                                        input.length < 50 && input.length > 0 && styles.charCountWarning,
+                                        input.length < 100 && input.length > 0 && styles.charCountWarning,
                                         input.length > 3000 && styles.charCountError,
                                     ]}>
                                         {input.length} / 3000 characters
-                                        {input.length < 50 && input.length > 0 && ' (minimum 50)'}
+                                        {input.length < 100 && input.length > 0 && ' (minimum 100)'}
                                         {input.length > 3000 && ' (too long!)'}
                                     </Text>
+                                </View>
+
+                                {/* Input Analysis Panel */}
+                                {inputAnalysis && input.length >= 50 && (
+                                    <View style={styles.analysisPanel}>
+                                        <View style={styles.analysisHeader}>
+                                            <Text style={styles.analysisTitle}>📊 Input Analysis</Text>
+                                            <View style={[
+                                                styles.completenessScore,
+                                                inputAnalysis.completeness >= 70 && styles.completenessGood,
+                                                inputAnalysis.completeness >= 40 && inputAnalysis.completeness < 70 && styles.completenessOkay,
+                                                inputAnalysis.completeness < 40 && styles.completenessLow,
+                                            ]}>
+                                                <Text style={styles.completenessText}>
+                                                    {inputAnalysis.completeness}% Complete
+                                                </Text>
+                                            </View>
+                                        </View>
+
+                                        {/* Case Type */}
+                                        <View style={styles.analysisRow}>
+                                            <Text style={styles.analysisLabel}>Case Type:</Text>
+                                            <Text style={styles.analysisValue}>
+                                                {inputAnalysis.caseType === 'constitutional' && '⚖️ Constitutional'}
+                                                {inputAnalysis.caseType === 'criminal' && '🔒 Criminal'}
+                                                {inputAnalysis.caseType === 'civil' && '📜 Civil'}
+                                                {inputAnalysis.caseType === 'procedural' && '⚙️ Procedural'}
+                                                {inputAnalysis.caseType === 'general' && '📋 General'}
+                                            </Text>
+                                        </View>
+
+                                        {/* Elements Present */}
+                                        <View style={styles.elementsGrid}>
+                                            <View style={[styles.elementChip, inputAnalysis.elements.hasFacts && styles.elementPresent]}>
+                                                <Text style={[styles.elementText, inputAnalysis.elements.hasFacts && styles.elementTextPresent]}>
+                                                    {inputAnalysis.elements.hasFacts ? '✓' : '○'} Facts
+                                                </Text>
+                                            </View>
+                                            <View style={[styles.elementChip, inputAnalysis.elements.hasLegalIssues && styles.elementPresent]}>
+                                                <Text style={[styles.elementText, inputAnalysis.elements.hasLegalIssues && styles.elementTextPresent]}>
+                                                    {inputAnalysis.elements.hasLegalIssues ? '✓' : '○'} Issues
+                                                </Text>
+                                            </View>
+                                            <View style={[styles.elementChip, inputAnalysis.elements.hasStatutes && styles.elementPresent]}>
+                                                <Text style={[styles.elementText, inputAnalysis.elements.hasStatutes && styles.elementTextPresent]}>
+                                                    {inputAnalysis.elements.hasStatutes ? '✓' : '○'} Statutes
+                                                </Text>
+                                            </View>
+                                            <View style={[styles.elementChip, inputAnalysis.elements.hasArguments && styles.elementPresent]}>
+                                                <Text style={[styles.elementText, inputAnalysis.elements.hasArguments && styles.elementTextPresent]}>
+                                                    {inputAnalysis.elements.hasArguments ? '✓' : '○'} Arguments
+                                                </Text>
+                                            </View>
+                                            <View style={[styles.elementChip, inputAnalysis.elements.hasEvidence && styles.elementPresent]}>
+                                                <Text style={[styles.elementText, inputAnalysis.elements.hasEvidence && styles.elementTextPresent]}>
+                                                    {inputAnalysis.elements.hasEvidence ? '✓' : '○'} Evidence
+                                                </Text>
+                                            </View>
+                                            <View style={[styles.elementChip, inputAnalysis.elements.hasCitations && styles.elementPresent]}>
+                                                <Text style={[styles.elementText, inputAnalysis.elements.hasCitations && styles.elementTextPresent]}>
+                                                    {inputAnalysis.elements.hasCitations ? '✓' : '○'} Citations
+                                                </Text>
+                                            </View>
+                                        </View>
+
+                                        {/* Suggestions */}
+                                        {inputAnalysis.suggestions && inputAnalysis.suggestions.length > 0 && (
+                                            <View style={styles.suggestionsContainer}>
+                                                <Text style={styles.suggestionsTitle}>💡 Suggestions:</Text>
+                                                {inputAnalysis.suggestions.map((suggestion, idx) => (
+                                                    <Text key={idx} style={styles.suggestionText}>
+                                                        • {suggestion}
+                                                    </Text>
+                                                ))}
+                                            </View>
+                                        )}
+                                    </View>
+                                )}
+                            </View>
+
+                            {/* Slide Count Selector */}
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>📊 Slide Count</Text>
+                                <Text style={styles.sectionHint}>
+                                    Choose how many slides to generate (3-8 slides)
+                                </Text>
+                                
+                                <View style={styles.slideCountContainer}>
+                                    {/* Slide count buttons */}
+                                    <View style={styles.slideCountButtons}>
+                                        {[3, 4, 5, 6, 7, 8].map((count) => (
+                                            <TouchableOpacity
+                                                key={count}
+                                                style={[
+                                                    styles.slideCountButton,
+                                                    desiredSlideCount === count && styles.slideCountButtonActive,
+                                                    count === (inputAnalysis?.estimatedSlideCount) && styles.slideCountButtonSuggested,
+                                                ]}
+                                                onPress={() => {
+                                                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                                    handleSlideCountChange(count);
+                                                }}
+                                                disabled={loading}
+                                            >
+                                                <Text style={[
+                                                    styles.slideCountButtonText,
+                                                    desiredSlideCount === count && styles.slideCountButtonTextActive,
+                                                ]}>
+                                                    {count}
+                                                </Text>
+                                                {count === (inputAnalysis?.estimatedSlideCount) && (
+                                                    <Text style={styles.suggestedBadge}>✨</Text>
+                                                )}
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+
+                                    {/* Info row */}
+                                    <View style={styles.slideCountInfo}>
+                                        <Text style={styles.slideCountInfoText}>
+                                            ⏱️ Estimated time: ~{desiredSlideCount * 2} minutes
+                                        </Text>
+                                        {inputAnalysis?.estimatedSlideCount && (
+                                            <Text style={styles.slideCountSuggestion}>
+                                                ✨ Suggested: {inputAnalysis.estimatedSlideCount} slides
+                                            </Text>
+                                        )}
+                                    </View>
                                 </View>
                             </View>
 
@@ -290,13 +490,13 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                 <TouchableOpacity
                                     style={[
                                         styles.generateButton,
-                                        (loading || input.length < 50) && styles.generateButtonDisabled,
+                                        (loading || input.length < 100) && styles.generateButtonDisabled,
                                     ]}
                                     onPress={() => {
                                         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                                         handleGenerate();
                                     }}
-                                    disabled={loading || input.length < 50}
+                                    disabled={loading || input.length < 100}
                                     activeOpacity={0.8}
                                 >
                                     {loading ? (
@@ -543,6 +743,173 @@ const styles = StyleSheet.create({
     charCountError: {
         color: '#ff4444',
         fontWeight: '700',
+    },
+    analysisPanel: {
+        backgroundColor: colors.card,
+        borderWidth: 1.5,
+        borderColor: colors.borderGold,
+        borderRadius: 12,
+        padding: 14,
+        marginTop: 12,
+    },
+    analysisHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    analysisTitle: {
+        color: colors.gold,
+        fontSize: 13,
+        fontWeight: '700',
+    },
+    completenessScore: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+        borderWidth: 1,
+    },
+    completenessGood: {
+        backgroundColor: colors.gold + '20',
+        borderColor: colors.gold,
+    },
+    completenessOkay: {
+        backgroundColor: '#ffaa00' + '20',
+        borderColor: '#ffaa00',
+    },
+    completenessLow: {
+        backgroundColor: '#ff4444' + '20',
+        borderColor: '#ff4444',
+    },
+    completenessText: {
+        fontSize: 11,
+        fontWeight: '700',
+    },
+    analysisRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    analysisLabel: {
+        color: colors.textSecondary,
+        fontSize: 12,
+        fontWeight: '600',
+        marginRight: 8,
+    },
+    analysisValue: {
+        color: colors.textPrimary,
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    elementsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginBottom: 10,
+    },
+    elementChip: {
+        backgroundColor: colors.background,
+        borderWidth: 1,
+        borderColor: colors.textSecondary + '40',
+        borderRadius: 16,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+    },
+    elementPresent: {
+        backgroundColor: colors.gold + '20',
+        borderColor: colors.gold,
+    },
+    elementText: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        fontWeight: '600',
+    },
+    elementTextPresent: {
+        color: colors.gold,
+    },
+    suggestionsContainer: {
+        backgroundColor: colors.background,
+        borderRadius: 8,
+        padding: 10,
+        marginTop: 4,
+    },
+    suggestionsTitle: {
+        color: colors.gold,
+        fontSize: 11,
+        fontWeight: '700',
+        marginBottom: 6,
+    },
+    suggestionText: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        lineHeight: 16,
+        marginBottom: 3,
+    },
+    slideCountContainer: {
+        backgroundColor: colors.card,
+        borderWidth: 1.5,
+        borderColor: colors.borderGold,
+        borderRadius: 12,
+        padding: 14,
+    },
+    slideCountButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 8,
+        marginBottom: 12,
+    },
+    slideCountButton: {
+        flex: 1,
+        backgroundColor: colors.background,
+        borderWidth: 1.5,
+        borderColor: colors.textSecondary + '40',
+        borderRadius: 10,
+        paddingVertical: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+    },
+    slideCountButtonActive: {
+        backgroundColor: colors.gold + '20',
+        borderColor: colors.gold,
+        borderWidth: 2,
+    },
+    slideCountButtonSuggested: {
+        borderColor: colors.gold + '60',
+        borderStyle: 'dashed',
+    },
+    slideCountButtonText: {
+        color: colors.textSecondary,
+        fontSize: 16,
+        fontWeight: '700',
+    },
+    slideCountButtonTextActive: {
+        color: colors.gold,
+        fontSize: 18,
+    },
+    suggestedBadge: {
+        position: 'absolute',
+        top: -6,
+        right: -6,
+        fontSize: 12,
+    },
+    slideCountInfo: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingTop: 8,
+        borderTopWidth: 1,
+        borderTopColor: colors.borderGold + '40',
+    },
+    slideCountInfoText: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        fontWeight: '500',
+    },
+    slideCountSuggestion: {
+        color: colors.gold,
+        fontSize: 11,
+        fontWeight: '600',
     },
     actionContainer: {
         paddingHorizontal: 16,

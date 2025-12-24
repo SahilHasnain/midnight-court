@@ -111,8 +111,9 @@ class EnhancedPromptBuilder {
    * @param {Object} options
    * @param {string} options.input - User's case description
    * @param {string} options.template - Template type (optional)
+   * @param {number} options.desiredSlideCount - User's preferred slide count (3-8)
    * @param {Object} options.refinementContext - Previous generation for refinement (optional)
-   * @param {Object} options.preferences - User preferences (slide count, detail level)
+   * @param {Object} options.preferences - User preferences (detail level)
    * @returns {Object} { systemPrompt, userPrompt, metadata }
    */
   buildPrompt(options)
@@ -386,6 +387,7 @@ const [selectedTemplate, setSelectedTemplate] = useState(null);
 const [qualityScore, setQualityScore] = useState(null);
 const [refinementMode, setRefinementMode] = useState(false);
 const [generationMetrics, setGenerationMetrics] = useState(null);
+const [desiredSlideCount, setDesiredSlideCount] = useState(5); // User preference
 
 // New UI sections
 <InputAnalysisPanel analysis={inputAnalysis} />
@@ -393,6 +395,13 @@ const [generationMetrics, setGenerationMetrics] = useState(null);
   templates={templates}
   suggested={suggestedTemplate}
   onSelect={setSelectedTemplate}
+/>
+<SlideCountSelector
+  value={desiredSlideCount}
+  min={3}
+  max={8}
+  suggestedCount={suggestedSlideCount}
+  onChange={setDesiredSlideCount}
 />
 <QualityScoreDisplay score={qualityScore} issues={issues} />
 <RefinementInterface
@@ -406,10 +415,11 @@ const [generationMetrics, setGenerationMetrics] = useState(null);
 
 1. **InputAnalysisPanel**: Real-time feedback on input completeness
 2. **TemplateSelector**: Visual template selection with previews
-3. **QualityScoreDisplay**: Shows validation results and quality metrics
-4. **RefinementInterface**: Allows targeted slide modifications
-5. **FormattingPreview**: Shows markdown rendering in preview
-6. **GenerationMetrics**: Displays performance and usage stats
+3. **SlideCountSelector**: Allows user to choose desired number of slides (3-8) with visual slider and estimated presentation time
+4. **QualityScoreDisplay**: Shows validation results and quality metrics
+5. **RefinementInterface**: Allows targeted slide modifications
+6. **FormattingPreview**: Shows markdown rendering in preview
+7. **GenerationMetrics**: Displays performance and usage stats
 
 ## Data Models
 
@@ -718,3 +728,45 @@ const retryConfig = {
    - Daily active users increase by 50%
    - Slides per user increase by 100%
    - Feature satisfaction rating > 4.5/5
+
+## User Preferences and Controls
+
+### Slide Count Control
+
+Users can specify their desired number of slides (3-8) before generation. This preference is:
+
+1. **Stored in state**: `desiredSlideCount` state variable in SlideGeneratorModal
+2. **Passed to AI**: Included in the prompt as a strict requirement
+3. **Validated**: AI must generate exactly the requested number of slides
+4. **Suggested**: System suggests optimal count based on input analysis and template
+5. **Persisted**: User's last preference is saved for future sessions
+
+**Prompt Integration**:
+
+```javascript
+const userPrompt = `Case Description:
+${trimmedInput}
+
+IMPORTANT: Generate EXACTLY ${desiredSlideCount} slides. No more, no less.
+
+Generate a professional legal presentation following the mandatory slide flow pattern.`;
+```
+
+**UI Component**:
+
+```javascript
+<SlideCountSelector
+  value={desiredSlideCount}
+  min={3}
+  max={8}
+  suggestedCount={suggestedSlideCount}
+  estimatedTime={desiredSlideCount * 2} // 2 minutes per slide
+  onChange={(count) => {
+    setDesiredSlideCount(count);
+    AsyncStorage.setItem("preferredSlideCount", count.toString());
+  }}
+/>
+```
+
+**Validation**:
+After generation, validate that `slideDeck.slides.length === desiredSlideCount`. If not, log a warning and optionally regenerate.

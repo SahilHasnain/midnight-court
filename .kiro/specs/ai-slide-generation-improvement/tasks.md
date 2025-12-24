@@ -11,8 +11,9 @@
   - Add examples of good vs bad slide structures
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 2. Implement input validation and analysis system
-- [ ] 2.1 Create InputProcessor class
+- [x] 2. Implement input validation and analysis system
+
+- [x] 2.1 Create InputProcessor class
 
   - Create new file `utils/inputProcessor.js`
   - Implement `analyzeInput()` method to extract case type, legal elements, and completeness score
@@ -20,9 +21,10 @@
   - Implement `detectCaseType()` using pattern matching for articles, sections, case names
   - Implement `suggestImprovements()` to provide actionable feedback
   - Add pattern matching for Indian legal references (Article X, Section Y IPC, case citations)
-  - _Requirements: 4.1, 4.2, 4.3_
+  - Implement `suggestSlideCount()` based on input length and complexity
+  - _Requirements: 4.1, 4.2, 4.3, 10.3_
 
-- [ ] 2.2 Integrate input analysis into SlideGeneratorModal
+- [x] 2.2 Integrate input analysis into SlideGeneratorModal
 
   - Add state for `inputAnalysis` in `components/SlideGeneratorModal.jsx`
   - Call `analyzeInput()` on input change with debouncing (500ms)
@@ -30,6 +32,25 @@
   - Show real-time suggestions below input field
   - Update character minimum to 100 with justification message
   - _Requirements: 4.2, 4.3, 4.4_
+
+- [x] 2.3 Add slide count selector UI
+
+  - Add state for `desiredSlideCount` (default: 5) in `components/SlideGeneratorModal.jsx`
+  - Create SlideCountSelector component with slider/stepper (range: 3-8)
+  - Display suggested slide count based on input analysis
+  - Show estimated presentation time (2 minutes per slide)
+  - Persist user preference to AsyncStorage
+  - Load saved preference on modal open
+  - _Requirements: 10.1, 10.2, 10.4_
+
+- [x] 2.4 Integrate slide count into generation flow
+
+  - Pass `desiredSlideCount` to `generateSlides()` function
+  - Update prompt builder to include "Generate EXACTLY X slides" instruction
+  - Validate generated slide count matches requested count
+  - Log warning if count mismatch occurs
+  - Store `requestedSlideCount` in slide deck metadata
+  - _Requirements: 10.2, 10.5_
 
 - [ ] 3. Create template system for common legal scenarios
 - [ ] 3.1 Implement TemplateEngine class
