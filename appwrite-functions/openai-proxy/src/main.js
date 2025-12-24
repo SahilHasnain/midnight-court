@@ -124,6 +124,7 @@ export default async ({ req, res, log, error }) => {
                     max_output_tokens: maxTokens,
                     text: {
                         format: {
+                            name: schemaName,
                             type: 'json_schema',
                             json_schema: {
                                 name: schemaName,
