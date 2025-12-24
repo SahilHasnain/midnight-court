@@ -692,6 +692,11 @@ ${trimmedInput}`;
       }
     }
 
+    // Add system prompt addition for retries (quality improvement)
+    if (options.systemPromptAddition) {
+      enhancedSystemPrompt += options.systemPromptAddition;
+    }
+
     userPrompt += `\n\nGenerate a professional legal presentation following the mandatory slide flow pattern. Apply strict structural limits and Indian legal citation standards.`;
 
     console.log("🎨 Generating slides with OpenAI...");
@@ -740,6 +745,58 @@ ${trimmedInput}`;
       );
     }
 
+    // Perform quality validation
+    console.log("🔍 Validating slide quality...");
+    const inputContext = {
+      input: trimmedInput,
+      desiredSlideCount,
+      template: templateType,
+    };
+
+    const validationResult = qualityValidator.validateSlideDeck(
+      response,
+      inputContext
+    );
+    console.log(`📊 Quality score: ${validationResult.overallScore}/100`);
+
+    // Log validation issues
+    if (validationResult.issues.length > 0) {
+      const errorCount = validationResult.issues.filter(
+        (i) => i.severity === "error"
+      ).length;
+      const warningCount = validationResult.issues.filter(
+        (i) => i.severity === "warning"
+      ).length;
+      console.log(
+        `⚠️ Validation issues: ${errorCount} errors, ${warningCount} warnings`
+      );
+    }
+
+    // Auto-regenerate if quality score is too low (< 60) and we haven't already retried
+    if (validationResult.overallScore < 60 && !options._isRetry) {
+      console.log("🔄 Quality score too low, attempting regeneration...");
+
+      // Retry with stricter prompt
+      const retryOptions = {
+        ...options,
+        _isRetry: true, // Prevent infinite retry loop
+        temperature: Math.max(0.3, (options.temperature || 0.7) - 0.2), // Lower temperature for more focused output
+        systemPromptAddition:
+          "\n\nIMPORTANT: Focus on legal accuracy, proper formatting, and clear structure. Ensure all legal terms are properly formatted and citations are complete.",
+      };
+
+      try {
+        console.log("🎯 Regenerating with improved parameters...");
+        return await generateSlides(input, retryOptions);
+      } catch (retryError) {
+        console.warn(
+          "⚠️ Regeneration failed, using original result:",
+          retryError.message
+        );
+        // Continue with original result if retry fails
+      }
+    }
+
     // Add metadata
     response.generatedAt = new Date().toISOString();
     response.inputLength = trimmedInput.length;
@@ -747,6 +804,27 @@ ${trimmedInput}`;
     response.fromCache = false;
     response.requestedSlideCount = desiredSlideCount;
     response.template = templateMetadata; // Store template metadata
+
+    // Store validation results in metadata
+    response.validation = {
+      score: validationResult.overallScore,
+      scores: validationResult.scores,
+      issues: validationResult.issues,
+      metrics: validationResult.metrics,
+      validatedAt: new Date().toISOString(),
+    };
+
+    // Log validation metrics for monitoring
+    console.log("📈 Validation metrics:", {
+      overallScore: validationResult.overallScore,
+      structureScore: validationResult.scores.structure,
+      legalAccuracyScore: validationResult.scores.legalAccuracy,
+      formattingScore: validationResult.scores.formatting,
+      relevanceScore: validationResult.scores.relevance,
+      citationCount: validationResult.metrics.citationCount,
+      legalTermDensity: validationResult.metrics.legalTermDensity,
+      avgBlocksPerSlide: validationResult.metrics.avgBlocksPerSlide,
+    });
 
     // Cache the result
     if (useCache) {

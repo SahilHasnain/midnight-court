@@ -744,7 +744,213 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                             <Text style={styles.statLabel}>{generatedSlides.template.name}</Text>
                                         </View>
                                     )}
+                                    {generatedSlides.validation && (
+                                        <View style={styles.statBadge}>
+                                            <Text style={[
+                                                styles.statValue,
+                                                generatedSlides.validation.score >= 80 && styles.qualityExcellent,
+                                                generatedSlides.validation.score >= 60 && generatedSlides.validation.score < 80 && styles.qualityGood,
+                                                generatedSlides.validation.score < 60 && styles.qualityPoor,
+                                            ]}>
+                                                {generatedSlides.validation.score}
+                                            </Text>
+                                            <Text style={styles.statLabel}>Quality</Text>
+                                        </View>
+                                    )}
                                 </View>
+
+                                {/* Quality Metrics Display */}
+                                {generatedSlides.validation && (
+                                    <View style={styles.qualitySection}>
+                                        <Text style={styles.qualitySectionTitle}>📊 Quality Assessment</Text>
+                                        
+                                        {/* Overall Score */}
+                                        <View style={[
+                                            styles.qualityOverallCard,
+                                            generatedSlides.validation.score >= 80 && styles.qualityCardExcellent,
+                                            generatedSlides.validation.score >= 60 && generatedSlides.validation.score < 80 && styles.qualityCardGood,
+                                            generatedSlides.validation.score < 60 && styles.qualityCardPoor,
+                                        ]}>
+                                            <View style={styles.qualityOverallHeader}>
+                                                <Text style={styles.qualityOverallScore}>
+                                                    {generatedSlides.validation.score}/100
+                                                </Text>
+                                                <View style={styles.qualityBadgeContainer}>
+                                                    <Text style={[
+                                                        styles.qualityBadge,
+                                                        generatedSlides.validation.score >= 80 && styles.qualityBadgeExcellent,
+                                                        generatedSlides.validation.score >= 60 && generatedSlides.validation.score < 80 && styles.qualityBadgeGood,
+                                                        generatedSlides.validation.score < 60 && styles.qualityBadgePoor,
+                                                    ]}>
+                                                        {generatedSlides.validation.score >= 80 && '🏆 Excellent'}
+                                                        {generatedSlides.validation.score >= 60 && generatedSlides.validation.score < 80 && '✅ Good'}
+                                                        {generatedSlides.validation.score < 60 && '⚠️ Needs Improvement'}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                            <Text style={styles.qualityOverallDescription}>
+                                                {generatedSlides.validation.score >= 80 && 'Professional quality slides ready for presentation'}
+                                                {generatedSlides.validation.score >= 60 && generatedSlides.validation.score < 80 && 'Good quality slides with minor improvements possible'}
+                                                {generatedSlides.validation.score < 60 && 'Consider regenerating for better quality'}
+                                            </Text>
+                                        </View>
+
+                                        {/* Score Breakdown */}
+                                        <View style={styles.qualityBreakdown}>
+                                            <Text style={styles.qualityBreakdownTitle}>Score Breakdown</Text>
+                                            <View style={styles.qualityScores}>
+                                                <View style={styles.qualityScoreItem}>
+                                                    <View style={styles.qualityScoreHeader}>
+                                                        <Text style={styles.qualityScoreLabel}>📐 Structure</Text>
+                                                        <Text style={styles.qualityScoreValue}>
+                                                            {generatedSlides.validation.scores.structure}/100
+                                                        </Text>
+                                                    </View>
+                                                    <View style={styles.qualityScoreBar}>
+                                                        <View style={[
+                                                            styles.qualityScoreProgress,
+                                                            { width: `${generatedSlides.validation.scores.structure}%` },
+                                                            generatedSlides.validation.scores.structure >= 80 && styles.progressExcellent,
+                                                            generatedSlides.validation.scores.structure >= 60 && generatedSlides.validation.scores.structure < 80 && styles.progressGood,
+                                                            generatedSlides.validation.scores.structure < 60 && styles.progressPoor,
+                                                        ]} />
+                                                    </View>
+                                                </View>
+
+                                                <View style={styles.qualityScoreItem}>
+                                                    <View style={styles.qualityScoreHeader}>
+                                                        <Text style={styles.qualityScoreLabel}>⚖️ Legal Accuracy</Text>
+                                                        <Text style={styles.qualityScoreValue}>
+                                                            {generatedSlides.validation.scores.legalAccuracy}/100
+                                                        </Text>
+                                                    </View>
+                                                    <View style={styles.qualityScoreBar}>
+                                                        <View style={[
+                                                            styles.qualityScoreProgress,
+                                                            { width: `${generatedSlides.validation.scores.legalAccuracy}%` },
+                                                            generatedSlides.validation.scores.legalAccuracy >= 80 && styles.progressExcellent,
+                                                            generatedSlides.validation.scores.legalAccuracy >= 60 && generatedSlides.validation.scores.legalAccuracy < 80 && styles.progressGood,
+                                                            generatedSlides.validation.scores.legalAccuracy < 60 && styles.progressPoor,
+                                                        ]} />
+                                                    </View>
+                                                </View>
+
+                                                <View style={styles.qualityScoreItem}>
+                                                    <View style={styles.qualityScoreHeader}>
+                                                        <Text style={styles.qualityScoreLabel}>🎨 Formatting</Text>
+                                                        <Text style={styles.qualityScoreValue}>
+                                                            {generatedSlides.validation.scores.formatting}/100
+                                                        </Text>
+                                                    </View>
+                                                    <View style={styles.qualityScoreBar}>
+                                                        <View style={[
+                                                            styles.qualityScoreProgress,
+                                                            { width: `${generatedSlides.validation.scores.formatting}%` },
+                                                            generatedSlides.validation.scores.formatting >= 80 && styles.progressExcellent,
+                                                            generatedSlides.validation.scores.formatting >= 60 && generatedSlides.validation.scores.formatting < 80 && styles.progressGood,
+                                                            generatedSlides.validation.scores.formatting < 60 && styles.progressPoor,
+                                                        ]} />
+                                                    </View>
+                                                </View>
+
+                                                <View style={styles.qualityScoreItem}>
+                                                    <View style={styles.qualityScoreHeader}>
+                                                        <Text style={styles.qualityScoreLabel}>🎯 Relevance</Text>
+                                                        <Text style={styles.qualityScoreValue}>
+                                                            {generatedSlides.validation.scores.relevance}/100
+                                                        </Text>
+                                                    </View>
+                                                    <View style={styles.qualityScoreBar}>
+                                                        <View style={[
+                                                            styles.qualityScoreProgress,
+                                                            { width: `${generatedSlides.validation.scores.relevance}%` },
+                                                            generatedSlides.validation.scores.relevance >= 80 && styles.progressExcellent,
+                                                            generatedSlides.validation.scores.relevance >= 60 && generatedSlides.validation.scores.relevance < 80 && styles.progressGood,
+                                                            generatedSlides.validation.scores.relevance < 60 && styles.progressPoor,
+                                                        ]} />
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        </View>
+
+                                        {/* Validation Issues */}
+                                        {generatedSlides.validation.issues && generatedSlides.validation.issues.length > 0 && (
+                                            <View style={styles.qualityIssues}>
+                                                <Text style={styles.qualityIssuesTitle}>
+                                                    🔍 Quality Issues ({generatedSlides.validation.issues.length})
+                                                </Text>
+                                                {generatedSlides.validation.issues.slice(0, 5).map((issue, idx) => (
+                                                    <View key={idx} style={[
+                                                        styles.qualityIssueItem,
+                                                        issue.severity === 'error' && styles.issueError,
+                                                        issue.severity === 'warning' && styles.issueWarning,
+                                                        issue.severity === 'info' && styles.issueInfo,
+                                                    ]}>
+                                                        <View style={styles.issueHeader}>
+                                                            <Text style={styles.issueSeverity}>
+                                                                {issue.severity === 'error' && '🚨'}
+                                                                {issue.severity === 'warning' && '⚠️'}
+                                                                {issue.severity === 'info' && 'ℹ️'}
+                                                            </Text>
+                                                            <Text style={styles.issueMessage} numberOfLines={2}>
+                                                                {issue.message}
+                                                            </Text>
+                                                        </View>
+                                                        {issue.suggestion && (
+                                                            <Text style={styles.issueSuggestion} numberOfLines={2}>
+                                                                💡 {issue.suggestion}
+                                                            </Text>
+                                                        )}
+                                                        {issue.slideIndex !== null && (
+                                                            <Text style={styles.issueLocation}>
+                                                                📍 Slide {issue.slideIndex + 1}
+                                                                {issue.blockIndex !== null && `, Block ${issue.blockIndex + 1}`}
+                                                            </Text>
+                                                        )}
+                                                    </View>
+                                                ))}
+                                                {generatedSlides.validation.issues.length > 5 && (
+                                                    <Text style={styles.moreIssuesText}>
+                                                        +{generatedSlides.validation.issues.length - 5} more issues
+                                                    </Text>
+                                                )}
+                                            </View>
+                                        )}
+
+                                        {/* Quality Metrics */}
+                                        {generatedSlides.validation.metrics && (
+                                            <View style={styles.qualityMetrics}>
+                                                <Text style={styles.qualityMetricsTitle}>📈 Content Metrics</Text>
+                                                <View style={styles.metricsGrid}>
+                                                    <View style={styles.metricItem}>
+                                                        <Text style={styles.metricValue}>
+                                                            {generatedSlides.validation.metrics.avgBlocksPerSlide.toFixed(1)}
+                                                        </Text>
+                                                        <Text style={styles.metricLabel}>Avg Blocks/Slide</Text>
+                                                    </View>
+                                                    <View style={styles.metricItem}>
+                                                        <Text style={styles.metricValue}>
+                                                            {generatedSlides.validation.metrics.citationCount}
+                                                        </Text>
+                                                        <Text style={styles.metricLabel}>Citations</Text>
+                                                    </View>
+                                                    <View style={styles.metricItem}>
+                                                        <Text style={styles.metricValue}>
+                                                            {generatedSlides.validation.metrics.legalTermDensity.toFixed(1)}
+                                                        </Text>
+                                                        <Text style={styles.metricLabel}>Legal Terms/Slide</Text>
+                                                    </View>
+                                                    <View style={styles.metricItem}>
+                                                        <Text style={styles.metricValue}>
+                                                            {generatedSlides.validation.metrics.formattingCompliance.toFixed(0)}%
+                                                        </Text>
+                                                        <Text style={styles.metricLabel}>Format Compliance</Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+                                        )}
+                                    </View>
+                                )}
                             </View>
 
                             {/* Slides Preview */}
@@ -1484,5 +1690,241 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         fontSize: 11,
         lineHeight: 16,
+    },
+    // Quality metrics styles
+    qualityExcellent: {
+        color: '#00C851',
+    },
+    qualityGood: {
+        color: colors.gold,
+    },
+    qualityPoor: {
+        color: '#ff4444',
+    },
+    qualitySection: {
+        backgroundColor: colors.card,
+        borderWidth: 1,
+        borderColor: colors.borderGold,
+        borderRadius: 12,
+        padding: 16,
+        marginTop: 16,
+    },
+    qualitySectionTitle: {
+        color: colors.gold,
+        fontSize: 16,
+        fontWeight: '700',
+        marginBottom: 16,
+    },
+    qualityOverallCard: {
+        backgroundColor: colors.background,
+        borderWidth: 1.5,
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+    },
+    qualityCardExcellent: {
+        borderColor: '#00C851',
+        backgroundColor: '#00C851' + '10',
+    },
+    qualityCardGood: {
+        borderColor: colors.gold,
+        backgroundColor: colors.gold + '10',
+    },
+    qualityCardPoor: {
+        borderColor: '#ff4444',
+        backgroundColor: '#ff4444' + '10',
+    },
+    qualityOverallHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    qualityOverallScore: {
+        fontSize: 32,
+        fontWeight: '800',
+        color: colors.textPrimary,
+    },
+    qualityBadgeContainer: {
+        alignItems: 'flex-end',
+    },
+    qualityBadge: {
+        fontSize: 12,
+        fontWeight: '700',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+        overflow: 'hidden',
+    },
+    qualityBadgeExcellent: {
+        color: '#00C851',
+        backgroundColor: '#00C851' + '20',
+    },
+    qualityBadgeGood: {
+        color: colors.gold,
+        backgroundColor: colors.gold + '20',
+    },
+    qualityBadgePoor: {
+        color: '#ff4444',
+        backgroundColor: '#ff4444' + '20',
+    },
+    qualityOverallDescription: {
+        color: colors.textSecondary,
+        fontSize: 13,
+        lineHeight: 18,
+    },
+    qualityBreakdown: {
+        marginBottom: 16,
+    },
+    qualityBreakdownTitle: {
+        color: colors.textPrimary,
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 12,
+    },
+    qualityScores: {
+        gap: 12,
+    },
+    qualityScoreItem: {
+        backgroundColor: colors.background,
+        borderRadius: 8,
+        padding: 12,
+    },
+    qualityScoreHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    qualityScoreLabel: {
+        color: colors.textPrimary,
+        fontSize: 13,
+        fontWeight: '600',
+    },
+    qualityScoreValue: {
+        color: colors.gold,
+        fontSize: 13,
+        fontWeight: '700',
+    },
+    qualityScoreBar: {
+        height: 6,
+        backgroundColor: colors.textSecondary + '20',
+        borderRadius: 3,
+        overflow: 'hidden',
+    },
+    qualityScoreProgress: {
+        height: '100%',
+        borderRadius: 3,
+    },
+    progressExcellent: {
+        backgroundColor: '#00C851',
+    },
+    progressGood: {
+        backgroundColor: colors.gold,
+    },
+    progressPoor: {
+        backgroundColor: '#ff4444',
+    },
+    qualityIssues: {
+        marginBottom: 16,
+    },
+    qualityIssuesTitle: {
+        color: colors.textPrimary,
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 12,
+    },
+    qualityIssueItem: {
+        backgroundColor: colors.background,
+        borderWidth: 1,
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 8,
+    },
+    issueError: {
+        borderColor: '#ff4444',
+        backgroundColor: '#ff4444' + '10',
+    },
+    issueWarning: {
+        borderColor: '#ffaa00',
+        backgroundColor: '#ffaa00' + '10',
+    },
+    issueInfo: {
+        borderColor: colors.gold,
+        backgroundColor: colors.gold + '10',
+    },
+    issueHeader: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 8,
+        marginBottom: 6,
+    },
+    issueSeverity: {
+        fontSize: 16,
+    },
+    issueMessage: {
+        flex: 1,
+        color: colors.textPrimary,
+        fontSize: 12,
+        fontWeight: '600',
+        lineHeight: 16,
+    },
+    issueSuggestion: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        lineHeight: 15,
+        marginBottom: 4,
+        marginLeft: 24,
+    },
+    issueLocation: {
+        color: colors.textSecondary,
+        fontSize: 10,
+        fontWeight: '500',
+        marginLeft: 24,
+    },
+    moreIssuesText: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        fontStyle: 'italic',
+        textAlign: 'center',
+        marginTop: 8,
+    },
+    qualityMetrics: {
+        backgroundColor: colors.background,
+        borderRadius: 8,
+        padding: 12,
+    },
+    qualityMetricsTitle: {
+        color: colors.textPrimary,
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 12,
+    },
+    metricsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+    },
+    metricItem: {
+        flex: 1,
+        minWidth: '45%',
+        alignItems: 'center',
+        backgroundColor: colors.card,
+        borderWidth: 1,
+        borderColor: colors.borderGold + '40',
+        borderRadius: 8,
+        padding: 12,
+    },
+    metricValue: {
+        color: colors.gold,
+        fontSize: 18,
+        fontWeight: '700',
+        marginBottom: 4,
+    },
+    metricLabel: {
+        color: colors.textSecondary,
+        fontSize: 10,
+        textAlign: 'center',
+        lineHeight: 14,
     },
 });
