@@ -148,7 +148,7 @@ export default async ({ req, res, log, error }) => {
           type: "json_schema",
           json_schema: {
             name: schemaName,
-            strict: true,
+            strict: false,
             schema: schema,
           },
         };

@@ -282,8 +282,8 @@ export const twoColumnBlockDataSchema = {
   additionalProperties: false,
 };
 
-// Simplified, flattened schema for OpenAI API with strict mode
-// Defines all possible block data structures using oneOf
+// Simplified schema for OpenAI API - NOT using strict mode
+// Data object is left flexible to accommodate different block types
 export const slideDeckSchema = {
   type: "object",
   properties: {
@@ -320,57 +320,8 @@ export const slideDeckSchema = {
                 },
                 data: {
                   type: "object",
-                  properties: {
-                    // Text block
-                    points: {
-                      type: "array",
-                      items: { type: "string" },
-                    },
-                    // Quote block
-                    quote: { type: "string" },
-                    citation: { type: "string" },
-                    // Callout block
-                    text: { type: "string" },
-                    // Timeline block
-                    events: {
-                      type: "array",
-                      items: {
-                        type: "object",
-                        properties: {
-                          date: { type: "string" },
-                          title: { type: "string" },
-                          description: { type: "string" },
-                        },
-                        required: ["date", "title", "description"],
-                        additionalProperties: false,
-                      },
-                    },
-                    // Evidence block
-                    items: {
-                      type: "array",
-                      items: {
-                        type: "object",
-                        properties: {
-                          label: { type: "string" },
-                          description: { type: "string" },
-                        },
-                        required: ["label", "description"],
-                        additionalProperties: false,
-                      },
-                    },
-                    // Two column block
-                    leftTitle: { type: "string" },
-                    leftPoints: {
-                      type: "array",
-                      items: { type: "string" },
-                    },
-                    rightTitle: { type: "string" },
-                    rightPoints: {
-                      type: "array",
-                      items: { type: "string" },
-                    },
-                  },
-                  additionalProperties: false,
+                  description:
+                    "Block-specific data structure that varies by type",
                 },
               },
               required: ["type", "data"],
