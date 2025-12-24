@@ -7,6 +7,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { callOpenAIWithSchema } from "./openaiAPI";
 import { slideDeckSchema } from "./schemas";
+import { templateEngine } from "./templateEngine";
 
 // Cache configuration
 const CACHE_KEY_PREFIX = "slide_gen_cache_";
@@ -609,6 +610,7 @@ export const clearSlideCache = async () => {
  * @param {object} options - Generation options
  * @param {boolean} options.useCache - Whether to use cache (default: true)
  * @param {number} options.desiredSlideCount - Desired number of slides (3-8, default: based on input)
+ * @param {string} options.template - Template type to apply (optional)
  * @returns {Promise<object>} - Generated slide deck with slides array
  */
 export const generateSlides = async (input, options = {}) => {
@@ -634,6 +636,7 @@ export const generateSlides = async (input, options = {}) => {
 
     // Get desired slide count (default to null to let AI decide based on content)
     const desiredSlideCount = options.desiredSlideCount || null;
+    const templateType = options.template || null;
 
     // Validate slide count if provided
     if (
@@ -664,6 +667,31 @@ ${trimmedInput}`;
       userPrompt += `\n\nIMPORTANT: Generate EXACTLY ${desiredSlideCount} slides. No more, no less.`;
     }
 
+    // Apply template-specific instructions if template is selected
+    let templateMetadata = null;
+    let enhancedSystemPrompt = SYSTEM_PROMPT;
+
+    if (templateType) {
+      const template = templateEngine.getTemplate(templateType);
+      if (template) {
+        templateMetadata = {
+          type: template.type,
+          name: template.name,
+          suggestedSlideCount: template.suggestedSlideCount,
+        };
+
+        // Append template-specific instructions to system prompt
+        enhancedSystemPrompt = SYSTEM_PROMPT + template.promptAdditions;
+
+        // Override slide count with template suggestion if not explicitly set
+        if (!desiredSlideCount && template.suggestedSlideCount) {
+          userPrompt += `\n\nSUGGESTED: Generate approximately ${template.suggestedSlideCount} slides based on the ${template.name} template structure.`;
+        }
+
+        console.log(`📋 Applying template: ${template.name}`);
+      }
+    }
+
     userPrompt += `\n\nGenerate a professional legal presentation following the mandatory slide flow pattern. Apply strict structural limits and Indian legal citation standards.`;
 
     console.log("🎨 Generating slides with OpenAI...");
@@ -671,13 +699,16 @@ ${trimmedInput}`;
     if (desiredSlideCount) {
       console.log(`📊 Requested slide count: ${desiredSlideCount}`);
     }
+    if (templateType) {
+      console.log(`📋 Template: ${templateType}`);
+    }
 
     // Call OpenAI with structured output
     const startTime = Date.now();
     const response = await callOpenAIWithSchema(userPrompt, {
       schema: slideDeckSchema,
       schemaName: "legal_slides",
-      systemPrompt: SYSTEM_PROMPT,
+      systemPrompt: enhancedSystemPrompt,
       model: options.model || "gpt-4o-mini",
       temperature: options.temperature || 0.7,
       maxTokens: options.maxTokens || 4096,
@@ -715,6 +746,7 @@ ${trimmedInput}`;
     response.generationTime = duration;
     response.fromCache = false;
     response.requestedSlideCount = desiredSlideCount;
+    response.template = templateMetadata; // Store template metadata
 
     // Cache the result
     if (useCache) {

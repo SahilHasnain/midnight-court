@@ -4,6 +4,7 @@
  */
 
 import { colors } from '@/theme/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
@@ -21,6 +22,7 @@ import {
 import { inputProcessor } from '../utils/inputProcessor';
 import { pinAuth } from '../utils/pinAuth';
 import { generateSlides } from '../utils/slideGenerationAPI';
+import { templateEngine } from '../utils/templateEngine';
 import PinModal from './PinModal';
 
 export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
@@ -32,6 +34,9 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
     const [isUnlocked, setIsUnlocked] = useState(false);
     const [inputAnalysis, setInputAnalysis] = useState(null);
     const [desiredSlideCount, setDesiredSlideCount] = useState(5);
+    const [selectedTemplate, setSelectedTemplate] = useState(null);
+    const [availableTemplates, setAvailableTemplates] = useState([]);
+    const [suggestedTemplate, setSuggestedTemplate] = useState(null);
     
     // Debounce timer ref
     const debounceTimerRef = useRef(null);
@@ -40,8 +45,14 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
         if (visible) {
             checkPinStatus();
             loadSavedSlideCountPreference();
+            loadAvailableTemplates();
         }
     }, [visible]);
+
+    const loadAvailableTemplates = () => {
+        const templates = templateEngine.getTemplates();
+        setAvailableTemplates(templates);
+    };
 
     // Debounced input analysis
     useEffect(() => {
@@ -55,8 +66,13 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
             if (input.trim().length > 0) {
                 const analysis = inputProcessor.analyzeInput(input);
                 setInputAnalysis(analysis);
+                
+                // Suggest template based on analysis
+                const suggested = templateEngine.suggestTemplate(analysis);
+                setSuggestedTemplate(suggested);
             } else {
                 setInputAnalysis(null);
+                setSuggestedTemplate(null);
             }
         }, 500);
 
@@ -122,9 +138,13 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
         try {
             console.log('🎨 Generating slides from modal...');
             console.log(`📊 Requested slide count: ${desiredSlideCount}`);
+            if (selectedTemplate) {
+                console.log(`📋 Selected template: ${selectedTemplate}`);
+            }
             
             const result = await generateSlides(input.trim(), {
-                desiredSlideCount: desiredSlideCount
+                desiredSlideCount: desiredSlideCount,
+                template: selectedTemplate
             });
 
             console.log('✅ Slides generated:', result);
@@ -181,6 +201,8 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
         setInput('');
         setGeneratedSlides(null);
         setFromCache(false);
+        setSelectedTemplate(null);
+        setSuggestedTemplate(null);
         onClose();
     };
 
@@ -416,6 +438,148 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                 </View>
                             </View>
 
+                            {/* Template Selector */}
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>📋 Template (Optional)</Text>
+                                <Text style={styles.sectionHint}>
+                                    Choose a template for structured slide generation, or select "No Template" for general format
+                                </Text>
+
+                                {/* No Template Option */}
+                                <TouchableOpacity
+                                    style={[
+                                        styles.templateCard,
+                                        selectedTemplate === null && styles.templateCardSelected,
+                                    ]}
+                                    onPress={() => {
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                        setSelectedTemplate(null);
+                                    }}
+                                    disabled={loading}
+                                >
+                                    <View style={styles.templateHeader}>
+                                        <Text style={styles.templateIcon}>✨</Text>
+                                        <View style={styles.templateInfo}>
+                                            <Text style={[
+                                                styles.templateName,
+                                                selectedTemplate === null && styles.templateNameSelected
+                                            ]}>
+                                                No Template
+                                            </Text>
+                                            <Text style={styles.templateDescription}>
+                                                General format - AI decides structure based on content
+                                            </Text>
+                                        </View>
+                                        {selectedTemplate === null && (
+                                            <Text style={styles.selectedBadge}>✓</Text>
+                                        )}
+                                    </View>
+                                </TouchableOpacity>
+
+                                {/* Template Cards */}
+                                <ScrollView 
+                                    horizontal 
+                                    showsHorizontalScrollIndicator={false} 
+                                    style={styles.templatesScroll}
+                                    contentContainerStyle={styles.templatesScrollContent}
+                                >
+                                    {availableTemplates.map((template) => (
+                                        <TouchableOpacity
+                                            key={template.type}
+                                            style={[
+                                                styles.templateCard,
+                                                styles.templateCardHorizontal,
+                                                selectedTemplate === template.type && styles.templateCardSelected,
+                                                suggestedTemplate === template.type && styles.templateCardSuggested,
+                                            ]}
+                                            onPress={() => {
+                                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                                setSelectedTemplate(template.type);
+                                            }}
+                                            disabled={loading}
+                                        >
+                                            <View style={styles.templateHeader}>
+                                                <Text style={styles.templateIcon}>{template.icon}</Text>
+                                                <View style={styles.templateInfo}>
+                                                    <View style={styles.templateTitleRow}>
+                                                        <Text style={[
+                                                            styles.templateName,
+                                                            selectedTemplate === template.type && styles.templateNameSelected
+                                                        ]}>
+                                                            {template.name}
+                                                        </Text>
+                                                        {suggestedTemplate === template.type && (
+                                                            <Text style={styles.recommendedBadge}>✨ Recommended</Text>
+                                                        )}
+                                                    </View>
+                                                    <Text style={styles.templateDescription} numberOfLines={2}>
+                                                        {template.description}
+                                                    </Text>
+                                                </View>
+                                                {selectedTemplate === template.type && (
+                                                    <Text style={styles.selectedBadge}>✓</Text>
+                                                )}
+                                            </View>
+
+                                            {/* Use Cases */}
+                                            <View style={styles.templateUseCases}>
+                                                <Text style={styles.useCasesTitle}>Use for:</Text>
+                                                {template.useCases.slice(0, 2).map((useCase, idx) => (
+                                                    <Text key={idx} style={styles.useCaseText} numberOfLines={1}>
+                                                        • {useCase}
+                                                    </Text>
+                                                ))}
+                                                {template.useCases.length > 2 && (
+                                                    <Text style={styles.useCaseMore}>
+                                                        +{template.useCases.length - 2} more
+                                                    </Text>
+                                                )}
+                                            </View>
+
+                                            {/* Suggested Slide Count */}
+                                            <View style={styles.templateFooter}>
+                                                <Text style={styles.templateSlideCount}>
+                                                    📊 Suggested: {template.suggestedSlideCount} slides
+                                                </Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
+
+                                {/* Selected Template Characteristics */}
+                                {selectedTemplate && (
+                                    <View style={styles.selectedTemplateInfo}>
+                                        <Text style={styles.selectedTemplateTitle}>
+                                            📌 Selected Template Characteristics
+                                        </Text>
+                                        {(() => {
+                                            const template = availableTemplates.find(t => t.type === selectedTemplate);
+                                            if (!template) return null;
+                                            
+                                            return (
+                                                <>
+                                                    <View style={styles.characteristicsGrid}>
+                                                        <View style={styles.characteristicChip}>
+                                                            <Text style={styles.characteristicText}>
+                                                                📊 {template.suggestedSlideCount} slides
+                                                            </Text>
+                                                        </View>
+                                                        <View style={styles.characteristicChip}>
+                                                            <Text style={styles.characteristicText}>
+                                                                {template.icon} {template.name}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
+                                                    <Text style={styles.characteristicDescription}>
+                                                        {template.description}
+                                                    </Text>
+                                                </>
+                                            );
+                                        })()}
+                                    </View>
+                                )}
+                            </View>
+
                             {/* Quick Example Prompts */}
                             <View style={styles.section}>
                                 <Text style={styles.sectionTitle}>⚡ Quick Examples</Text>
@@ -574,6 +738,12 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                         </Text>
                                         <Text style={styles.statLabel}>Blocks</Text>
                                     </View>
+                                    {generatedSlides.template && (
+                                        <View style={styles.statBadge}>
+                                            <Text style={styles.statValue}>📋</Text>
+                                            <Text style={styles.statLabel}>{generatedSlides.template.name}</Text>
+                                        </View>
+                                    )}
                                 </View>
                             </View>
 
@@ -1169,5 +1339,150 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         fontSize: 11,
         fontWeight: '500',
+    },
+    templatesScroll: {
+        marginTop: 8,
+    },
+    templatesScrollContent: {
+        gap: 12,
+        paddingRight: 16,
+    },
+    templateCard: {
+        backgroundColor: colors.card,
+        borderWidth: 1.5,
+        borderColor: colors.borderGold + '60',
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 12,
+    },
+    templateCardHorizontal: {
+        width: 280,
+        marginBottom: 0,
+    },
+    templateCardSelected: {
+        backgroundColor: colors.gold + '15',
+        borderColor: colors.gold,
+        borderWidth: 2,
+    },
+    templateCardSuggested: {
+        borderColor: colors.gold + '80',
+        borderStyle: 'dashed',
+    },
+    templateHeader: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 12,
+    },
+    templateIcon: {
+        fontSize: 28,
+    },
+    templateInfo: {
+        flex: 1,
+    },
+    templateTitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 4,
+    },
+    templateName: {
+        color: colors.textPrimary,
+        fontSize: 15,
+        fontWeight: '700',
+    },
+    templateNameSelected: {
+        color: colors.gold,
+    },
+    templateDescription: {
+        color: colors.textSecondary,
+        fontSize: 12,
+        lineHeight: 16,
+    },
+    recommendedBadge: {
+        color: colors.gold,
+        fontSize: 10,
+        fontWeight: '600',
+        backgroundColor: colors.gold + '20',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 8,
+    },
+    selectedBadge: {
+        color: colors.gold,
+        fontSize: 20,
+        fontWeight: '700',
+    },
+    templateUseCases: {
+        marginTop: 12,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: colors.borderGold + '40',
+    },
+    useCasesTitle: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        fontWeight: '600',
+        marginBottom: 6,
+    },
+    useCaseText: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        lineHeight: 16,
+        marginBottom: 2,
+    },
+    useCaseMore: {
+        color: colors.textSecondary,
+        fontSize: 10,
+        fontStyle: 'italic',
+        marginTop: 2,
+    },
+    templateFooter: {
+        marginTop: 10,
+        paddingTop: 10,
+        borderTopWidth: 1,
+        borderTopColor: colors.borderGold + '40',
+    },
+    templateSlideCount: {
+        color: colors.gold,
+        fontSize: 11,
+        fontWeight: '600',
+    },
+    selectedTemplateInfo: {
+        backgroundColor: colors.gold + '10',
+        borderWidth: 1,
+        borderColor: colors.gold + '40',
+        borderRadius: 10,
+        padding: 12,
+        marginTop: 8,
+    },
+    selectedTemplateTitle: {
+        color: colors.gold,
+        fontSize: 12,
+        fontWeight: '700',
+        marginBottom: 10,
+    },
+    characteristicsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        marginBottom: 8,
+    },
+    characteristicChip: {
+        backgroundColor: colors.card,
+        borderWidth: 1,
+        borderColor: colors.gold,
+        borderRadius: 16,
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+    },
+    characteristicText: {
+        color: colors.gold,
+        fontSize: 11,
+        fontWeight: '600',
+    },
+    characteristicDescription: {
+        color: colors.textSecondary,
+        fontSize: 11,
+        lineHeight: 16,
     },
 });

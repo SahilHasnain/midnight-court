@@ -52,8 +52,9 @@
   - Store `requestedSlideCount` in slide deck metadata
   - _Requirements: 10.2, 10.5_
 
-- [ ] 3. Create template system for common legal scenarios
-- [ ] 3.1 Implement TemplateEngine class
+- [x] 3. Create template system for common legal scenarios
+
+- [x] 3.1 Implement TemplateEngine class
 
   - Create new file `utils/templateEngine.js`
   - Define 5 core templates: Constitutional Challenge, Criminal Prosecution, Civil Dispute, Moot Court, Case Brief
@@ -63,7 +64,7 @@
   - Implement `suggestTemplate()` based on input analysis
   - _Requirements: 7.1, 7.2, 7.3_
 
-- [ ] 3.2 Add template selection UI
+- [x] 3.2 Add template selection UI
 
   - Add template selector component to `components/SlideGeneratorModal.jsx`
   - Display template cards with descriptions and example use cases
@@ -72,7 +73,7 @@
   - Display selected template characteristics
   - _Requirements: 7.1, 7.5_
 
-- [ ] 3.3 Integrate templates into generation flow
+- [x] 3.3 Integrate templates into generation flow
 
   - Modify `generateSlides()` in `utils/slideGenerationAPI.js` to accept template parameter
   - Apply template-specific prompt additions when template is selected
