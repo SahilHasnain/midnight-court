@@ -171,57 +171,76 @@ Include full citation, year, summary, legal significance, and key principles.`;
       };
     }
 
-    const requestBody = {
-      contents: [{
-        parts: [{
-          text: systemPrompt ? `${systemPrompt}\n\n${userPrompt}` : userPrompt
-        }]
-      }],
-      generationConfig: {
-        temperature: 0.3,
-        responseMimeType: 'application/json',
-        responseSchema: schema
-      }
-    };
+    // Build messages array
+    const messages = [];
 
-    // Call OpenAI Responses API with structured output
+    if (systemPrompt) {
+      messages.push({
+        role: "system",
+        content: systemPrompt
+      });
+    }
+
+    messages.push({
+      role: "user",
+      content: userPrompt
+    });
+
+    // Call OpenAI Chat Completions API with structured output
     let data;
     try {
-      const response = await openai.responses.create({
+      const completion = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
-        input: userPrompt,
-        instructions: systemPrompt || undefined,
+        messages,
         temperature: 0.3,
-        text: {
-          format: {
-            type: 'json_schema',
-            json_schema: {
-              name: `citation_${action}`,
-              strict: true,
-              schema
-            }
+        max_tokens: 4000,
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: `citation_${action}`,
+            strict: true,
+            schema
           }
         }
       });
 
       log('Citation search successful');
 
+      const content = completion.choices[0]?.message?.content;
+
+      if (!content) {
+        throw new Error("OpenAI response missing content");
+      }
+
       // Parse the JSON response
-      const parsedData = response.output_parsed || JSON.parse(response.output_text);
+      let parsedData;
+      try {
+        parsedData = JSON.parse(content);
+      } catch (err) {
+        error(`Failed to parse citation response: ${err.message}`);
+        throw new Error(`Failed to parse AI response: ${err.message}`);
+      }
 
       // Format response to match Gemini's structure for compatibility
       data = {
         candidates: [{
           content: {
             parts: [{
-              text: JSON.stringify(parsedData)
+              text: content
             }]
           }
         }],
         output_parsed: parsedData,
-        output_text: response.output_text
+        output_text: content
       };
     } catch (apiError) {
+      if (apiError instanceof OpenAI.APIError) {
+        error(`OpenAI API error: ${apiError.status} - ${apiError.message}`);
+        return res.json({
+          error: 'Citation search failed',
+          details: `${apiError.status} - ${apiError.message}`
+        }, apiError.status || 500);
+      }
       error(`OpenAI API error: ${apiError.message}`);
       return res.json({ error: 'Citation search failed', details: apiError.message }, 500);
     }
