@@ -275,8 +275,8 @@ export const twoColumnBlockDataSchema = {
     additionalProperties: false
 };
 
-// Simplified, flattened schema for Gemini API (avoids nesting depth limit)
-// Ultra-simplified schema to avoid nesting depth issues
+// Simplified, flattened schema for OpenAI API with strict mode
+// Defines all possible block data structures using oneOf
 export const slideDeckSchema = {
     type: "object",
     properties: {
@@ -299,8 +299,64 @@ export const slideDeckSchema = {
                         items: {
                             type: "object",
                             properties: {
-                                type: { type: "string" },
-                                data: { type: "object" }
+                                type: { 
+                                    type: "string",
+                                    enum: ["text", "quote", "callout", "timeline", "evidence", "twoColumn"]
+                                },
+                                data: { 
+                                    type: "object",
+                                    properties: {
+                                        // Text block
+                                        points: {
+                                            type: "array",
+                                            items: { type: "string" }
+                                        },
+                                        // Quote block
+                                        quote: { type: "string" },
+                                        citation: { type: "string" },
+                                        // Callout block
+                                        text: { type: "string" },
+                                        // Timeline block
+                                        events: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    date: { type: "string" },
+                                                    title: { type: "string" },
+                                                    description: { type: "string" }
+                                                },
+                                                required: ["date", "title"],
+                                                additionalProperties: false
+                                            }
+                                        },
+                                        // Evidence block
+                                        items: {
+                                            type: "array",
+                                            items: {
+                                                type: "object",
+                                                properties: {
+                                                    label: { type: "string" },
+                                                    description: { type: "string" }
+                                                },
+                                                required: ["label", "description"],
+                                                additionalProperties: false
+                                            }
+                                        },
+                                        // Two column block
+                                        leftTitle: { type: "string" },
+                                        leftPoints: {
+                                            type: "array",
+                                            items: { type: "string" }
+                                        },
+                                        rightTitle: { type: "string" },
+                                        rightPoints: {
+                                            type: "array",
+                                            items: { type: "string" }
+                                        }
+                                    },
+                                    additionalProperties: false
+                                }
                             },
                             required: ["type", "data"],
                             additionalProperties: false
