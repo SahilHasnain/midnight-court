@@ -331,28 +331,6 @@ export default function EditorScreen() {
                         <Text style={styles.templateName}>{getTemplateName(template)}</Text>
                         <Text style={styles.slideCounter}>Slide {currentSlideIndex + 1} of {slides.length}</Text>
                     </View>
-
-                    {/* Dev controls */}
-                    <View style={styles.devButtonsContainer}>
-                        <TouchableOpacity
-                            style={styles.geminiTestButton}
-                            onPress={() => router.push('/dev/gemini-test')}
-                        >
-                            <Text style={styles.geminiTestText}>🔧</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.geminiTestButton}
-                            onPress={() => router.push('/dev/citation-test')}
-                        >
-                            <Text style={styles.geminiTestText}>⚖️</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.geminiTestButton}
-                            onPress={() => router.push('/dev/slide-gen-test')}
-                        >
-                            <Text style={styles.geminiTestText}>🎨</Text>
-                        </TouchableOpacity>
-                    </View>
                 </View>
 
                 {/* Slide Navigation */}
@@ -471,44 +449,44 @@ export default function EditorScreen() {
                     <Text style={styles.label}>Content Blocks</Text>
                     {currentSlide.blocks && currentSlide.blocks.length > 0 ? (
                         currentSlide.blocks.map((block, index) => (
-                        <View key={block.id || `block-${index}`}>
-                            {/* Insert button before first block and between blocks */}
-                            {index === 0 && (
-                                <TouchableOpacity
-                                    onPress={() => openInsertPicker(0)}
-                                    style={styles.insertButton}
-                                >
-                                    <Text style={styles.insertButtonText}>+ Insert Block</Text>
-                                </TouchableOpacity>
-                            )}
+                            <View key={block.id || `block-${index}`}>
+                                {/* Insert button before first block and between blocks */}
+                                {index === 0 && (
+                                    <TouchableOpacity
+                                        onPress={() => openInsertPicker(0)}
+                                        style={styles.insertButton}
+                                    >
+                                        <Text style={styles.insertButtonText}>+ Insert Block</Text>
+                                    </TouchableOpacity>
+                                )}
 
-                            <BlockRenderer
-                                block={block}
-                                onUpdate={(updatedBlock) => updateBlock(block.id, updatedBlock)}
-                                onDelete={() => deleteBlock(block.id)}
-                                onOpenImageSearch={(blockId) => {
-                                    setSelectedImageBlockId(blockId);
-                                    setImageSearchVisible(true);
-                                }}
-                            />
+                                <BlockRenderer
+                                    block={block}
+                                    onUpdate={(updatedBlock) => updateBlock(block.id, updatedBlock)}
+                                    onDelete={() => deleteBlock(block.id)}
+                                    onOpenImageSearch={(blockId) => {
+                                        setSelectedImageBlockId(blockId);
+                                        setImageSearchVisible(true);
+                                    }}
+                                />
 
-                            {/* Insert button between blocks (not after last) */}
-                            {index < currentSlide.blocks.length - 1 && (
-                                <TouchableOpacity
-                                    onPress={() => openInsertPicker(index + 1)}
-                                    style={styles.insertButton}
-                                >
-                                    <Text style={styles.insertButtonText}>+ Insert Block</Text>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    )))
-                     : (
-                        <View style={styles.emptyBlocksContainer}>
-                            <Text style={styles.emptyBlocksText}>No content blocks yet</Text>
-                            <Text style={styles.emptyBlocksHint}>Add your first block below</Text>
-                        </View>
-                    )}
+                                {/* Insert button between blocks (not after last) */}
+                                {index < currentSlide.blocks.length - 1 && (
+                                    <TouchableOpacity
+                                        onPress={() => openInsertPicker(index + 1)}
+                                        style={styles.insertButton}
+                                    >
+                                        <Text style={styles.insertButtonText}>+ Insert Block</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        )))
+                        : (
+                            <View style={styles.emptyBlocksContainer}>
+                                <Text style={styles.emptyBlocksText}>No content blocks yet</Text>
+                                <Text style={styles.emptyBlocksHint}>Add your first block below</Text>
+                            </View>
+                        )}
 
                     <TouchableOpacity
                         onPress={() => setBlockPickerVisible(true)}
@@ -836,21 +814,6 @@ const styles = StyleSheet.create({
         borderColor: colors.borderGold,
     },
     testModeText: {
-        fontSize: 18,
-    },
-    devButtonsContainer: {
-        flexDirection: 'row',
-        gap: 8,
-    },
-    geminiTestButton: {
-        backgroundColor: colors.card,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: colors.gold,
-    },
-    geminiTestText: {
         fontSize: 18,
     },
     editorContent: {

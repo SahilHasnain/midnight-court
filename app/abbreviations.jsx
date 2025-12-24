@@ -1,19 +1,19 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
+import { useEffect, useMemo, useState } from 'react';
 import {
-    View,
-    Text,
-    TextInput,
     FlatList,
     StyleSheet,
+    Text,
+    TextInput,
     TouchableOpacity,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Clipboard from 'expo-clipboard';
-import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
-import abbreviationsData from '../data/legalAbbreviations.json';
-import { getBookmarks, toggleBookmark } from '../utils/abbreviationsStorage';
 import Toast from '../components/Toast';
+import abbreviationsData from '../data/legalAbbreviations.json';
+import { lightColors, sizing, spacing, typography } from '../theme/designSystem';
+import { getBookmarks, toggleBookmark } from '../utils/abbreviationsStorage';
 
 export default function AbbreviationsScreen() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -87,60 +87,94 @@ export default function AbbreviationsScreen() {
         return (
             <View style={styles.card}>
                 <View style={styles.cardHeader}>
-                    <Text style={styles.abbr}>{item.abbr}</Text>
-                    <View style={styles.cardActions}>
+                    <View style={styles.abbrContainer}>
+                        <Text style={styles.abbr}>{item.abbr}</Text>
                         <View style={styles.categoryBadge}>
                             <Text style={styles.categoryText}>{item.category}</Text>
                         </View>
-                        <TouchableOpacity onPress={() => handleToggleBookmark(item.abbr)}>
+                    </View>
+                    <View style={styles.cardActions}>
+                        <TouchableOpacity 
+                            style={styles.actionButton}
+                            onPress={() => handleToggleBookmark(item.abbr)}
+                            accessibilityLabel={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+                        >
                             <Ionicons 
                                 name={isBookmarked ? "star" : "star-outline"} 
-                                size={22} 
-                                color={isBookmarked ? colors.gold : colors.textSecondary} 
+                                size={20} 
+                                color={isBookmarked ? lightColors.accent.gold : lightColors.text.tertiary} 
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleCopyToClipboard(item)}>
-                            <Ionicons name="copy-outline" size={20} color={colors.textSecondary} />
+                        <TouchableOpacity 
+                            style={styles.actionButton}
+                            onPress={() => handleCopyToClipboard(item)}
+                            accessibilityLabel="Copy to clipboard"
+                        >
+                            <Ionicons 
+                                name="copy-outline" 
+                                size={18} 
+                                color={lightColors.text.tertiary} 
+                            />
                         </TouchableOpacity>
                     </View>
                 </View>
                 <Text style={styles.full}>{item.full}</Text>
                 <Text style={styles.meaning}>{item.meaning}</Text>
-                <Text style={styles.example}>Example: {item.example}</Text>
+                <View style={styles.exampleContainer}>
+                    <Text style={styles.exampleLabel}>Example:</Text>
+                    <Text style={styles.example}>{item.example}</Text>
+                </View>
             </View>
         );
     };
 
     const renderEmpty = () => (
         <View style={styles.emptyContainer}>
-            <Ionicons name="search-outline" size={64} color={colors.textSecondary} />
+            <View style={styles.emptyIconContainer}>
+                <Ionicons 
+                    name={showBookmarksOnly ? "star-outline" : "search-outline"} 
+                    size={56} 
+                    color={lightColors.text.tertiary} 
+                />
+            </View>
             <Text style={styles.emptyText}>
-                {showBookmarksOnly ? 'No bookmarks yet' : 'No abbreviations found'}
+                {showBookmarksOnly ? 'No Bookmarks Yet' : 'No Abbreviations Found'}
             </Text>
             <Text style={styles.emptySubtext}>
-                {showBookmarksOnly ? 'Tap the star icon to bookmark' : 'Try a different search term'}
+                {showBookmarksOnly 
+                    ? 'Tap the star icon on any term to bookmark it for quick access' 
+                    : 'Try adjusting your search or category filters'}
             </Text>
         </View>
     );
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* Enhanced Header */}
             <View style={styles.header}>
                 <View style={styles.headerTop}>
-                    <View>
-                        <Text style={styles.title}>Legal Abbreviations</Text>
-                        <Text style={styles.subtitle}>{filteredData.length} terms</Text>
+                    <View style={styles.headerContent}>
+                        <Text style={styles.kicker}>LEGAL REFERENCE</Text>
+                        <Text style={styles.title}>Legal Dictionary</Text>
+                        <View style={styles.goldLine} />
+                        <Text style={styles.subtitle}>
+                            {filteredData.length} legal abbreviation{filteredData.length !== 1 ? 's' : ''}
+                        </Text>
                     </View>
                     <TouchableOpacity 
-                        style={styles.bookmarkButton}
+                        style={[
+                            styles.bookmarkButton,
+                            showBookmarksOnly && styles.bookmarkButtonActive
+                        ]}
                         onPress={() => setShowBookmarksOnly(!showBookmarksOnly)}
+                        accessibilityLabel={showBookmarksOnly ? "Show all terms" : "Show bookmarks only"}
                     >
                         <Ionicons 
                             name={showBookmarksOnly ? "star" : "star-outline"} 
-                            size={24} 
-                            color={showBookmarksOnly ? colors.gold : colors.textSecondary} 
+                            size={22} 
+                            color={showBookmarksOnly ? lightColors.background.primary : lightColors.accent.gold} 
                         />
-                        {bookmarks.length > 0 && (
+                        {bookmarks.length > 0 && !showBookmarksOnly && (
                             <View style={styles.bookmarkBadge}>
                                 <Text style={styles.bookmarkBadgeText}>{bookmarks.length}</Text>
                             </View>
@@ -149,23 +183,38 @@ export default function AbbreviationsScreen() {
                 </View>
             </View>
 
+            {/* Enhanced Search Bar */}
             <View style={styles.searchContainer}>
-                <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
+                <Ionicons 
+                    name="search" 
+                    size={20} 
+                    color={lightColors.text.tertiary} 
+                    style={styles.searchIcon} 
+                />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Search abbreviations..."
-                    placeholderTextColor={colors.textSecondary}
+                    placeholder="Search abbreviations, terms, or meanings..."
+                    placeholderTextColor={lightColors.text.tertiary}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     autoCapitalize="characters"
                 />
                 {searchQuery.length > 0 && (
-                    <TouchableOpacity onPress={() => setSearchQuery('')}>
-                        <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+                    <TouchableOpacity 
+                        onPress={() => setSearchQuery('')}
+                        style={styles.clearButton}
+                        accessibilityLabel="Clear search"
+                    >
+                        <Ionicons 
+                            name="close-circle" 
+                            size={20} 
+                            color={lightColors.text.tertiary} 
+                        />
                     </TouchableOpacity>
                 )}
             </View>
 
+            {/* Enhanced Category Chips */}
             <FlatList
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -179,6 +228,8 @@ export default function AbbreviationsScreen() {
                             selectedCategory === item && styles.categoryChipActive,
                         ]}
                         onPress={() => setSelectedCategory(item)}
+                        accessibilityLabel={`Filter by ${item}`}
+                        accessibilityState={{ selected: selectedCategory === item }}
                     >
                         <Text
                             style={[
@@ -192,6 +243,7 @@ export default function AbbreviationsScreen() {
                 )}
             />
 
+            {/* Results List */}
             <FlatList
                 data={filteredData}
                 keyExtractor={item => item.abbr}
@@ -213,164 +265,311 @@ export default function AbbreviationsScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: lightColors.background.primary,
     },
+
+    // Header Styles
     header: {
-        padding: 20,
-        paddingBottom: 10,
+        paddingHorizontal: spacing.lg, // 24px
+        paddingTop: spacing.xl, // 32px
+        paddingBottom: spacing.lg, // 24px
+        borderBottomWidth: sizing.borderThin,
+        borderBottomColor: lightColors.background.tertiary,
+        backgroundColor: lightColors.background.secondary,
     },
+
     headerTop: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
     },
-    bookmarkButton: {
-        padding: 8,
-        position: 'relative',
+
+    headerContent: {
+        flex: 1,
     },
-    bookmarkBadge: {
-        position: 'absolute',
-        top: 4,
-        right: 4,
-        backgroundColor: colors.gold,
-        borderRadius: 10,
-        minWidth: 18,
-        height: 18,
+
+    kicker: {
+        ...typography.overline,
+        color: lightColors.text.secondary,
+        marginBottom: spacing.xs, // 4px
+    },
+
+    title: {
+        ...typography.display,
+        color: lightColors.accent.gold,
+        marginBottom: spacing.xs, // 4px
+    },
+
+    goldLine: {
+        width: 60,
+        height: 3,
+        backgroundColor: lightColors.accent.gold,
+        borderRadius: sizing.radiusXs, // 4px
+        marginBottom: spacing.sm, // 8px
+        shadowColor: lightColors.accent.gold,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+    },
+
+    subtitle: {
+        ...typography.bodySmall,
+        color: lightColors.text.secondary,
+    },
+
+    bookmarkButton: {
+        width: sizing.touchTarget, // 44px
+        height: sizing.touchTarget,
+        borderRadius: sizing.touchTarget / 2,
+        backgroundColor: lightColors.background.tertiary,
         justifyContent: 'center',
         alignItems: 'center',
+        position: 'relative',
+        borderWidth: sizing.borderThin,
+        borderColor: lightColors.background.tertiary,
     },
+
+    bookmarkButtonActive: {
+        backgroundColor: lightColors.accent.gold,
+        borderColor: lightColors.accent.gold,
+    },
+
+    bookmarkBadge: {
+        position: 'absolute',
+        top: -4,
+        right: -4,
+        backgroundColor: lightColors.accent.error,
+        borderRadius: 10,
+        minWidth: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 2,
+        borderColor: lightColors.background.secondary,
+    },
+
     bookmarkBadgeText: {
-        color: colors.background,
+        ...typography.caption,
+        color: lightColors.background.primary,
         fontSize: 10,
-        fontWeight: 'bold',
+        fontWeight: '700',
     },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: colors.text,
-        marginBottom: 4,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: colors.textSecondary,
-    },
+
+    // Search Styles
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.cardBackground,
-        marginHorizontal: 20,
-        marginBottom: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
+        backgroundColor: lightColors.background.secondary,
+        marginHorizontal: spacing.lg, // 24px
+        marginTop: spacing.md, // 16px
+        marginBottom: spacing.md,
+        paddingHorizontal: spacing.md, // 16px
+        paddingVertical: spacing.sm, // 8px
+        borderRadius: sizing.radiusLg, // 12px
+        borderWidth: sizing.borderThin,
+        borderColor: lightColors.background.tertiary,
+        shadowColor: lightColors.text.primary,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.02,
+        shadowRadius: 4,
+        elevation: 1,
     },
+
     searchIcon: {
-        marginRight: 8,
+        marginRight: spacing.sm, // 8px
     },
+
     searchInput: {
         flex: 1,
-        fontSize: 16,
-        color: colors.text,
+        ...typography.body,
+        color: lightColors.text.primary,
+        paddingVertical: spacing.xs, // 4px
     },
+
+    clearButton: {
+        padding: spacing.xs, // 4px
+    },
+
+    // Category Chips
     categoryContainer: {
-        paddingHorizontal: 20,
-        paddingBottom: 16,
-        gap: 8,
+        paddingHorizontal: spacing.lg, // 24px
+        paddingBottom: spacing.md, // 16px
+        gap: spacing.sm, // 8px
     },
+
     categoryChip: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
-        backgroundColor: colors.cardBackground,
-        borderWidth: 1,
-        borderColor: colors.border,
-        marginRight: 8,
+        paddingHorizontal: spacing.md, // 16px
+        paddingVertical: spacing.sm, // 8px
+        borderRadius: sizing.radiusLg, // 12px
+        backgroundColor: lightColors.background.secondary,
+        borderWidth: sizing.borderThin,
+        borderColor: lightColors.background.tertiary,
+        marginRight: spacing.sm, // 8px
     },
+
     categoryChipActive: {
-        backgroundColor: colors.gold,
-        borderColor: colors.gold,
+        backgroundColor: lightColors.accent.gold,
+        borderColor: lightColors.accent.gold,
+        shadowColor: lightColors.accent.gold,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 2,
     },
+
     categoryChipText: {
-        fontSize: 14,
-        color: colors.textSecondary,
+        ...typography.bodySmall,
+        color: lightColors.text.secondary,
         fontWeight: '500',
     },
+
     categoryChipTextActive: {
-        color: colors.background,
+        color: lightColors.background.primary,
+        fontWeight: '600',
     },
+
+    // List Content
     listContent: {
-        padding: 20,
-        paddingTop: 0,
+        padding: spacing.lg, // 24px
+        paddingTop: spacing.md, // 16px
     },
+
+    // Card Styles
     card: {
-        backgroundColor: colors.cardBackground,
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: colors.border,
+        backgroundColor: lightColors.background.secondary,
+        borderRadius: sizing.radiusLg, // 12px
+        padding: spacing.lg, // 24px
+        marginBottom: spacing.md, // 16px
+        borderWidth: sizing.borderThin,
+        borderColor: lightColors.background.tertiary,
+        shadowColor: lightColors.text.primary,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 8,
+        elevation: 2,
     },
+
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
+        alignItems: 'flex-start',
+        marginBottom: spacing.md, // 16px
     },
-    cardActions: {
+
+    abbrContainer: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: spacing.sm, // 8px
     },
+
     abbr: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: colors.gold,
+        ...typography.h2,
+        color: lightColors.accent.gold,
+        fontWeight: '700',
     },
+
     categoryBadge: {
-        backgroundColor: colors.gold + '20',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 6,
+        backgroundColor: lightColors.accent.goldLight,
+        paddingHorizontal: spacing.sm, // 8px
+        paddingVertical: spacing.xs, // 4px
+        borderRadius: sizing.radiusSm, // 6px
+        borderWidth: sizing.borderThin,
+        borderColor: lightColors.accent.gold,
     },
+
     categoryText: {
-        fontSize: 11,
-        color: colors.gold,
+        ...typography.caption,
+        color: lightColors.accent.gold,
         fontWeight: '600',
+        fontSize: 10,
     },
+
+    cardActions: {
+        flexDirection: 'row',
+        gap: spacing.sm, // 8px
+    },
+
+    actionButton: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: lightColors.background.tertiary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: sizing.borderThin,
+        borderColor: lightColors.background.tertiary,
+    },
+
     full: {
-        fontSize: 16,
+        ...typography.h3,
+        color: lightColors.text.primary,
+        marginBottom: spacing.sm, // 8px
         fontWeight: '600',
-        color: colors.text,
-        marginBottom: 6,
     },
+
     meaning: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        lineHeight: 20,
-        marginBottom: 8,
+        ...typography.body,
+        color: lightColors.text.secondary,
+        lineHeight: 24,
+        marginBottom: spacing.md, // 16px
     },
+
+    exampleContainer: {
+        backgroundColor: lightColors.background.tertiary,
+        padding: spacing.md, // 16px
+        borderRadius: sizing.radiusMd, // 8px
+        borderLeftWidth: 3,
+        borderLeftColor: lightColors.accent.gold,
+    },
+
+    exampleLabel: {
+        ...typography.caption,
+        color: lightColors.text.tertiary,
+        fontWeight: '600',
+        marginBottom: spacing.xs, // 4px
+        textTransform: 'uppercase',
+    },
+
     example: {
-        fontSize: 13,
-        color: colors.textSecondary,
+        ...typography.bodySmall,
+        color: lightColors.text.secondary,
         fontStyle: 'italic',
-        opacity: 0.8,
+        lineHeight: 20,
     },
+
+    // Empty State
     emptyContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 60,
+        paddingVertical: spacing.xxxxxl, // 64px
+        paddingHorizontal: spacing.xl, // 32px
     },
+
+    emptyIconContainer: {
+        width: 96,
+        height: 96,
+        borderRadius: 48,
+        backgroundColor: lightColors.background.secondary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: spacing.lg, // 24px
+        borderWidth: sizing.borderThin,
+        borderColor: lightColors.background.tertiary,
+    },
+
     emptyText: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: colors.text,
-        marginTop: 16,
+        ...typography.h2,
+        color: lightColors.text.primary,
+        marginBottom: spacing.sm, // 8px
+        textAlign: 'center',
     },
+
     emptySubtext: {
-        fontSize: 14,
-        color: colors.textSecondary,
-        marginTop: 4,
+        ...typography.body,
+        color: lightColors.text.secondary,
+        textAlign: 'center',
+        lineHeight: 24,
+        maxWidth: 320,
     },
 });

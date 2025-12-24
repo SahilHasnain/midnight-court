@@ -84,21 +84,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: lightColors.background.secondary,
-    borderRadius: sizing.radiusLg, // 12px
+    borderRadius: sizing.radiusXl, // 16px - more rounded
     paddingVertical: spacing.lg, // 24px
     paddingHorizontal: spacing.lg, // 24px
     minHeight: sizing.touchTarget + spacing.lg, // Ensure 44px+ touch target
     
-    // Subtle border
+    // Enhanced border
     borderWidth: sizing.borderThin,
     borderColor: lightColors.background.tertiary,
     
-    // Elegant shadow
+    // Enhanced shadow
     shadowColor: lightColors.text.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 3,
     
     // Smooth transitions for hover effects
     // Note: React Native doesn't have CSS hover, but we can simulate with activeOpacity
@@ -110,22 +110,25 @@ const styles = StyleSheet.create({
     backgroundColor: lightColors.accent.goldLight,
     
     // Enhanced shadow for highlighted cards
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowColor: lightColors.accent.gold,
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 5,
   },
 
   iconContainer: {
-    width: spacing.xxxl, // 48px
-    height: spacing.xxxl, // 48px
+    width: spacing.xxxl + spacing.sm, // 56px - larger
+    height: spacing.xxxl + spacing.sm, // 56px
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: spacing.md, // 16px
+    marginRight: spacing.lg, // 16px
+    backgroundColor: lightColors.background.tertiary,
+    borderRadius: sizing.radiusLg, // 12px
   },
 
   icon: {
-    fontSize: sizing.iconLg, // 32px
-    lineHeight: sizing.iconLg,
+    fontSize: sizing.iconXl, // 48px - larger
+    lineHeight: sizing.iconXl,
   },
 
   cardContent: {
@@ -135,9 +138,11 @@ const styles = StyleSheet.create({
 
   cardTitle: {
     ...typography.h3,
+    fontSize: 19, // Slightly larger
     color: lightColors.text.primary,
-    marginBottom: spacing.xs, // 4px
-    lineHeight: 24,
+    marginBottom: spacing.xs + 2, // 6px
+    lineHeight: 26,
+    fontWeight: '600',
   },
 
   cardSubtitle: {
@@ -155,7 +160,7 @@ const styles = StyleSheet.create({
   },
 
   chevron: {
-    fontSize: 20,
+    fontSize: 24, // Larger
     color: lightColors.text.tertiary,
     fontWeight: '300',
   },

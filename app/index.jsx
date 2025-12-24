@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   },
 
   actionGrid: {
-    marginTop: spacing.lg, // 24px
+    marginTop: spacing.xl, // 32px - increased spacing
     marginBottom: spacing.xl, // 32px
   },
 });

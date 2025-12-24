@@ -132,13 +132,13 @@ const ContinuePresentationCard = ({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    marginBottom: spacing.lg, // 24px
+    marginBottom: spacing.xl, // 32px - increased
   },
 
   card: {
     backgroundColor: lightColors.background.secondary,
     borderRadius: sizing.radiusXl, // 16px
-    padding: spacing.lg, // 24px
+    padding: spacing.xl, // 32px - increased padding
     
     // Prominent border to draw attention
     borderWidth: sizing.borderMedium, // 2px
@@ -146,31 +146,33 @@ const styles = StyleSheet.create({
     
     // Enhanced shadow for prominence
     shadowColor: lightColors.accent.gold,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
   },
 
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.md, // 16px
+    marginBottom: spacing.lg, // 24px - increased
   },
 
   iconContainer: {
-    width: spacing.xl, // 32px
-    height: spacing.xl, // 32px
+    width: spacing.xxl, // 40px - larger
+    height: spacing.xxl, // 40px
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: lightColors.accent.goldLight,
-    borderRadius: sizing.radiusSm, // 6px
+    borderRadius: sizing.radiusMd, // 8px
     marginRight: spacing.md, // 16px
+    borderWidth: sizing.borderThin,
+    borderColor: lightColors.accent.gold,
   },
 
   icon: {
-    fontSize: 18,
-    lineHeight: 18,
+    fontSize: 22, // Larger
+    lineHeight: 22,
   },
 
   headerContent: {
@@ -179,8 +181,10 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     ...typography.h3,
+    fontSize: 20, // Larger
     color: lightColors.text.primary,
-    marginBottom: spacing.xs, // 4px
+    marginBottom: spacing.xs + 2, // 6px
+    fontWeight: '600',
   },
 
   headerSubtitle: {
@@ -189,13 +193,13 @@ const styles = StyleSheet.create({
   },
 
   metadata: {
-    marginBottom: spacing.md, // 16px
+    marginBottom: spacing.lg, // 24px - increased
   },
 
   metadataRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: spacing.sm, // 8px
+    marginBottom: spacing.md, // 16px - increased
   },
 
   metadataItem: {
@@ -205,42 +209,49 @@ const styles = StyleSheet.create({
   metadataLabel: {
     ...typography.caption,
     color: lightColors.text.tertiary,
-    marginBottom: spacing.xs, // 4px
+    marginBottom: spacing.xs + 2, // 6px
     textTransform: 'uppercase',
+    letterSpacing: 1,
   },
 
   metadataValue: {
     ...typography.bodySmall,
+    fontSize: 15, // Slightly larger
     color: lightColors.text.primary,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 
   progressContainer: {
-    marginBottom: spacing.md, // 16px
+    marginBottom: spacing.lg, // 24px - increased
   },
 
   progressBar: {
-    height: 4,
+    height: 6, // Thicker
     backgroundColor: lightColors.background.tertiary,
-    borderRadius: 2,
-    marginBottom: spacing.xs, // 4px
+    borderRadius: 3,
+    marginBottom: spacing.sm, // 8px
     overflow: 'hidden',
   },
 
   progressFill: {
     height: '100%',
     backgroundColor: lightColors.accent.gold,
-    borderRadius: 2,
+    borderRadius: 3,
+    shadowColor: lightColors.accent.gold,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
   },
 
   progressText: {
     ...typography.caption,
     color: lightColors.text.secondary,
+    fontWeight: '500',
   },
 
   ctaContainer: {
     alignItems: 'center',
-    paddingTop: spacing.sm, // 8px
+    paddingTop: spacing.md, // 16px
     borderTopWidth: sizing.borderThin,
     borderTopColor: lightColors.background.tertiary,
   },
@@ -248,7 +259,8 @@ const styles = StyleSheet.create({
   ctaText: {
     ...typography.button,
     color: lightColors.accent.gold,
-    fontSize: 14,
+    fontSize: 15, // Slightly larger
+    fontWeight: '600',
   },
 });
 

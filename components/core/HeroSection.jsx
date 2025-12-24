@@ -1,20 +1,25 @@
 /**
  * HeroSection Component
- * 
+ *
  * A calm, clean hero section with refined typography and proper spacing
  * using the 8-point grid system. Features subtle animations and accessibility compliance.
  */
 
-import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
-import { lightColors, sizing, spacing, typography } from '../../theme/designSystem';
+import { useEffect, useRef } from "react";
+import { Animated, StyleSheet, Text, View } from "react-native";
+import {
+  lightColors,
+  sizing,
+  spacing,
+  typography,
+} from "../../theme/designSystem";
 
-const HeroSection = ({ 
+const HeroSection = ({
   title = "Midnight Court",
   tagline = "For your voice, for your case",
   subtitle = "Build clear, elegant decks for courtrooms and clients.",
   showAnimations = true,
-  children 
+  children,
 }) => {
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -51,30 +56,30 @@ const HeroSection = ({
       slideAnim.setValue(0);
       logoScaleAnim.setValue(1);
     }
-  }, [showAnimations]);
+  }, [fadeAnim, logoScaleAnim, showAnimations, slideAnim]);
 
   return (
     <View style={styles.container}>
       {/* Logo/Brand Mark - Animated */}
-      <Animated.View 
+      <Animated.View
         style={[
           styles.logoContainer,
           {
-            transform: [{ scale: logoScaleAnim }]
-          }
+            transform: [{ scale: logoScaleAnim }],
+          },
         ]}
       >
         <View style={styles.logoMark} />
       </Animated.View>
 
       {/* Main Content - Animated */}
-      <Animated.View 
+      <Animated.View
         style={[
           styles.content,
           {
             opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }]
-          }
+            transform: [{ translateY: slideAnim }],
+          },
         ]}
       >
         {/* Overline/Kicker */}
@@ -83,7 +88,7 @@ const HeroSection = ({
         </Text>
 
         {/* Main Title */}
-        <Text 
+        <Text
           style={styles.title}
           accessibilityRole="header"
           accessibilityLevel={1}
@@ -95,27 +100,17 @@ const HeroSection = ({
         <View style={styles.goldLine} />
 
         {/* Tagline */}
-        <Text 
-          style={styles.tagline}
-          accessibilityRole="text"
-        >
+        <Text style={styles.tagline} accessibilityRole="text">
           {tagline}
         </Text>
 
         {/* Subtitle */}
-        <Text 
-          style={styles.subtitle}
-          accessibilityRole="text"
-        >
+        <Text style={styles.subtitle} accessibilityRole="text">
           {subtitle}
         </Text>
 
         {/* Children (e.g., continue button) */}
-        {children && (
-          <View style={styles.childrenContainer}>
-            {children}
-          </View>
-        )}
+        {children && <View style={styles.childrenContainer}>{children}</View>}
       </Animated.View>
     </View>
   );
@@ -123,90 +118,95 @@ const HeroSection = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    width: "100%",
     maxWidth: 480,
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: spacing.lg, // 24px
     paddingVertical: spacing.xxxl, // 48px
   },
 
   logoContainer: {
-    marginBottom: spacing.lg, // 24px
-    alignItems: 'center',
+    marginBottom: spacing.xl, // 24px - increased
+    alignItems: "center",
   },
 
   logoMark: {
-    width: spacing.xxxxl, // 56px
-    height: spacing.xxxxl, // 56px
-    borderRadius: spacing.md, // 16px
+    width: spacing.xxxxxl, // 64px - larger
+    height: spacing.xxxxxl, // 64px
+    borderRadius: sizing.radiusLg, // 16px - more rounded
     backgroundColor: lightColors.accent.gold,
-    // Subtle shadow for depth
+    // Enhanced shadow for depth
     shadowColor: lightColors.accent.gold,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
 
   content: {
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
   },
 
   kicker: {
     ...typography.overline,
     color: lightColors.text.secondary,
-    marginBottom: spacing.xs, // 4px
-    textAlign: 'center',
+    marginBottom: spacing.sm, // 8px - increased
+    textAlign: "center",
+    letterSpacing: 1.5,
   },
 
   title: {
     ...typography.display,
+    fontSize: 36, // Larger
+    lineHeight: 44,
     color: lightColors.accent.gold,
-    textAlign: 'center',
-    marginBottom: spacing.sm, // 8px
-    // Subtle text shadow for elegance
-    textShadowColor: 'rgba(184, 134, 11, 0.2)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    textAlign: "center",
+    marginBottom: spacing.md, // 16px - increased
+    // Enhanced text shadow for elegance
+    textShadowColor: "rgba(184, 134, 11, 0.25)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
 
   goldLine: {
-    width: 80,
-    height: 3,
+    width: 100, // Wider
+    height: 4, // Thicker
     backgroundColor: lightColors.accent.gold,
-    borderRadius: sizing.radiusXs, // 4px
-    marginBottom: spacing.md, // 16px
-    // Subtle glow effect
+    borderRadius: sizing.radiusSm, // 6px
+    marginBottom: spacing.lg, // 24px - increased
+    // Enhanced glow effect
     shadowColor: lightColors.accent.gold,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 3,
   },
 
   tagline: {
     ...typography.h2,
+    fontSize: 22, // Slightly larger
     color: lightColors.accent.gold,
-    textAlign: 'center',
-    marginBottom: spacing.md, // 16px
-    lineHeight: 28,
-    letterSpacing: 0.3,
+    textAlign: "center",
+    marginBottom: spacing.lg, // 24px - increased
+    lineHeight: 32,
+    letterSpacing: 0.5,
   },
 
   subtitle: {
     ...typography.body,
+    fontSize: 17, // Slightly larger
     color: lightColors.text.secondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: spacing.xl, // 32px
-    paddingHorizontal: spacing.sm, // 8px
-    lineHeight: 24,
+    paddingHorizontal: spacing.md, // 16px
+    lineHeight: 26,
   },
 
   childrenContainer: {
-    width: '100%',
-    alignItems: 'center',
-    marginTop: spacing.md, // 16px
+    width: "100%",
+    alignItems: "center",
+    marginTop: spacing.lg, // 24px - increased
   },
 });
 
