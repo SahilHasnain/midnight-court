@@ -144,13 +144,15 @@ IMPORTANT: Every citation MUST have name, fullTitle, summary, and relevance.`;
                 relevance: { type: "number" },
                 url: { type: "string" }
               },
-              required: ["type", "name", "fullTitle", "summary", "relevance"]
+              required: ["type", "name", "fullTitle", "summary", "relevance"],
+              additionalProperties: false
             }
           },
           totalFound: { type: "number" },
           searchTime: { type: "string" }
         },
-        required: ["query", "citations", "totalFound"]
+        required: ["query", "citations", "totalFound"],
+        additionalProperties: false
       };
     } else if (action === 'details') {
       systemPrompt = `You are an expert legal analyst specializing in Indian law.`;
@@ -167,7 +169,8 @@ Include full citation, year, summary, legal significance, and key principles.`;
           summary: { type: "string" },
           significance: { type: "string" },
           keyPrinciples: { type: "array", items: { type: "string" } }
-        }
+        },
+        additionalProperties: false
       };
     }
 

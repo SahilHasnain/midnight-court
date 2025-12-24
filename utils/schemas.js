@@ -300,18 +300,20 @@ export const slideDeckSchema = {
                             type: "object",
                             properties: {
                                 type: { type: "string" },
-                                // Keep data as free-form to reduce schema complexity
-                                data: {}
+                                data: { type: "object" }
                             },
-                            required: ["type", "data"]
+                            required: ["type", "data"],
+                            additionalProperties: false
                         }
                     }
                 },
-                required: ["title", "blocks"]
+                required: ["title", "blocks"],
+                additionalProperties: false
             }
         }
     },
-    required: ["title", "totalSlides", "slides"]
+    required: ["title", "totalSlides", "slides"],
+    additionalProperties: false
 };
 
 /**
@@ -342,7 +344,7 @@ export const imageSchema = {
             description: "Relevance score",
             minimum: 0,
             maximum: 100
-        },
+        }
     },
     required: ["url", "title", "attribution", "source", "relevance"],
     additionalProperties: false
