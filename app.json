@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "midnight-court",
+    "name": "Midnight Court",
     "slug": "midnight-court",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,7 +16,8 @@
         "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.sahilhasnain.midnightcourt"
     },
     "web": {
       "output": "static",
