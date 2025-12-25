@@ -4,7 +4,7 @@
     "slug": "midnight-court",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/intro.png",
+    "icon": "./assets/mid-icon.png",
     "scheme": "midnightcourt",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -20,14 +20,14 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/intro.png"
+      "favicon": "./assets/mid-icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/intro.png",
+          "image": "./assets/mid-splash.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -41,6 +41,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "aab9716c-8c73-4297-9aa4-2c2bfb840cc7"
+      }
     }
   }
 }
