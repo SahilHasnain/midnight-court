@@ -82,10 +82,16 @@ export default async ({ req, res, log, error }) => {
       );
     }
 
-    // Robust body parsing: Appwrite may provide an object or a string
-    const payload =
-      typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-    const { query, action = "search" } = payload || {};
+    // Parse request body
+    let payload;
+    try {
+      payload = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    } catch (parseError) {
+      error(`Body parse error: ${parseError.message}`);
+      return res.json({ error: "Invalid JSON in request body" }, 400);
+    }
+
+    const { query, action = "search" } = payload;
 
     if (!query) {
       return res.json({ error: "Query is required" }, 400);

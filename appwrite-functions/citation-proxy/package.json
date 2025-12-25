@@ -1,12 +1,15 @@
 {
   "name": "citation-proxy",
   "version": "1.0.0",
-  "description": "Appwrite function to proxy citation search via Gemini",
+  "description": "Appwrite function to proxy citation search via OpenAI",
   "main": "src/main.js",
   "type": "module",
   "scripts": {
     "test": "echo \"No tests\" && exit 0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "node-appwrite": "^13.0.0",
+    "openai": "^4.0.0"
+  },
   "devDependencies": {}
 }
