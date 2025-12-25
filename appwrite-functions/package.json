@@ -6,11 +6,11 @@
   "type": "module",
   "scripts": {
     "test": "echo \"No tests\" && exit 0",
-    "build": "echo \"Build script not defined\" && exit 0"
+    "build": "node init && echo \"Build script not defined\" && exit 0"
   },
   "dependencies": {
     "node-appwrite": "^21.0.0",
-     "openai": "^6.15.0"
+    "openai": "^6.15.0"
   },
   "devDependencies": {}
 }
