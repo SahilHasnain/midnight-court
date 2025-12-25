@@ -4,7 +4,9 @@ export default async ({ req, res, log, error }) => {
   }
 
   try {
-    const { query, source = 'pexels' } = JSON.parse(req.body);
+    // Robust body parsing: Appwrite may provide an object or a string
+    const payload = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const { query, source = 'pexels' } = payload || {};
 
     if (!query) {
       return res.json({ error: 'Query is required' }, 400);
@@ -16,7 +18,11 @@ export default async ({ req, res, log, error }) => {
     log(`Image search: ${query} (source: ${source})`);
 
     let apiUrl = '';
-    let headers = {};
+    // Some providers require explicit headers; include common defaults
+    let headers = {
+      Accept: 'application/json',
+      'User-Agent': 'MidnightCourt/1.0 (Appwrite Function)'
+    };
 
     if (source === 'unsplash') {
       if (!unsplashKey) {
@@ -24,21 +30,34 @@ export default async ({ req, res, log, error }) => {
         return res.json({ error: 'Unsplash not configured' }, 500);
       }
       apiUrl = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=20&orientation=portrait`;
-      headers = { Authorization: `Client-ID ${unsplashKey}` };
+      headers = {
+        ...headers,
+        Authorization: `Client-ID ${unsplashKey}`,
+        'Accept-Version': 'v1'
+      };
     } else {
       if (!pexelsKey) {
         error('PEXELS_KEY not configured');
         return res.json({ error: 'Pexels not configured' }, 500);
       }
       apiUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=20&orientation=portrait`;
-      headers = { Authorization: pexelsKey };
+      headers = {
+        ...headers,
+        Authorization: pexelsKey
+      };
     }
 
     const response = await fetch(apiUrl, { headers });
 
     if (!response.ok) {
-      error(`${source} API error: ${response.status}`);
-      return res.json({ error: `${source} API failed` }, response.status);
+      let bodyText = '';
+      try {
+        bodyText = await response.text();
+      } catch (e) {
+        bodyText = '(no body)';
+      }
+      error(`${source} API error: ${response.status} - ${bodyText}`);
+      return res.json({ error: `${source} API failed`, details: bodyText }, response.status);
     }
 
     const data = await response.json();
