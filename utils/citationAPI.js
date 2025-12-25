@@ -5,10 +5,9 @@ import { Alert } from "react-native";
 
 const callCitationFunction = async (payload) => {
   const url = process.env.EXPO_PUBLIC_CITATION_FUNCTION_URL;
-
   if (!url) {
     throw new Error(
-      "EXPO_PUBLIC_CITATION_FUNCTION_URL not configured in environment"
+      "Citation function URL not configured (EXPO_PUBLIC_CITATION_FUNCTION_URL)"
     );
   }
 
@@ -16,28 +15,98 @@ const callCitationFunction = async (payload) => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
     },
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    if (errorData.error === "AI_LIMIT_EXCEEDED") {
-      Alert.alert(
-        "Usage Limit Reached",
-        errorData.message || "You have reached your AI usage limit."
-      );
-      throw new Error("AI_LIMIT_EXCEEDED");
+    let bodyText = "";
+    try {
+      bodyText = await response.text();
+    } catch (_e) {
+      bodyText = "";
     }
-    console.error("Citation function error:", response.status, errorData);
+
+    // Try to parse as JSON for specific error handling
+    try {
+      const errorData = JSON.parse(bodyText);
+      if (errorData.error === "AI_LIMIT_EXCEEDED") {
+        Alert.alert(
+          "Usage Limit Reached",
+          errorData.message || "You have reached your AI usage limit."
+        );
+        throw new Error("AI_LIMIT_EXCEEDED");
+      }
+    } catch (_e) {
+      // Not JSON, continue with generic error
+    }
+
     throw new Error(
-      `Citation function failed: ${response.status} - ${
-        errorData.error || "Unknown error"
+      `Citation function failed: ${response.status}${
+        bodyText ? ` - ${bodyText}` : ""
       }`
     );
   }
 
-  return await response.json();
+  // Handle both Appwrite execution wrapper and direct JSON response
+  let parsed;
+  const contentType = response.headers?.get?.("content-type") || "";
+  if (contentType.includes("application/json")) {
+    parsed = await response.json();
+  } else {
+    const text = await response.text();
+    try {
+      parsed = JSON.parse(text);
+    } catch (_err) {
+      throw new Error(
+        `Invalid JSON from citation function: ${
+          text?.slice(0, 200) || "(empty)"
+        }`
+      );
+    }
+  }
+
+  // If this is an Appwrite execution wrapper
+  if (
+    parsed &&
+    typeof parsed === "object" &&
+    "status" in parsed &&
+    ("responseBody" in parsed || "stderr" in parsed)
+  ) {
+    if (parsed.status === "failed") {
+      throw new Error(
+        `Function execution failed: ${parsed.stderr || "unknown error"}`
+      );
+    }
+    const body = parsed.responseBody;
+    if (typeof body === "string") {
+      try {
+        return JSON.parse(body);
+      } catch (_err) {
+        throw new Error(`Invalid responseBody JSON: ${body.slice(0, 200)}`);
+      }
+    }
+    return body;
+  }
+
+  // Direct JSON response from proxy
+  if (parsed && parsed.error) {
+    if (parsed.error === "AI_LIMIT_EXCEEDED") {
+      Alert.alert(
+        "Usage Limit Reached",
+        parsed.message || "You have reached your AI usage limit."
+      );
+      throw new Error("AI_LIMIT_EXCEEDED");
+    }
+    throw new Error(
+      `Citation proxy error: ${parsed.error}${
+        parsed.details ? ` - ${parsed.details}` : ""
+      }`
+    );
+  }
+
+  return parsed;
 };
 
 /**
