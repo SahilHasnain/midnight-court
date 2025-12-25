@@ -1,6 +1,12 @@
 {
+  "cli": {
+    "version": ">= 16.28.0",
+    "appVersionSource": "remote"
+  },
   "build": {
     "development": {
+      "developmentClient": true,
+      "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_OPENAI_FUNCTION_URL": "https://6946fabd00348ef83af0.fra.appwrite.run",
         "EXPO_PUBLIC_IMAGE_FUNCTION_URL": "https://694ac947000d4edb037e.fra.appwrite.run",
@@ -9,6 +15,7 @@
       }
     },
     "preview": {
+      "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_OPENAI_FUNCTION_URL": "https://6946fabd00348ef83af0.fra.appwrite.run",
         "EXPO_PUBLIC_IMAGE_FUNCTION_URL": "https://694ac947000d4edb037e.fra.appwrite.run",
@@ -17,6 +24,7 @@
       }
     },
     "production": {
+      "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_OPENAI_FUNCTION_URL": "https://6946fabd00348ef83af0.fra.appwrite.run",
         "EXPO_PUBLIC_IMAGE_FUNCTION_URL": "https://694ac947000d4edb037e.fra.appwrite.run",
@@ -24,5 +32,8 @@
         "EXPO_PUBLIC_AI_PIN": "9322"
       }
     }
+  },
+  "submit": {
+    "production": {}
   }
 }
