@@ -3,6 +3,7 @@ import * as Clipboard from "expo-clipboard";
 import { useState } from "react";
 import {
   ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -11,9 +12,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import CitationSearchModal from "../components/CitationSearchModal";
 import Toast from "../components/Toast";
-import { lightColors, typography, sizing } from "../theme/designSystem";
-import { StyleSheet } from "react-native";
-import { spacing } from "../theme/designSystem";
+import {
+  lightColors,
+  sizing,
+  spacing,
+  typography,
+} from "../theme/designSystem";
 
 export default function CitationFormatterScreen() {
   const [caseName, setCaseName] = useState(
@@ -91,7 +95,7 @@ export default function CitationFormatterScreen() {
             Format legal citations instantly in multiple styles
           </Text>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.aiSearchButton}
             onPress={() => setShowCitationSearch(true)}
             accessibilityLabel="Open AI Citation Search"
@@ -106,7 +110,7 @@ export default function CitationFormatterScreen() {
             </View>
             <Text style={styles.aiSearchText}>AI Citation Search</Text>
             <Text style={styles.aiSearchEmoji}>✨</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Input Form */}

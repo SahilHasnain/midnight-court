@@ -1,35 +1,43 @@
 /**
  * Citation API - Proxy via Appwrite Functions
  */
-import { Alert } from 'react-native';
+import { Alert } from "react-native";
 
 const callCitationFunction = async (payload) => {
-  const url = process.env.EXPO_PUBLIC_CITATION_FUNCTION_URL; // Will be set from env
+  const url = process.env.EXPO_PUBLIC_CITATION_FUNCTION_URL;
+
+  if (!url) {
+    throw new Error(
+      "EXPO_PUBLIC_CITATION_FUNCTION_URL not configured in environment"
+    );
+  }
 
   const response = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    if (errorData.error === 'AI_LIMIT_EXCEEDED') {
-      Alert.alert('Usage Limit Reached', errorData.message || 'You have reached your AI usage limit.');
-      throw new Error('AI_LIMIT_EXCEEDED');
+    const errorData = await response.json().catch(() => ({}));
+    if (errorData.error === "AI_LIMIT_EXCEEDED") {
+      Alert.alert(
+        "Usage Limit Reached",
+        errorData.message || "You have reached your AI usage limit."
+      );
+      throw new Error("AI_LIMIT_EXCEEDED");
     }
-    throw new Error(`Citation function failed: ${response.status}`);
+    console.error("Citation function error:", response.status, errorData);
+    throw new Error(
+      `Citation function failed: ${response.status} - ${
+        errorData.error || "Unknown error"
+      }`
+    );
   }
 
-  const execution = await response.json();
-
-  if (execution.status === 'failed') {
-    throw new Error(`Function execution failed: ${execution.stderr}`);
-  }
-
-  return JSON.parse(execution.responseBody);
+  return await response.json();
 };
 
 /**
@@ -41,17 +49,17 @@ export const findCitations = async (query) => {
       query,
       citations: [],
       totalFound: 0,
-      searchTime: "0ms"
+      searchTime: "0ms",
     };
   }
 
-  console.log('🤖 Citation search:', query);
+  console.log("🤖 Citation search:", query);
   const startTime = Date.now();
 
   try {
     const response = await callCitationFunction({
       query,
-      action: 'search'
+      action: "search",
     });
 
     if (!response?.candidates?.[0]?.content?.parts?.[0]?.text) {
@@ -61,8 +69,12 @@ export const findCitations = async (query) => {
     const result = JSON.parse(response.candidates[0].content.parts[0].text);
 
     // Filter valid citations
-    const validCitations = result.citations.filter(citation =>
-      citation.name && citation.fullTitle && citation.summary && typeof citation.relevance === 'number'
+    const validCitations = result.citations.filter(
+      (citation) =>
+        citation.name &&
+        citation.fullTitle &&
+        citation.summary &&
+        typeof citation.relevance === "number"
     );
 
     const searchTime = `${Date.now() - startTime}ms`;
@@ -85,12 +97,12 @@ export const findCitations = async (query) => {
  * Get detailed information about a specific citation
  */
 export const getCitationDetails = async (citationName) => {
-  console.log('🤖 Fetching citation details:', citationName);
+  console.log("🤖 Fetching citation details:", citationName);
 
   try {
     const response = await callCitationFunction({
       query: citationName,
-      action: 'details'
+      action: "details",
     });
 
     if (!response?.candidates?.[0]?.content?.parts?.[0]?.text) {
@@ -98,10 +110,10 @@ export const getCitationDetails = async (citationName) => {
     }
 
     const result = JSON.parse(response.candidates[0].content.parts[0].text);
-    console.log('✅ Citation details retrieved');
+    console.log("✅ Citation details retrieved");
     return result;
   } catch (error) {
-    console.error('❌ Failed to get citation details:', error);
+    console.error("❌ Failed to get citation details:", error);
     throw error;
   }
 };
@@ -110,7 +122,7 @@ export const getCitationDetails = async (citationName) => {
  * Verify if a citation is accurate
  */
 export const verifyCitation = async (citation) => {
-  console.log('🔍 Verifying citation:', citation);
+  console.log("🔍 Verifying citation:", citation);
   return getCitationDetails(citation);
 };
 
@@ -118,7 +130,7 @@ export const verifyCitation = async (citation) => {
  * Get related citations
  */
 export const getRelatedCitations = async (citation) => {
-  console.log('🔗 Finding related citations:', citation);
+  console.log("🔗 Finding related citations:", citation);
   return findCitations(`related citations for ${citation}`);
 };
 
@@ -126,6 +138,6 @@ export const getRelatedCitations = async (citation) => {
  * Search citations by topic
  */
 export const searchByTopic = async (topic) => {
-  console.log('📚 Searching by topic:', topic);
+  console.log("📚 Searching by topic:", topic);
   return findCitations(topic);
 };

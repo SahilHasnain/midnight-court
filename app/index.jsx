@@ -1,13 +1,15 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { router } from "expo-router"
-import { useEffect, useState } from "react"
-import { ScrollView, StyleSheet } from "react-native"
-import { SafeAreaView } from 'react-native-safe-area-context'
-import SlideGeneratorModal from "../components/SlideGeneratorModal"
-import ActionGrid, { createDefaultActions } from "../components/core/ActionGrid"
-import ContinuePresentationCard from "../components/core/ContinuePresentationCard"
-import HeroSection from "../components/core/HeroSection"
-import { lightColors, spacing } from "../theme/designSystem"
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { ScrollView, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import SlideGeneratorModal from "../components/SlideGeneratorModal";
+import ActionGrid, {
+  createDefaultActions,
+} from "../components/core/ActionGrid";
+import ContinuePresentationCard from "../components/core/ContinuePresentationCard";
+import HeroSection from "../components/core/HeroSection";
+import { lightColors, spacing } from "../theme/designSystem";
 
 export default function Index() {
   const [hasSavedPresentation, setHasSavedPresentation] = useState(false);
@@ -17,14 +19,14 @@ export default function Index() {
   useEffect(() => {
     const checkSaved = async () => {
       try {
-        const saved = await AsyncStorage.getItem('current_presentation');
+        const saved = await AsyncStorage.getItem("current_presentation");
         if (saved) {
           const data = JSON.parse(saved);
           setHasSavedPresentation(true);
           setSavedData(data);
         }
       } catch (error) {
-        console.error('Failed to check saved presentation:', error);
+        console.error("Failed to check saved presentation:", error);
       }
     };
     checkSaved();
@@ -34,7 +36,7 @@ export default function Index() {
     if (savedData && savedData.template) {
       router.push({
         pathname: "/editor",
-        params: { template: savedData.template }
+        params: { template: savedData.template },
       });
     }
   };
@@ -43,28 +45,31 @@ export default function Index() {
     try {
       const presentationData = {
         slides,
-        template: 'custom',
-        lastModified: new Date().toISOString()
+        template: "custom",
+        lastModified: new Date().toISOString(),
       };
-      await AsyncStorage.setItem('current_presentation', JSON.stringify(presentationData));
+      await AsyncStorage.setItem(
+        "current_presentation",
+        JSON.stringify(presentationData)
+      );
       router.push({
         pathname: "/editor",
-        params: { template: 'custom' }
+        params: { template: "custom" },
       });
     } catch (error) {
-      console.error('Failed to save generated slides:', error);
+      console.error("Failed to save generated slides:", error);
     }
   };
 
   // Create actions with proper navigation handlers
   const actions = createDefaultActions(router);
-  
+
   // Update AI generator action to show modal
-  const updatedActions = actions.map(action => {
-    if (action.id === 'ai-generator') {
+  const updatedActions = actions.map((action) => {
+    if (action.id === "ai-generator") {
       return {
         ...action,
-        onPress: () => setShowSlideGenerator(true)
+        onPress: () => setShowSlideGenerator(true),
       };
     }
     return action;
@@ -72,7 +77,7 @@ export default function Index() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
@@ -88,10 +93,7 @@ export default function Index() {
         </HeroSection>
 
         {/* Action Grid */}
-        <ActionGrid 
-          actions={updatedActions}
-          style={styles.actionGrid}
-        />
+        <ActionGrid actions={updatedActions} style={styles.actionGrid} />
       </ScrollView>
 
       <SlideGeneratorModal
@@ -100,7 +102,7 @@ export default function Index() {
         onUseSlides={handleUseGeneratedSlides}
       />
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -111,11 +113,11 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: spacing.lg, // 24px
     paddingVertical: spacing.xl, // 32px
-    minHeight: '100%',
+    minHeight: "100%",
   },
 
   actionGrid: {
