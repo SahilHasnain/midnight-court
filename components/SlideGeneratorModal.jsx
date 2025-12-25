@@ -46,6 +46,13 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
   const [prefilledImageKeyword, setPrefilledImageKeyword] = useState(null);
   const [targetSlideForImage, setTargetSlideForImage] = useState(null);
 
+  // Refinement state
+  const [refinementMode, setRefinementMode] = useState(false);
+  const [refinementInput, setRefinementInput] = useState("");
+  const [refinementLoading, setRefinementLoading] = useState(false);
+  const [preservedSlides, setPreservedSlides] = useState([]);
+  const [refinementChanges, setRefinementChanges] = useState([]);
+
   // Debounce timer ref
   const debounceTimerRef = useRef(null);
 
@@ -171,7 +178,8 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
       const cacheMsg = result.fromCache ? " (from cache)" : "";
       Alert.alert(
         "Success! 🎉",
-        `Generated ${result.slides?.length || 0
+        `Generated ${
+          result.slides?.length || 0
         } slides${cacheMsg}\n\nReview and tap "Use These Slides" to replace your current presentation.`
       );
     } catch (error) {
@@ -193,8 +201,10 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
 
     Alert.alert(
       "Replace Slides?",
-      `This will replace your current ${onUseSlides ? "presentation" : "slides"
-      } with ${generatedSlides.slides.length
+      `This will replace your current ${
+        onUseSlides ? "presentation" : "slides"
+      } with ${
+        generatedSlides.slides.length
       } new slides. This cannot be undone.`,
       [
         {
@@ -220,6 +230,10 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
     setSelectedTemplate(null);
     setSuggestedTemplate(null);
     setExpandedSlides({});
+    setRefinementMode(false);
+    setRefinementInput("");
+    setPreservedSlides([]);
+    setRefinementChanges([]);
     onClose();
   };
 
@@ -300,7 +314,8 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
 
     Alert.alert(
       "Success! 🎉",
-      `Image added as background to Slide ${slideIndex + 1
+      `Image added as background to Slide ${
+        slideIndex + 1
       }. You can see it when you use these slides.`
     );
   };
@@ -336,7 +351,8 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
 
     Alert.alert(
       "Success! 🎉",
-      `Image will appear inline with content in Slide ${slideIndex + 1
+      `Image will appear inline with content in Slide ${
+        slideIndex + 1
       }. You can see it when you use these slides.`
     );
   };
@@ -375,9 +391,93 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
 
     Alert.alert(
       "Success! 🎉",
-      `Image added as a separate block to Slide ${slideIndex + 1
+      `Image added as a separate block to Slide ${
+        slideIndex + 1
       }. You can see it when you use these slides.`
     );
+  };
+
+  const handleRefineSlides = async () => {
+    if (!refinementInput.trim()) {
+      Alert.alert("Error", "Please enter refinement instructions");
+      return;
+    }
+
+    if (!generatedSlides) {
+      Alert.alert("Error", "No slides to refine");
+      return;
+    }
+
+    setRefinementLoading(true);
+    try {
+      console.log("🔄 Refining slides...");
+      console.log(`📝 Instructions: ${refinementInput}`);
+
+      // Use refinement handler to refine slides
+      const result = await refinementHandler.refineSlides(
+        generatedSlides,
+        refinementInput,
+        {
+          preserveSlides: preservedSlides,
+          generateFunction: async (prompt, options) => {
+            // Call generateSlides with refinement context
+            return await generateSlides(prompt, {
+              desiredSlideCount: generatedSlides.slides.length,
+              template: selectedTemplate,
+              isRefinement: true,
+            });
+          },
+        }
+      );
+
+      console.log("✅ Refinement complete:", result);
+
+      // Update slides with refined version
+      setGeneratedSlides(result.slides);
+      setRefinementChanges(result.changes);
+
+      // Show success message with changes summary
+      const changesCount = result.changes.length;
+      const modifiedSlides = result.changes
+        .filter((c) => c.slideIndex !== undefined)
+        .map((c) => c.slideIndex + 1)
+        .filter((v, i, a) => a.indexOf(v) === i); // unique
+
+      Alert.alert(
+        "Refinement Complete! 🎉",
+        `${changesCount} changes made across ${
+          modifiedSlides.length
+        } slide(s).\n\nModified slides: ${modifiedSlides.join(", ")}`
+      );
+
+      // Clear refinement input and exit refinement mode
+      setRefinementInput("");
+      setRefinementMode(false);
+    } catch (error) {
+      console.error("❌ Refinement error:", error);
+      Alert.alert(
+        "Refinement Failed",
+        error.message || "Failed to refine slides. Please try again."
+      );
+    } finally {
+      setRefinementLoading(false);
+    }
+  };
+
+  const toggleSlidePreservation = (slideIndex) => {
+    setPreservedSlides((prev) => {
+      if (prev.includes(slideIndex)) {
+        return prev.filter((idx) => idx !== slideIndex);
+      } else {
+        return [...prev, slideIndex];
+      }
+    });
+  };
+
+  const handleCancelRefinement = () => {
+    setRefinementMode(false);
+    setRefinementInput("");
+    setPreservedSlides([]);
   };
 
   const calculateSlideMetadata = (slide) => {
@@ -640,8 +740,8 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                       style={[
                         styles.charCount,
                         input.length < 100 &&
-                        input.length > 0 &&
-                        styles.charCountWarning,
+                          input.length > 0 &&
+                          styles.charCountWarning,
                         input.length > 3000 && styles.charCountError,
                       ]}
                     >
@@ -664,12 +764,12 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           style={[
                             styles.completenessScore,
                             inputAnalysis.completeness >= 70 &&
-                            styles.completenessGood,
+                              styles.completenessGood,
                             inputAnalysis.completeness >= 40 &&
-                            inputAnalysis.completeness < 70 &&
-                            styles.completenessOkay,
+                              inputAnalysis.completeness < 70 &&
+                              styles.completenessOkay,
                             inputAnalysis.completeness < 40 &&
-                            styles.completenessLow,
+                              styles.completenessLow,
                           ]}
                         >
                           <Text style={styles.completenessText}>
@@ -699,14 +799,14 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           style={[
                             styles.elementChip,
                             inputAnalysis.elements.hasFacts &&
-                            styles.elementPresent,
+                              styles.elementPresent,
                           ]}
                         >
                           <Text
                             style={[
                               styles.elementText,
                               inputAnalysis.elements.hasFacts &&
-                              styles.elementTextPresent,
+                                styles.elementTextPresent,
                             ]}
                           >
                             {inputAnalysis.elements.hasFacts ? "✓" : "○"} Facts
@@ -716,14 +816,14 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           style={[
                             styles.elementChip,
                             inputAnalysis.elements.hasLegalIssues &&
-                            styles.elementPresent,
+                              styles.elementPresent,
                           ]}
                         >
                           <Text
                             style={[
                               styles.elementText,
                               inputAnalysis.elements.hasLegalIssues &&
-                              styles.elementTextPresent,
+                                styles.elementTextPresent,
                             ]}
                           >
                             {inputAnalysis.elements.hasLegalIssues ? "✓" : "○"}{" "}
@@ -734,14 +834,14 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           style={[
                             styles.elementChip,
                             inputAnalysis.elements.hasStatutes &&
-                            styles.elementPresent,
+                              styles.elementPresent,
                           ]}
                         >
                           <Text
                             style={[
                               styles.elementText,
                               inputAnalysis.elements.hasStatutes &&
-                              styles.elementTextPresent,
+                                styles.elementTextPresent,
                             ]}
                           >
                             {inputAnalysis.elements.hasStatutes ? "✓" : "○"}{" "}
@@ -752,14 +852,14 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           style={[
                             styles.elementChip,
                             inputAnalysis.elements.hasArguments &&
-                            styles.elementPresent,
+                              styles.elementPresent,
                           ]}
                         >
                           <Text
                             style={[
                               styles.elementText,
                               inputAnalysis.elements.hasArguments &&
-                              styles.elementTextPresent,
+                                styles.elementTextPresent,
                             ]}
                           >
                             {inputAnalysis.elements.hasArguments ? "✓" : "○"}{" "}
@@ -770,14 +870,14 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           style={[
                             styles.elementChip,
                             inputAnalysis.elements.hasEvidence &&
-                            styles.elementPresent,
+                              styles.elementPresent,
                           ]}
                         >
                           <Text
                             style={[
                               styles.elementText,
                               inputAnalysis.elements.hasEvidence &&
-                              styles.elementTextPresent,
+                                styles.elementTextPresent,
                             ]}
                           >
                             {inputAnalysis.elements.hasEvidence ? "✓" : "○"}{" "}
@@ -788,14 +888,14 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           style={[
                             styles.elementChip,
                             inputAnalysis.elements.hasCitations &&
-                            styles.elementPresent,
+                              styles.elementPresent,
                           ]}
                         >
                           <Text
                             style={[
                               styles.elementText,
                               inputAnalysis.elements.hasCitations &&
-                              styles.elementTextPresent,
+                                styles.elementTextPresent,
                             ]}
                           >
                             {inputAnalysis.elements.hasCitations ? "✓" : "○"}{" "}
@@ -840,9 +940,9 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           style={[
                             styles.slideCountButton,
                             desiredSlideCount === count &&
-                            styles.slideCountButtonActive,
+                              styles.slideCountButtonActive,
                             count === inputAnalysis?.estimatedSlideCount &&
-                            styles.slideCountButtonSuggested,
+                              styles.slideCountButtonSuggested,
                           ]}
                           onPress={() => {
                             Haptics.impactAsync(
@@ -856,7 +956,7 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                             style={[
                               styles.slideCountButtonText,
                               desiredSlideCount === count &&
-                              styles.slideCountButtonTextActive,
+                                styles.slideCountButtonTextActive,
                             ]}
                           >
                             {count}
@@ -912,7 +1012,7 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           style={[
                             styles.templateName,
                             selectedTemplate === null &&
-                            styles.templateNameSelected,
+                              styles.templateNameSelected,
                           ]}
                         >
                           No Template
@@ -941,9 +1041,9 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           styles.templateCard,
                           styles.templateCardHorizontal,
                           selectedTemplate === template.type &&
-                          styles.templateCardSelected,
+                            styles.templateCardSelected,
                           suggestedTemplate === template.type &&
-                          styles.templateCardSuggested,
+                            styles.templateCardSuggested,
                         ]}
                         onPress={() => {
                           Haptics.impactAsync(
@@ -963,7 +1063,7 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                 style={[
                                   styles.templateName,
                                   selectedTemplate === template.type &&
-                                  styles.templateNameSelected,
+                                    styles.templateNameSelected,
                                 ]}
                               >
                                 {template.name}
@@ -1160,7 +1260,7 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                     style={[
                       styles.generateButton,
                       (loading || input.length < 100) &&
-                      styles.generateButtonDisabled,
+                        styles.generateButtonDisabled,
                     ]}
                     onPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -1273,12 +1373,12 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           style={[
                             styles.statValue,
                             generatedSlides.validation.score >= 80 &&
-                            styles.qualityExcellent,
+                              styles.qualityExcellent,
                             generatedSlides.validation.score >= 60 &&
-                            generatedSlides.validation.score < 80 &&
-                            styles.qualityGood,
+                              generatedSlides.validation.score < 80 &&
+                              styles.qualityGood,
                             generatedSlides.validation.score < 60 &&
-                            styles.qualityPoor,
+                              styles.qualityPoor,
                           ]}
                         >
                           {generatedSlides.validation.score}
@@ -1300,12 +1400,12 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                         style={[
                           styles.qualityOverallCard,
                           generatedSlides.validation.score >= 80 &&
-                          styles.qualityCardExcellent,
+                            styles.qualityCardExcellent,
                           generatedSlides.validation.score >= 60 &&
-                          generatedSlides.validation.score < 80 &&
-                          styles.qualityCardGood,
+                            generatedSlides.validation.score < 80 &&
+                            styles.qualityCardGood,
                           generatedSlides.validation.score < 60 &&
-                          styles.qualityCardPoor,
+                            styles.qualityCardPoor,
                         ]}
                       >
                         <View style={styles.qualityOverallHeader}>
@@ -1317,12 +1417,12 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                               style={[
                                 styles.qualityBadge,
                                 generatedSlides.validation.score >= 80 &&
-                                styles.qualityBadgeExcellent,
+                                  styles.qualityBadgeExcellent,
                                 generatedSlides.validation.score >= 60 &&
-                                generatedSlides.validation.score < 80 &&
-                                styles.qualityBadgeGood,
+                                  generatedSlides.validation.score < 80 &&
+                                  styles.qualityBadgeGood,
                                 generatedSlides.validation.score < 60 &&
-                                styles.qualityBadgePoor,
+                                  styles.qualityBadgePoor,
                               ]}
                             >
                               {generatedSlides.validation.score >= 80 &&
@@ -1370,14 +1470,14 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                     width: `${generatedSlides.validation.scores.structure}%`,
                                   },
                                   generatedSlides.validation.scores.structure >=
-                                  80 && styles.progressExcellent,
+                                    80 && styles.progressExcellent,
                                   generatedSlides.validation.scores.structure >=
-                                  60 &&
-                                  generatedSlides.validation.scores
-                                    .structure < 80 &&
-                                  styles.progressGood,
+                                    60 &&
+                                    generatedSlides.validation.scores
+                                      .structure < 80 &&
+                                    styles.progressGood,
                                   generatedSlides.validation.scores.structure <
-                                  60 && styles.progressPoor,
+                                    60 && styles.progressPoor,
                                 ]}
                               />
                             </View>
@@ -1405,12 +1505,12 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                   },
                                   generatedSlides.validation.scores
                                     .legalAccuracy >= 80 &&
-                                  styles.progressExcellent,
+                                    styles.progressExcellent,
                                   generatedSlides.validation.scores
                                     .legalAccuracy >= 60 &&
-                                  generatedSlides.validation.scores
-                                    .legalAccuracy < 80 &&
-                                  styles.progressGood,
+                                    generatedSlides.validation.scores
+                                      .legalAccuracy < 80 &&
+                                    styles.progressGood,
                                   generatedSlides.validation.scores
                                     .legalAccuracy < 60 && styles.progressPoor,
                                 ]}
@@ -1437,14 +1537,14 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                   },
                                   generatedSlides.validation.scores
                                     .formatting >= 80 &&
-                                  styles.progressExcellent,
+                                    styles.progressExcellent,
                                   generatedSlides.validation.scores
                                     .formatting >= 60 &&
-                                  generatedSlides.validation.scores
-                                    .formatting < 80 &&
-                                  styles.progressGood,
+                                    generatedSlides.validation.scores
+                                      .formatting < 80 &&
+                                    styles.progressGood,
                                   generatedSlides.validation.scores.formatting <
-                                  60 && styles.progressPoor,
+                                    60 && styles.progressPoor,
                                 ]}
                               />
                             </View>
@@ -1468,14 +1568,14 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                     width: `${generatedSlides.validation.scores.relevance}%`,
                                   },
                                   generatedSlides.validation.scores.relevance >=
-                                  80 && styles.progressExcellent,
+                                    80 && styles.progressExcellent,
                                   generatedSlides.validation.scores.relevance >=
-                                  60 &&
-                                  generatedSlides.validation.scores
-                                    .relevance < 80 &&
-                                  styles.progressGood,
+                                    60 &&
+                                    generatedSlides.validation.scores
+                                      .relevance < 80 &&
+                                    styles.progressGood,
                                   generatedSlides.validation.scores.relevance <
-                                  60 && styles.progressPoor,
+                                    60 && styles.progressPoor,
                                 ]}
                               />
                             </View>
@@ -1499,11 +1599,11 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                   style={[
                                     styles.qualityIssueItem,
                                     issue.severity === "error" &&
-                                    styles.issueError,
+                                      styles.issueError,
                                     issue.severity === "warning" &&
-                                    styles.issueWarning,
+                                      styles.issueWarning,
                                     issue.severity === "info" &&
-                                    styles.issueInfo,
+                                      styles.issueInfo,
                                   ]}
                                 >
                                   <View style={styles.issueHeader}>
@@ -1803,7 +1903,7 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                         style={[
                                           styles.imageKeywordButtonEnhanced,
                                           isHighRelevance &&
-                                          styles.imageKeywordButtonHighRelevance,
+                                            styles.imageKeywordButtonHighRelevance,
                                         ]}
                                         onPress={() => {
                                           Haptics.impactAsync(
@@ -1913,7 +2013,7 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                     style={[
                                       styles.recommendedBadgeSmall,
                                       slide.blocks?.length <= 2 &&
-                                      styles.recommendedBadgeVisible,
+                                        styles.recommendedBadgeVisible,
                                     ]}
                                   >
                                     <Text style={styles.recommendedBadgeText}>
@@ -1960,7 +2060,7 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                                     style={[
                                       styles.recommendedBadgeSmall,
                                       slide.blocks?.length >= 3 &&
-                                      styles.recommendedBadgeVisible,
+                                        styles.recommendedBadgeVisible,
                                     ]}
                                   >
                                     <Text style={styles.recommendedBadgeText}>
@@ -1983,6 +2083,227 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                     );
                   })}
                 </View>
+
+                {/* Refinement Section */}
+                {!refinementMode ? (
+                  <View style={styles.section}>
+                    <TouchableOpacity
+                      style={styles.refineButton}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setRefinementMode(true);
+                      }}
+                    >
+                      <Text style={styles.refineButtonText}>
+                        ✨ Refine Slides
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={styles.refineHint}>
+                      Make targeted improvements to generated slides
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={styles.section}>
+                    <View style={styles.refinementHeader}>
+                      <Text style={styles.sectionTitle}>
+                        ✨ Refine Your Slides
+                      </Text>
+                      <TouchableOpacity
+                        style={styles.cancelRefinementButton}
+                        onPress={handleCancelRefinement}
+                      >
+                        <Text style={styles.cancelRefinementText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <Text style={styles.sectionHint}>
+                      Describe what you'd like to change or improve
+                    </Text>
+
+                    <TextInput
+                      style={styles.refinementInput}
+                      value={refinementInput}
+                      onChangeText={setRefinementInput}
+                      placeholder="E.g., 'Add more detail to slide 3', 'Expand arguments section', 'Make slides more concise'..."
+                      placeholderTextColor={colors.textSecondary}
+                      multiline
+                      numberOfLines={4}
+                      textAlignVertical="top"
+                      editable={!refinementLoading}
+                    />
+
+                    {/* Refinement Suggestions */}
+                    <View style={styles.refinementSuggestions}>
+                      <Text style={styles.refinementSuggestionsTitle}>
+                        💡 Quick Refinement Ideas:
+                      </Text>
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        style={styles.suggestionChipsScroll}
+                      >
+                        <TouchableOpacity
+                          style={styles.suggestionChip}
+                          onPress={() =>
+                            setRefinementInput("Add more legal citations")
+                          }
+                          disabled={refinementLoading}
+                        >
+                          <Text style={styles.suggestionChipText}>
+                            📚 Add citations
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.suggestionChip}
+                          onPress={() =>
+                            setRefinementInput("Expand the arguments section")
+                          }
+                          disabled={refinementLoading}
+                        >
+                          <Text style={styles.suggestionChipText}>
+                            📝 Expand arguments
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.suggestionChip}
+                          onPress={() =>
+                            setRefinementInput("Make content more concise")
+                          }
+                          disabled={refinementLoading}
+                        >
+                          <Text style={styles.suggestionChipText}>
+                            ✂️ Make concise
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.suggestionChip}
+                          onPress={() =>
+                            setRefinementInput("Add more evidence details")
+                          }
+                          disabled={refinementLoading}
+                        >
+                          <Text style={styles.suggestionChipText}>
+                            🔍 Add evidence
+                          </Text>
+                        </TouchableOpacity>
+                      </ScrollView>
+                    </View>
+
+                    {/* Slide Preservation Options */}
+                    <View style={styles.preservationSection}>
+                      <Text style={styles.preservationTitle}>
+                        🔒 Preserve Specific Slides (Optional)
+                      </Text>
+                      <Text style={styles.preservationHint}>
+                        Tap slides you want to keep unchanged during refinement
+                      </Text>
+                      <View style={styles.preservationChips}>
+                        {generatedSlides.slides.map((slide, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            style={[
+                              styles.preservationChip,
+                              preservedSlides.includes(index) &&
+                                styles.preservationChipActive,
+                            ]}
+                            onPress={() => {
+                              Haptics.impactAsync(
+                                Haptics.ImpactFeedbackStyle.Light
+                              );
+                              toggleSlidePreservation(index);
+                            }}
+                            disabled={refinementLoading}
+                          >
+                            <Text
+                              style={[
+                                styles.preservationChipText,
+                                preservedSlides.includes(index) &&
+                                  styles.preservationChipTextActive,
+                              ]}
+                            >
+                              {preservedSlides.includes(index) ? "🔒" : "○"}{" "}
+                              Slide {index + 1}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+
+                    {/* Refinement Changes Display */}
+                    {refinementChanges.length > 0 && (
+                      <View style={styles.changesSection}>
+                        <Text style={styles.changesSectionTitle}>
+                          📋 Recent Changes ({refinementChanges.length})
+                        </Text>
+                        <ScrollView
+                          style={styles.changesScroll}
+                          nestedScrollEnabled
+                        >
+                          {refinementChanges.slice(0, 5).map((change, idx) => (
+                            <View key={idx} style={styles.changeItem}>
+                              <View style={styles.changeHeader}>
+                                <Text
+                                  style={[
+                                    styles.changeSeverity,
+                                    change.severity === "major" &&
+                                      styles.changeSeverityMajor,
+                                    change.severity === "moderate" &&
+                                      styles.changeSeverityModerate,
+                                    change.severity === "minor" &&
+                                      styles.changeSeverityMinor,
+                                  ]}
+                                >
+                                  {change.severity === "major" && "🔴"}
+                                  {change.severity === "moderate" && "🟡"}
+                                  {change.severity === "minor" && "🟢"}
+                                </Text>
+                                <Text style={styles.changeDescription}>
+                                  {change.description}
+                                </Text>
+                              </View>
+                            </View>
+                          ))}
+                          {refinementChanges.length > 5 && (
+                            <Text style={styles.moreChangesText}>
+                              +{refinementChanges.length - 5} more changes
+                            </Text>
+                          )}
+                        </ScrollView>
+                      </View>
+                    )}
+
+                    {/* Refine Action Button */}
+                    <TouchableOpacity
+                      style={[
+                        styles.refineActionButton,
+                        (refinementLoading || !refinementInput.trim()) &&
+                          styles.refineActionButtonDisabled,
+                      ]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        handleRefineSlides();
+                      }}
+                      disabled={refinementLoading || !refinementInput.trim()}
+                    >
+                      {refinementLoading ? (
+                        <View style={styles.buttonContent}>
+                          <ActivityIndicator
+                            color={colors.background}
+                            size="small"
+                          />
+                          <Text style={styles.refineActionButtonText}>
+                            {" "}
+                            Refining...
+                          </Text>
+                        </View>
+                      ) : (
+                        <Text style={styles.refineActionButtonText}>
+                          ✨ Apply Refinement
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
 
                 {/* Action Buttons */}
                 <View style={styles.actionContainer}>
@@ -3343,5 +3664,203 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 11,
     lineHeight: 16,
+  },
+  // Refinement UI styles
+  refineButton: {
+    backgroundColor: colors.card,
+    borderWidth: 1.5,
+    borderColor: colors.gold,
+    borderRadius: 12,
+    padding: 14,
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  refineButtonText: {
+    color: colors.gold,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  refineHint: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    textAlign: "center",
+    fontStyle: "italic",
+  },
+  refinementHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  cancelRefinementButton: {
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.textSecondary + "40",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  cancelRefinementText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  refinementInput: {
+    backgroundColor: colors.card,
+    borderWidth: 1.5,
+    borderColor: colors.borderGold,
+    borderRadius: 12,
+    padding: 14,
+    color: colors.textPrimary,
+    fontSize: 14,
+    minHeight: 120,
+    textAlignVertical: "top",
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  refinementSuggestions: {
+    marginBottom: 16,
+  },
+  refinementSuggestionsTitle: {
+    color: colors.gold,
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  suggestionChipsScroll: {
+    marginTop: 4,
+  },
+  suggestionChip: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.gold + "60",
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginRight: 10,
+  },
+  suggestionChipText: {
+    color: colors.gold,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  preservationSection: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.borderGold + "40",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+  },
+  preservationTitle: {
+    color: colors.gold,
+    fontSize: 13,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  preservationHint: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    marginBottom: 12,
+    lineHeight: 16,
+  },
+  preservationChips: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  preservationChip: {
+    backgroundColor: colors.background,
+    borderWidth: 1.5,
+    borderColor: colors.textSecondary + "40",
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  preservationChipActive: {
+    backgroundColor: colors.gold + "20",
+    borderColor: colors.gold,
+    borderWidth: 2,
+  },
+  preservationChipText: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  preservationChipTextActive: {
+    color: colors.gold,
+  },
+  changesSection: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.borderGold + "40",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+    maxHeight: 200,
+  },
+  changesSectionTitle: {
+    color: colors.gold,
+    fontSize: 13,
+    fontWeight: "700",
+    marginBottom: 10,
+  },
+  changesScroll: {
+    maxHeight: 140,
+  },
+  changeItem: {
+    backgroundColor: colors.background,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 8,
+  },
+  changeHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  changeSeverity: {
+    fontSize: 14,
+  },
+  changeSeverityMajor: {
+    color: "#ff4444",
+  },
+  changeSeverityModerate: {
+    color: "#ffaa00",
+  },
+  changeSeverityMinor: {
+    color: "#00C851",
+  },
+  changeDescription: {
+    flex: 1,
+    color: colors.textPrimary,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  moreChangesText: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontStyle: "italic",
+    textAlign: "center",
+    marginTop: 8,
+  },
+  refineActionButton: {
+    backgroundColor: colors.gold,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: "center",
+    shadowColor: colors.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  refineActionButtonDisabled: {
+    opacity: 0.5,
+  },
+  refineActionButtonText: {
+    color: colors.background,
+    fontSize: 16,
+    fontWeight: "700",
   },
 });

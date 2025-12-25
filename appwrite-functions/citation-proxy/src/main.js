@@ -1,5 +1,5 @@
-import { Client, Databases } from 'node-appwrite';
-import OpenAI from 'openai';
+import { Client, Databases } from "node-appwrite";
+import OpenAI from "openai";
 
 const client = new Client()
   .setEndpoint(process.env.APPWRITE_ENDPOINT)
@@ -8,7 +8,7 @@ const client = new Client()
 
 const databases = new Databases(client);
 const dbId = process.env.APPWRITE_DATABASE_ID;
-const collectionId = 'ai_usage';
+const collectionId = "ai_usage";
 
 // Daily limit per service
 const DAILY_LIMIT = 10;
@@ -19,8 +19,8 @@ const DAILY_LIMIT = 10;
 const getTodayUsageDocId = () => {
   const today = new Date();
   const year = today.getUTCFullYear();
-  const month = String(today.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(today.getUTCDate()).padStart(2, '0');
+  const month = String(today.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(today.getUTCDate()).padStart(2, "0");
   return `daily_${year}-${month}-${day}`;
 };
 
@@ -38,7 +38,7 @@ const getDailyUsage = async (databases, dbId, collectionId, docId, log) => {
         return await databases.createDocument(dbId, collectionId, docId, {
           used: 0,
           limit: DAILY_LIMIT,
-          date: docId.replace('daily_', '')
+          date: docId.replace("daily_", ""),
         });
       } catch (createError) {
         throw new Error(`Failed to create daily usage: ${createError.message}`);
@@ -49,8 +49,8 @@ const getDailyUsage = async (databases, dbId, collectionId, docId, log) => {
 };
 
 export default async ({ req, res, log, error }) => {
-  if (req.method !== 'POST') {
-    return res.json({ error: 'Method not allowed' }, 405);
+  if (req.method !== "POST") {
+    return res.json({ error: "Method not allowed" }, 405);
   }
 
   try {
@@ -60,32 +60,41 @@ export default async ({ req, res, log, error }) => {
     // Check daily usage limits
     let usage;
     try {
-      usage = await getDailyUsage(databases, dbId, collectionId, todayDocId, log);
+      usage = await getDailyUsage(
+        databases,
+        dbId,
+        collectionId,
+        todayDocId,
+        log
+      );
     } catch (e) {
       error(`Failed to get daily usage: ${e.message}`);
-      return res.json({ error: 'Usage tracking error' }, 500);
+      return res.json({ error: "Usage tracking error" }, 500);
     }
 
     if (usage.used >= usage.limit) {
       return res.json(
         {
-          error: 'AI_LIMIT_EXCEEDED',
-          message: `Daily AI usage limit reached. You have used all ${usage.limit} requests today. Resets at midnight UTC.`
+          error: "AI_LIMIT_EXCEEDED",
+          message: `Daily AI usage limit reached. You have used all ${usage.limit} requests today. Resets at midnight UTC.`,
         },
         429
       );
     }
 
-    const { query, action = 'search' } = JSON.parse(req.body);
+    // Robust body parsing: Appwrite may provide an object or a string
+    const payload =
+      typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const { query, action = "search" } = payload || {};
 
     if (!query) {
-      return res.json({ error: 'Query is required' }, 400);
+      return res.json({ error: "Query is required" }, 400);
     }
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      error('OPENAI_API_KEY not configured');
-      return res.json({ error: 'Server configuration error' }, 500);
+      error("OPENAI_API_KEY not configured");
+      return res.json({ error: "Server configuration error" }, 500);
     }
 
     const openai = new OpenAI({ apiKey });
@@ -93,11 +102,11 @@ export default async ({ req, res, log, error }) => {
     log(`Citation ${action}: ${query}`);
 
     // Build prompt based on action
-    let systemPrompt = '';
-    let userPrompt = '';
+    let systemPrompt = "";
+    let userPrompt = "";
     let schema = null;
 
-    if (action === 'search') {
+    if (action === "search") {
       systemPrompt = `You are an expert legal researcher specializing in Indian law.
 Return output that exactly matches this JSON shape and keys:
 {
@@ -136,25 +145,28 @@ IMPORTANT: Every citation MUST have name, fullTitle, summary, and relevance.`;
             items: {
               type: "object",
               properties: {
-                type: { type: "string", enum: ["article", "case", "act", "section"] },
+                type: {
+                  type: "string",
+                  enum: ["article", "case", "act", "section"],
+                },
                 name: { type: "string" },
                 year: { type: "string" },
                 fullTitle: { type: "string" },
                 summary: { type: "string" },
                 relevance: { type: "number" },
-                url: { type: "string" }
+                url: { type: "string" },
               },
               required: ["type", "name", "fullTitle", "summary", "relevance"],
-              additionalProperties: false
-            }
+              additionalProperties: false,
+            },
           },
           totalFound: { type: "number" },
-          searchTime: { type: "string" }
+          searchTime: { type: "string" },
         },
         required: ["query", "citations", "totalFound"],
-        additionalProperties: false
+        additionalProperties: false,
       };
-    } else if (action === 'details') {
+    } else if (action === "details") {
       systemPrompt = `You are an expert legal analyst specializing in Indian law.`;
       userPrompt = `Provide comprehensive details about: "${query}"
 
@@ -168,9 +180,9 @@ Include full citation, year, summary, legal significance, and key principles.`;
           year: { type: "string" },
           summary: { type: "string" },
           significance: { type: "string" },
-          keyPrinciples: { type: "array", items: { type: "string" } }
+          keyPrinciples: { type: "array", items: { type: "string" } },
         },
-        additionalProperties: false
+        additionalProperties: false,
       };
     }
 
@@ -180,20 +192,20 @@ Include full citation, year, summary, legal significance, and key principles.`;
     if (systemPrompt) {
       messages.push({
         role: "system",
-        content: systemPrompt
+        content: systemPrompt,
       });
     }
 
     messages.push({
       role: "user",
-      content: userPrompt
+      content: userPrompt,
     });
 
     // Call OpenAI Chat Completions API with structured output
     let data;
     try {
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
+        model: "gpt-4o-mini",
         messages,
         temperature: 0.3,
         max_tokens: 4000,
@@ -202,12 +214,12 @@ Include full citation, year, summary, legal significance, and key principles.`;
           json_schema: {
             name: `citation_${action}`,
             strict: true,
-            schema
-          }
-        }
+            schema,
+          },
+        },
       });
 
-      log('Citation search successful');
+      log("Citation search successful");
 
       const content = completion.choices[0]?.message?.content;
 
@@ -226,35 +238,53 @@ Include full citation, year, summary, legal significance, and key principles.`;
 
       // Format response to match Gemini's structure for compatibility
       data = {
-        candidates: [{
-          content: {
-            parts: [{
-              text: content
-            }]
-          }
-        }],
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: content,
+                },
+              ],
+            },
+          },
+        ],
         output_parsed: parsedData,
-        output_text: content
+        output_text: content,
       };
     } catch (apiError) {
       if (apiError instanceof OpenAI.APIError) {
         error(`OpenAI API error: ${apiError.status} - ${apiError.message}`);
-        return res.json({
-          error: 'Citation search failed',
-          details: `${apiError.status} - ${apiError.message}`
-        }, apiError.status || 500);
+        return res.json(
+          {
+            error: "Citation search failed",
+            details: `${apiError.status} - ${apiError.message}`,
+          },
+          apiError.status || 500
+        );
       }
       error(`OpenAI API error: ${apiError.message}`);
-      return res.json({ error: 'Citation search failed', details: apiError.message }, 500);
+      return res.json(
+        { error: "Citation search failed", details: apiError.message },
+        500
+      );
     }
 
     // Increment daily usage counter
     try {
-      const currentUsage = await databases.getDocument(dbId, collectionId, todayDocId);
+      const currentUsage = await databases.getDocument(
+        dbId,
+        collectionId,
+        todayDocId
+      );
       await databases.updateDocument(dbId, collectionId, todayDocId, {
-        used: currentUsage.used + 1
+        used: currentUsage.used + 1,
       });
-      log(`Daily usage incremented: ${currentUsage.used + 1}/${currentUsage.limit} (${todayDocId})`);
+      log(
+        `Daily usage incremented: ${currentUsage.used + 1}/${
+          currentUsage.limit
+        } (${todayDocId})`
+      );
     } catch (e) {
       error(`Failed to update usage: ${e.message}`);
     }

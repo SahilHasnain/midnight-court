@@ -6,6 +6,7 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { callOpenAIWithSchema } from "./openaiAPI";
+import { qualityValidator } from "./qualityValidator";
 import { slideDeckSchema } from "./schemas";
 import { templateEngine } from "./templateEngine";
 
@@ -991,9 +992,216 @@ export const getSlideDeckStats = (slideDeck) => {
   };
 };
 
+/**
+ * Refine existing slides with new instructions
+ * @param {Object} existingSlides - Current slide deck
+ * @param {string} refinementInstructions - User's refinement request
+ * @param {Object} options - Refinement options
+ * @param {Array<number>} options.preserveSlides - Slide indices to preserve (optional)
+ * @param {Array<number>} options.targetSlides - Specific slides to modify (optional)
+ * @returns {Promise<Object>} Refined slide deck with change tracking
+ */
+export const refineSlides = async (
+  existingSlides,
+  refinementInstructions,
+  options = {}
+) => {
+  try {
+    if (!existingSlides || !existingSlides.slides) {
+      throw new Error("Invalid existing slides");
+    }
+
+    if (!refinementInstructions || refinementInstructions.trim().length === 0) {
+      throw new Error("Refinement instructions cannot be empty");
+    }
+
+    console.log("🔄 Starting slide refinement via API...");
+    console.log(`📝 Instructions: ${refinementInstructions}`);
+
+    // Build refinement prompt with context
+    const preserveSlides = options.preserveSlides || [];
+    const targetSlides =
+      options.targetSlides ||
+      Array.from({ length: existingSlides.slides.length }, (_, i) => i);
+
+    // Filter out preserved slides
+    const slidesToModify = targetSlides.filter(
+      (idx) => !preserveSlides.includes(idx)
+    );
+
+    console.log(`🎯 Target slides: ${slidesToModify.join(", ")}`);
+    if (preserveSlides.length > 0) {
+      console.log(`🔒 Preserved slides: ${preserveSlides.join(", ")}`);
+    }
+
+    // Build refinement prompt
+    let refinementPrompt = `REFINEMENT REQUEST:\n\n`;
+    refinementPrompt += `User Instructions: ${refinementInstructions}\n\n`;
+    refinementPrompt += `CURRENT PRESENTATION:\n`;
+    refinementPrompt += `Title: ${existingSlides.title || "Untitled"}\n`;
+    refinementPrompt += `Total Slides: ${existingSlides.slides.length}\n\n`;
+
+    // Add context about slides to modify
+    if (slidesToModify.length < existingSlides.slides.length) {
+      refinementPrompt += `TARGET SLIDES TO MODIFY: ${slidesToModify
+        .map((i) => i + 1)
+        .join(", ")}\n\n`;
+    }
+
+    if (preserveSlides.length > 0) {
+      refinementPrompt += `PRESERVED SLIDES (DO NOT MODIFY): ${preserveSlides
+        .map((i) => i + 1)
+        .join(", ")}\n\n`;
+    }
+
+    // Add current slide content for context
+    refinementPrompt += `CURRENT SLIDE CONTENT:\n\n`;
+    existingSlides.slides.forEach((slide, index) => {
+      const isTarget = slidesToModify.includes(index);
+      const isPreserved = preserveSlides.includes(index);
+
+      refinementPrompt += `Slide ${index + 1}: ${slide.title}`;
+      if (isPreserved) {
+        refinementPrompt += ` [PRESERVE - DO NOT MODIFY]`;
+      } else if (isTarget) {
+        refinementPrompt += ` [TARGET FOR MODIFICATION]`;
+      }
+      refinementPrompt += `\n`;
+
+      // Add brief content summary
+      const blockCount = slide.blocks?.length || 0;
+      refinementPrompt += `  - ${blockCount} block(s)\n`;
+
+      slide.blocks?.forEach((block, blockIndex) => {
+        refinementPrompt += `  - Block ${blockIndex + 1}: ${block.type}\n`;
+      });
+
+      refinementPrompt += `\n`;
+    });
+
+    refinementPrompt += `\nIMPORTANT INSTRUCTIONS:\n`;
+    refinementPrompt += `1. Maintain the overall structure and flow of the presentation\n`;
+    refinementPrompt += `2. Apply the requested modifications ONLY to target slides\n`;
+    refinementPrompt += `3. Keep preserved slides exactly as they are\n`;
+    refinementPrompt += `4. Maintain legal accuracy and proper citation format\n`;
+    refinementPrompt += `5. Follow all formatting rules (markdown colors, block limits, etc.)\n`;
+    refinementPrompt += `6. Ensure modifications align with the user's specific request\n\n`;
+
+    refinementPrompt += `Generate the complete refined presentation with all slides, applying modifications as requested.`;
+
+    // Enhanced system prompt for refinement
+    const refinementSystemPrompt =
+      SYSTEM_PROMPT +
+      `\n\nREFINEMENT MODE:\nYou are refining an existing presentation based on user feedback. Maintain consistency with the original structure while applying the requested changes. Preserve slides marked as "PRESERVE" exactly as they are.`;
+
+    // Call OpenAI with refinement prompt
+    const startTime = Date.now();
+    const response = await callOpenAIWithSchema(refinementPrompt, {
+      schema: slideDeckSchema,
+      schemaName: "legal_slides_refinement",
+      systemPrompt: refinementSystemPrompt,
+      model: options.model || "gpt-4o-mini",
+      temperature: options.temperature || 0.7,
+      maxTokens: options.maxTokens || 4096,
+    });
+
+    const duration = Date.now() - startTime;
+    console.log(`✅ Refinement complete in ${duration}ms`);
+    console.log(`📊 Refined ${response.slides?.length || 0} slides`);
+
+    // Validate response
+    if (!response.slides || !Array.isArray(response.slides)) {
+      throw new Error("Invalid refinement response: missing slides array");
+    }
+
+    if (response.slides.length === 0) {
+      throw new Error("No slides in refined result");
+    }
+
+    // Apply modifications while preserving user-approved slides
+    const modifiedSlides = JSON.parse(JSON.stringify(existingSlides));
+
+    slidesToModify.forEach((targetIndex) => {
+      const refinedSlide = response.slides[targetIndex];
+      if (refinedSlide) {
+        modifiedSlides.slides[targetIndex] = {
+          ...refinedSlide,
+          _modified: true,
+          _modifiedAt: new Date().toISOString(),
+        };
+      }
+    });
+
+    // Update metadata
+    modifiedSlides.totalSlides = modifiedSlides.slides.length;
+    modifiedSlides.lastModified = new Date().toISOString();
+    modifiedSlides.refinedAt = new Date().toISOString();
+    modifiedSlides.refinementTime = duration;
+
+    // Add refinement history
+    if (!modifiedSlides.refinementHistory) {
+      modifiedSlides.refinementHistory = [];
+    }
+    modifiedSlides.refinementHistory.push({
+      timestamp: new Date().toISOString(),
+      instructions: refinementInstructions,
+      targetSlides: slidesToModify,
+      preservedSlides: preserveSlides,
+      duration: duration,
+    });
+
+    // Perform quality validation on refined slides
+    console.log("🔍 Validating refined slide quality...");
+    const inputContext = {
+      input: refinementInstructions,
+      isRefinement: true,
+    };
+
+    const validationResult = qualityValidator.validateSlideDeck(
+      modifiedSlides,
+      inputContext
+    );
+    console.log(
+      `📊 Refined quality score: ${validationResult.overallScore}/100`
+    );
+
+    // Store validation results
+    modifiedSlides.validation = {
+      score: validationResult.overallScore,
+      scores: validationResult.scores,
+      issues: validationResult.issues,
+      metrics: validationResult.metrics,
+      validatedAt: new Date().toISOString(),
+    };
+
+    return modifiedSlides;
+  } catch (error) {
+    console.error("❌ Slide refinement failed:", error);
+
+    // Provide helpful error messages
+    if (
+      error.message.includes("API key") ||
+      error.message.includes("configuration")
+    ) {
+      throw new Error(
+        "OpenAI API key not configured. Please check your .env file."
+      );
+    }
+
+    if (error.message.includes("rate limit")) {
+      throw new Error(
+        "Rate limit exceeded. Please wait a moment and try again."
+      );
+    }
+
+    throw new Error(`Slide refinement failed: ${error.message}`);
+  }
+};
+
 export default {
   generateSlides,
   generateSlidesWithRetry,
+  refineSlides,
   validateSlideDeck,
   getSlideDeckStats,
   clearSlideCache,
