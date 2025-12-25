@@ -110,8 +110,9 @@
   - Add visual indicators (color-coded badges) for quality levels
   - _Requirements: 3.3, 5.5_
 
-- [ ] 5. Enhance preview with formatted markdown rendering
-- [ ] 5.1 Create markdown formatter utility
+- [x] 5. Enhance preview with formatted markdown rendering
+
+- [x] 5.1 Create markdown formatter utility
 
   - Create new file `utils/markdownFormatter.js`
   - Implement functions to convert markdown to styled text components
@@ -119,7 +120,7 @@
   - Preserve other text formatting
   - _Requirements: 1.4, 3.2_
 
-- [ ] 5.2 Update slide preview rendering
+- [x] 5.2 Update slide preview rendering
 
   - Modify `renderBlockPreview()` in `components/SlideGeneratorModal.jsx`
   - Apply markdown formatting to all text content in preview
@@ -127,7 +128,7 @@
   - Add legend explaining color coding
   - _Requirements: 3.2_
 
-- [ ] 5.3 Add metadata display to preview
+- [x] 5.3 Add metadata display to preview
 
   - Show block type counts per slide
   - Display legal citation count
