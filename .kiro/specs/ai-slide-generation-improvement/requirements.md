@@ -148,3 +148,15 @@ This document outlines the requirements for improving the AI slide generation fe
 3. WHERE errors occur, THE User Interface SHALL explain the issue in plain language with suggested fixes
 4. THE User Interface SHALL support keyboard shortcuts for common actions (generate, refine, accept)
 5. WHEN slides are generated, THE User Interface SHALL provide a "What's Next?" guide for using and customizing the output
+
+### Requirement 12: Image Placement Guidance and Integration
+
+**User Story:** As a law student, I want clear guidance on where and how to add suggested images to my slides, so that I can easily enhance my presentation with relevant visuals without confusion.
+
+#### Acceptance Criteria
+
+1. WHEN the AI generates image suggestions for a slide, THE User Interface SHALL provide actionable buttons or links to search and add images directly from the preview
+2. WHEN the User taps an image suggestion keyword, THE AI Slide Generator SHALL automatically open the image search modal with the keyword pre-filled
+3. WHEN an image is selected from search, THE User Interface SHALL provide clear options for where to place the image (as slide background, inline with content, or as a separate image block)
+4. THE User Interface SHALL display visual indicators showing recommended image placement positions within each slide
+5. WHEN displaying image suggestions, THE User Interface SHALL explain the purpose of each suggested image and its relevance to the slide content

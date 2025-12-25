@@ -376,7 +376,7 @@ class RefinementHandler {
 - Reorder slides
 - Adjust formatting
 
-### 6. Enhanced UI Components
+### Enhanced UI Components
 
 **SlideGeneratorModal Enhancements**:
 
@@ -388,6 +388,9 @@ const [qualityScore, setQualityScore] = useState(null);
 const [refinementMode, setRefinementMode] = useState(false);
 const [generationMetrics, setGenerationMetrics] = useState(null);
 const [desiredSlideCount, setDesiredSlideCount] = useState(5); // User preference
+const [imageSearchModalVisible, setImageSearchModalVisible] = useState(false);
+const [prefilledImageKeyword, setPrefilledImageKeyword] = useState(null);
+const [targetSlideForImage, setTargetSlideForImage] = useState(null);
 
 // New UI sections
 <InputAnalysisPanel analysis={inputAnalysis} />
@@ -409,6 +412,11 @@ const [desiredSlideCount, setDesiredSlideCount] = useState(5); // User preferenc
   onRefine={handleRefine}
 />
 <GenerationMetrics metrics={generationMetrics} />
+<ImageSuggestionButtons
+  keywords={slide.suggestedImages}
+  slideIndex={slideIndex}
+  onImageSearch={handleImageSearch}
+/>
 ```
 
 **New Components**:
@@ -420,6 +428,7 @@ const [desiredSlideCount, setDesiredSlideCount] = useState(5); // User preferenc
 5. **RefinementInterface**: Allows targeted slide modifications
 6. **FormattingPreview**: Shows markdown rendering in preview
 7. **GenerationMetrics**: Displays performance and usage stats
+8. **ImageSuggestionButtons**: Interactive buttons for each image keyword that open image search with pre-filled query and target slide context
 
 ## Data Models
 
@@ -770,3 +779,102 @@ Generate a professional legal presentation following the mandatory slide flow pa
 
 **Validation**:
 After generation, validate that `slideDeck.slides.length === desiredSlideCount`. If not, log a warning and optionally regenerate.
+
+### Image Placement Guidance System
+
+Users often receive image suggestions but don't know where or how to add them to slides. The system provides:
+
+1. **Interactive Image Suggestion Buttons**: Each suggested keyword becomes a tappable button
+2. **Automatic Image Search Integration**: Tapping a keyword opens the image search modal with pre-filled query
+3. **Contextual Placement Options**: After selecting an image, users see clear placement options
+4. **Visual Placement Indicators**: Preview shows where images can be added
+
+**Implementation**:
+
+```javascript
+// State for image placement workflow
+const [imageSearchModalVisible, setImageSearchModalVisible] = useState(false);
+const [prefilledImageKeyword, setPrefilledImageKeyword] = useState(null);
+const [targetSlideForImage, setTargetSlideForImage] = useState(null);
+const [imagePlacementMode, setImagePlacementMode] = useState(null); // 'background' | 'inline' | 'block'
+
+// Handler for image suggestion tap
+const handleImageSuggestionTap = (keyword, slideIndex) => {
+  setPrefilledImageKeyword(keyword);
+  setTargetSlideForImage(slideIndex);
+  setImageSearchModalVisible(true);
+};
+
+// Handler for image selection from search
+const handleImageSelected = (imageUrl) => {
+  // Show placement options modal
+  Alert.alert(
+    "Where should this image be placed?",
+    `Choose how to add this image to Slide ${targetSlideForImage + 1}`,
+    [
+      {
+        text: "Slide Background",
+        onPress: () => addImageAsBackground(imageUrl, targetSlideForImage),
+      },
+      {
+        text: "Inline with Content",
+        onPress: () => addImageInline(imageUrl, targetSlideForImage),
+      },
+      {
+        text: "Separate Image Block",
+        onPress: () => addImageBlock(imageUrl, targetSlideForImage),
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]
+  );
+};
+```
+
+**UI Enhancement for Image Suggestions**:
+
+```javascript
+// Enhanced image suggestions display with actionable buttons
+{
+  slide.suggestedImages && slide.suggestedImages.length > 0 && (
+    <View style={styles.imageSuggestions}>
+      <Text style={styles.imageSuggestionsTitle}>
+        🖼️ Suggested Images for This Slide:
+      </Text>
+      <View style={styles.imageKeywords}>
+        {slide.suggestedImages.map((keyword, idx) => (
+          <TouchableOpacity
+            key={idx}
+            style={styles.imageKeywordButton}
+            onPress={() => handleImageSuggestionTap(keyword, slideIndex)}
+          >
+            <Text style={styles.imageKeywordIcon}>🔍</Text>
+            <Text style={styles.imageKeywordText}>{keyword}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <View style={styles.imagePlacementHint}>
+        <Text style={styles.imagePlacementIcon}>💡</Text>
+        <Text style={styles.imagePlacementText}>
+          Tap any keyword to search and add an image. You'll choose where to
+          place it after selection.
+        </Text>
+      </View>
+    </View>
+  );
+}
+```
+
+**Image Placement Options**:
+
+1. **Slide Background**: Image fills the entire slide background with content overlaid
+2. **Inline with Content**: Image appears alongside text blocks (requires layout adjustment)
+3. **Separate Image Block**: Creates a new dedicated image block in the slide
+
+**Visual Indicators**:
+
+- Show placeholder zones in slide preview where images can be added
+- Highlight recommended placement based on slide content type
+- Display mini-preview of how image will look in each placement option

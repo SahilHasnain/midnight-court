@@ -206,7 +206,7 @@
   - Create "How to Write Better Descriptions" guide
   - Add inline examples for each template type
   - Implement first-time user tutorial overlay
-  - _Requirements: 10.1, 10.2_
+  - _Requirements: 11.1, 11.2_
 
 - [ ] 9.2 Improve error messaging
 
@@ -214,7 +214,7 @@
   - Add suggested fixes for common errors
   - Show examples of valid input when validation fails
   - Implement progressive disclosure for error details
-  - _Requirements: 10.3_
+  - _Requirements: 11.3_
 
 - [ ] 9.3 Add keyboard shortcuts and navigation
 
@@ -222,7 +222,7 @@
   - Add Ctrl+R for refinement
   - Implement Escape to close modal
   - Add Tab navigation through all interactive elements
-  - _Requirements: 10.4_
+  - _Requirements: 11.4_
 
 - [ ] 9.4 Create "What's Next?" guide
 
@@ -230,7 +230,50 @@
   - Explain how to customize slides further
   - Show how to add images using suggested keywords
   - Provide tips for effective presentations
-  - _Requirements: 10.5_
+  - _Requirements: 11.5_
+
+- [x] 9.5 Implement image placement guidance system
+
+- [x] 9.5.1 Make image suggestions interactive
+
+  - Convert image keyword chips to tappable buttons with search icon
+  - Add visual feedback (haptics, color change) on tap
+  - Display clear call-to-action text explaining the tap action
+  - Update styles for interactive image keyword buttons
+  - _Requirements: 12.1_
+
+- [x] 9.5.2 Integrate image search with pre-filled keywords
+
+  - Add state management for `imageSearchModalVisible`, `prefilledImageKeyword`, `targetSlideForImage` in SlideGeneratorModal
+  - Implement `handleImageSuggestionTap()` to open image search modal with keyword
+  - Pass pre-filled keyword to ImageSearchModal component via props
+  - Store target slide index for later image placement
+  - _Requirements: 12.2_
+
+- [x] 9.5.3 Create image placement options UI
+
+  - Implement placement options modal/alert after image selection
+  - Provide three clear options: "Slide Background", "Inline with Content", "Separate Image Block"
+  - Add visual previews or icons for each placement option
+  - Implement handlers: `addImageAsBackground()`, `addImageInline()`, `addImageBlock()`
+  - _Requirements: 12.3, 12.4_
+
+- [x] 9.5.4 Add visual placement indicators
+
+  - Show placeholder zones in slide preview where images can be placed
+  - Highlight recommended placement based on slide content type
+  - Add explanatory text for each placement option
+  - Display mini-preview of how image will look in each option
+  - _Requirements: 12.4_
+
+- [x] 9.5.5 Enhance image suggestion display
+
+  - Update image suggestions section with better visual hierarchy
+  - Add contextual help text explaining purpose of each suggested image
+  - Show relevance indicator for each keyword (why this image is suggested)
+  - Add "Skip" option if user doesn't want to add images
+  - Update styles for enhanced image suggestions section
+  - _Requirements: 12.5_
 
 - [ ] 10. Update OpenAI proxy function for better reliability
 - [ ] 10.1 Enhance error handling in proxy

@@ -3,6 +3,7 @@
  * Converts text descriptions into structured presentation slides
  */
 
+import ImageSearchModal from "@/components/ImageSearchModal";
 import { colors } from "@/theme/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
@@ -26,7 +27,6 @@ import { generateSlides } from "../utils/slideGenerationAPI";
 import { templateEngine } from "../utils/templateEngine";
 import PinModal from "./PinModal";
 
-
 export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,6 +40,11 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
   const [availableTemplates, setAvailableTemplates] = useState([]);
   const [suggestedTemplate, setSuggestedTemplate] = useState(null);
   const [expandedSlides, setExpandedSlides] = useState({});
+
+  // Image placement guidance state
+  const [imageSearchModalVisible, setImageSearchModalVisible] = useState(false);
+  const [prefilledImageKeyword, setPrefilledImageKeyword] = useState(null);
+  const [targetSlideForImage, setTargetSlideForImage] = useState(null);
 
   // Debounce timer ref
   const debounceTimerRef = useRef(null);
@@ -223,6 +228,156 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
       ...prev,
       [slideIndex]: !prev[slideIndex],
     }));
+  };
+
+  const handleImageSuggestionTap = (keyword, slideIndex) => {
+    console.log(
+      `🖼️ Image suggestion tapped: "${keyword}" for slide ${slideIndex}`
+    );
+    setPrefilledImageKeyword(keyword);
+    setTargetSlideForImage(slideIndex);
+    setImageSearchModalVisible(true);
+  };
+
+  const handleImageSelected = (image) => {
+    console.log(`🖼️ Image selected for slide ${targetSlideForImage}:`, image);
+
+    // Show placement options
+    Alert.alert(
+      "Where should this image be placed?",
+      `Choose how to add this image to Slide ${targetSlideForImage + 1}`,
+      [
+        {
+          text: "🖼️ Slide Background",
+          onPress: () => addImageAsBackground(image, targetSlideForImage),
+        },
+        {
+          text: "📝 Inline with Content",
+          onPress: () => addImageInline(image, targetSlideForImage),
+        },
+        {
+          text: "🎨 Separate Image Block",
+          onPress: () => addImageBlock(image, targetSlideForImage),
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+          onPress: () => {
+            setImageSearchModalVisible(false);
+            setPrefilledImageKeyword(null);
+            setTargetSlideForImage(null);
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const addImageAsBackground = (image, slideIndex) => {
+    console.log(`🖼️ Adding image as background to slide ${slideIndex}`);
+
+    if (!generatedSlides || !generatedSlides.slides[slideIndex]) {
+      Alert.alert("Error", "Slide not found");
+      return;
+    }
+
+    // Create updated slides with background image
+    const updatedSlides = { ...generatedSlides };
+    updatedSlides.slides[slideIndex] = {
+      ...updatedSlides.slides[slideIndex],
+      backgroundImage: {
+        uri: image.uri,
+        caption: image.caption,
+        photographer: image.photographer,
+        source: image.source,
+      },
+    };
+
+    setGeneratedSlides(updatedSlides);
+    setImageSearchModalVisible(false);
+    setPrefilledImageKeyword(null);
+    setTargetSlideForImage(null);
+
+    Alert.alert(
+      "Success! 🎉",
+      `Image added as background to Slide ${slideIndex + 1
+      }. You can see it when you use these slides.`
+    );
+  };
+
+  const addImageInline = (image, slideIndex) => {
+    console.log(`🖼️ Adding image inline to slide ${slideIndex}`);
+
+    if (!generatedSlides || !generatedSlides.slides[slideIndex]) {
+      Alert.alert("Error", "Slide not found");
+      return;
+    }
+
+    // Create updated slides with inline image reference
+    const updatedSlides = { ...generatedSlides };
+    const slide = updatedSlides.slides[slideIndex];
+
+    // Add inline image metadata to the slide
+    if (!slide.inlineImages) {
+      slide.inlineImages = [];
+    }
+    slide.inlineImages.push({
+      uri: image.uri,
+      caption: image.caption,
+      photographer: image.photographer,
+      source: image.source,
+      position: "inline",
+    });
+
+    setGeneratedSlides(updatedSlides);
+    setImageSearchModalVisible(false);
+    setPrefilledImageKeyword(null);
+    setTargetSlideForImage(null);
+
+    Alert.alert(
+      "Success! 🎉",
+      `Image will appear inline with content in Slide ${slideIndex + 1
+      }. You can see it when you use these slides.`
+    );
+  };
+
+  const addImageBlock = (image, slideIndex) => {
+    console.log(`🖼️ Adding image as separate block to slide ${slideIndex}`);
+
+    if (!generatedSlides || !generatedSlides.slides[slideIndex]) {
+      Alert.alert("Error", "Slide not found");
+      return;
+    }
+
+    // Create updated slides with new image block
+    const updatedSlides = { ...generatedSlides };
+    const slide = updatedSlides.slides[slideIndex];
+
+    // Add image block to the slide
+    if (!slide.blocks) {
+      slide.blocks = [];
+    }
+
+    slide.blocks.push({
+      type: "image",
+      data: {
+        uri: image.uri,
+        caption: image.caption,
+        photographer: image.photographer,
+        source: image.source,
+      },
+    });
+
+    setGeneratedSlides(updatedSlides);
+    setImageSearchModalVisible(false);
+    setPrefilledImageKeyword(null);
+    setTargetSlideForImage(null);
+
+    Alert.alert(
+      "Success! 🎉",
+      `Image added as a separate block to Slide ${slideIndex + 1
+      }. You can see it when you use these slides.`
+    );
   };
 
   const calculateSlideMetadata = (slide) => {
@@ -735,7 +890,7 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                   </Text>
                   <Text style={styles.sectionHint}>
                     Choose a template for structured slide generation, or select
-                    "No Template" for general format
+                    &quot;No Template&quot; for general format
                   </Text>
 
                   {/* No Template Option */}
@@ -1597,29 +1752,223 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
                           </View>
                         )}
 
-                        {/* Image Suggestions */}
+                        {/* Enhanced Image Suggestions */}
                         {slide.suggestedImages &&
                           slide.suggestedImages.length > 0 && (
-                            <View style={styles.imageSuggestions}>
-                              <Text style={styles.imageSuggestionsTitle}>
-                                🖼️ Suggested Images:
-                              </Text>
-                              <View style={styles.imageKeywords}>
-                                {slide.suggestedImages.map((keyword, idx) => (
-                                  <View
-                                    key={idx}
-                                    style={styles.imageKeywordChip}
+                            <View style={styles.imageSuggestionsEnhanced}>
+                              <View style={styles.imageSuggestionsHeader}>
+                                <View style={styles.imageSuggestionsHeaderLeft}>
+                                  <Text
+                                    style={styles.imageSuggestionsTitleEnhanced}
                                   >
-                                    <Text style={styles.imageKeywordText}>
-                                      {keyword}
+                                    🖼️ Suggested Images
+                                  </Text>
+                                  <Text style={styles.imageSuggestionsSubtitle}>
+                                    Enhance this slide with relevant visuals
+                                  </Text>
+                                </View>
+                                <TouchableOpacity
+                                  style={styles.skipImagesButton}
+                                  onPress={() => {
+                                    console.log(
+                                      `⏭️ Skipped images for slide ${index}`
+                                    );
+                                    Alert.alert(
+                                      "Images Skipped",
+                                      "You can always add images later from the image library."
+                                    );
+                                  }}
+                                >
+                                  <Text style={styles.skipImagesButtonText}>
+                                    Skip
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+
+                              <View style={styles.imageKeywordsEnhanced}>
+                                {slide.suggestedImages.map((keyword, idx) => {
+                                  // Determine relevance based on slide content
+                                  const slideTitle =
+                                    slide.title?.toLowerCase() || "";
+                                  const isHighRelevance = slideTitle.includes(
+                                    keyword.toLowerCase().split(" ")[0]
+                                  );
+
+                                  return (
+                                    <View
+                                      key={idx}
+                                      style={styles.imageKeywordWrapper}
+                                    >
+                                      <TouchableOpacity
+                                        style={[
+                                          styles.imageKeywordButtonEnhanced,
+                                          isHighRelevance &&
+                                          styles.imageKeywordButtonHighRelevance,
+                                        ]}
+                                        onPress={() => {
+                                          Haptics.impactAsync(
+                                            Haptics.ImpactFeedbackStyle.Medium
+                                          );
+                                          handleImageSuggestionTap(
+                                            keyword,
+                                            index
+                                          );
+                                        }}
+                                        activeOpacity={0.7}
+                                      >
+                                        <Text
+                                          style={
+                                            styles.imageKeywordIconEnhanced
+                                          }
+                                        >
+                                          🔍
+                                        </Text>
+                                        <View
+                                          style={styles.imageKeywordContent}
+                                        >
+                                          <Text
+                                            style={
+                                              styles.imageKeywordTextEnhanced
+                                            }
+                                          >
+                                            {keyword}
+                                          </Text>
+                                          {isHighRelevance && (
+                                            <View
+                                              style={styles.relevanceIndicator}
+                                            >
+                                              <Text
+                                                style={
+                                                  styles.relevanceIndicatorText
+                                                }
+                                              >
+                                                ⭐ Highly Relevant
+                                              </Text>
+                                            </View>
+                                          )}
+                                        </View>
+                                      </TouchableOpacity>
+
+                                      {/* Contextual help for each keyword */}
+                                      <Text style={styles.imageKeywordPurpose}>
+                                        {idx === 0 &&
+                                          "Perfect for slide background or header"}
+                                        {idx === 1 &&
+                                          "Great for supporting visual context"}
+                                        {idx > 1 && "Additional visual option"}
+                                      </Text>
+                                    </View>
+                                  );
+                                })}
+                              </View>
+
+                              <View style={styles.imagePlacementHintEnhanced}>
+                                <Text style={styles.imagePlacementIconEnhanced}>
+                                  💡
+                                </Text>
+                                <View
+                                  style={styles.imagePlacementTextContainer}
+                                >
+                                  <Text
+                                    style={styles.imagePlacementTextEnhanced}
+                                  >
+                                    <Text style={styles.imagePlacementTextBold}>
+                                      How it works:{" "}
+                                    </Text>
+                                    Tap any keyword to search professional stock
+                                    photos. After selecting an image,
+                                    you&apos;ll choose where to place it
+                                    (background, inline, or separate block).
+                                  </Text>
+                                </View>
+                              </View>
+                            </View>
+                          )}
+
+                        {/* Image Placement Zones Indicator */}
+                        {slide.suggestedImages &&
+                          slide.suggestedImages.length > 0 && (
+                            <View style={styles.placementZonesContainer}>
+                              <Text style={styles.placementZonesTitle}>
+                                📍 Image Placement Options
+                              </Text>
+                              <View style={styles.placementZones}>
+                                <View style={styles.placementZone}>
+                                  <View style={styles.placementZoneIcon}>
+                                    <Text style={styles.placementZoneEmoji}>
+                                      🖼️
                                     </Text>
                                   </View>
-                                ))}
+                                  <View style={styles.placementZoneInfo}>
+                                    <Text style={styles.placementZoneLabel}>
+                                      Slide Background
+                                    </Text>
+                                    <Text
+                                      style={styles.placementZoneDescription}
+                                    >
+                                      Image fills entire slide behind content
+                                    </Text>
+                                  </View>
+                                  <View
+                                    style={[
+                                      styles.recommendedBadgeSmall,
+                                      slide.blocks?.length <= 2 &&
+                                      styles.recommendedBadgeVisible,
+                                    ]}
+                                  >
+                                    <Text style={styles.recommendedBadgeText}>
+                                      ✨ Recommended
+                                    </Text>
+                                  </View>
+                                </View>
+
+                                <View style={styles.placementZone}>
+                                  <View style={styles.placementZoneIcon}>
+                                    <Text style={styles.placementZoneEmoji}>
+                                      📝
+                                    </Text>
+                                  </View>
+                                  <View style={styles.placementZoneInfo}>
+                                    <Text style={styles.placementZoneLabel}>
+                                      Inline with Content
+                                    </Text>
+                                    <Text
+                                      style={styles.placementZoneDescription}
+                                    >
+                                      Image appears alongside text blocks
+                                    </Text>
+                                  </View>
+                                </View>
+
+                                <View style={styles.placementZone}>
+                                  <View style={styles.placementZoneIcon}>
+                                    <Text style={styles.placementZoneEmoji}>
+                                      🎨
+                                    </Text>
+                                  </View>
+                                  <View style={styles.placementZoneInfo}>
+                                    <Text style={styles.placementZoneLabel}>
+                                      Separate Image Block
+                                    </Text>
+                                    <Text
+                                      style={styles.placementZoneDescription}
+                                    >
+                                      Creates dedicated image block
+                                    </Text>
+                                  </View>
+                                  <View
+                                    style={[
+                                      styles.recommendedBadgeSmall,
+                                      slide.blocks?.length >= 3 &&
+                                      styles.recommendedBadgeVisible,
+                                    ]}
+                                  >
+                                    <Text style={styles.recommendedBadgeText}>
+                                      ✨ Best for content-heavy slides
+                                    </Text>
+                                  </View>
+                                </View>
                               </View>
-                              <Text style={styles.imageInstructions}>
-                                💡 Tap a keyword to search and add an image
-                                using the image library
-                              </Text>
                             </View>
                           )}
 
@@ -1674,6 +2023,17 @@ export default function SlideGeneratorModal({ visible, onClose, onUseSlides }) {
           setShowPinModal(false);
           onClose();
         }}
+      />
+
+      <ImageSearchModal
+        visible={imageSearchModalVisible}
+        onClose={() => {
+          setImageSearchModalVisible(false);
+          setPrefilledImageKeyword(null);
+          setTargetSlideForImage(null);
+        }}
+        onSelectImage={handleImageSelected}
+        prefilledKeyword={prefilledImageKeyword}
       />
     </>
   );
@@ -2078,27 +2438,247 @@ const styles = StyleSheet.create({
   imageKeywords: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 6,
-    marginBottom: 8,
+    gap: 8,
+    marginBottom: 10,
   },
-  imageKeywordChip: {
+  imageKeywordButton: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors.card,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.gold,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    gap: 6,
+    shadowColor: colors.gold,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  imageKeywordIcon: {
+    fontSize: 14,
+    color: colors.gold,
+  },
+  imageKeywordText: {
+    color: colors.gold,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  imagePlacementHint: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: colors.background,
+    borderRadius: 8,
+    padding: 10,
+    gap: 8,
+  },
+  imagePlacementIcon: {
+    fontSize: 14,
+  },
+  imagePlacementText: {
+    flex: 1,
+    color: colors.textSecondary,
+    fontSize: 11,
+    lineHeight: 16,
+  },
+  // Enhanced image suggestions styles
+  imageSuggestionsEnhanced: {
+    backgroundColor: colors.card,
+    borderWidth: 1.5,
+    borderColor: colors.gold + "50",
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 12,
+    marginBottom: 8,
+    shadowColor: colors.gold,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  imageSuggestionsHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 12,
+  },
+  imageSuggestionsHeaderLeft: {
+    flex: 1,
+  },
+  imageSuggestionsTitleEnhanced: {
+    color: colors.gold,
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  imageSuggestionsSubtitle: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  skipImagesButton: {
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.textSecondary + "40",
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
-  imageKeywordText: {
-    color: colors.gold,
+  skipImagesButtonText: {
+    color: colors.textSecondary,
     fontSize: 11,
-    fontWeight: "500",
+    fontWeight: "600",
   },
-  imageInstructions: {
+  imageKeywordsEnhanced: {
+    gap: 10,
+    marginBottom: 12,
+  },
+  imageKeywordWrapper: {
+    gap: 6,
+  },
+  imageKeywordButtonEnhanced: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.background,
+    borderWidth: 1.5,
+    borderColor: colors.gold + "60",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 10,
+    shadowColor: colors.gold,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  imageKeywordButtonHighRelevance: {
+    borderColor: colors.gold,
+    borderWidth: 2,
+    backgroundColor: colors.gold + "08",
+  },
+  imageKeywordIconEnhanced: {
+    fontSize: 16,
+    color: colors.gold,
+  },
+  imageKeywordContent: {
+    flex: 1,
+    gap: 4,
+  },
+  imageKeywordTextEnhanced: {
+    color: colors.textPrimary,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  relevanceIndicator: {
+    alignSelf: "flex-start",
+  },
+  relevanceIndicatorText: {
+    color: colors.gold,
+    fontSize: 9,
+    fontWeight: "700",
+  },
+  imageKeywordPurpose: {
     color: colors.textSecondary,
     fontSize: 10,
     fontStyle: "italic",
-    marginTop: 4,
+    marginLeft: 14,
+    lineHeight: 14,
+  },
+  imagePlacementHintEnhanced: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: colors.background,
+    borderRadius: 10,
+    padding: 12,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: colors.borderGold + "30",
+  },
+  imagePlacementIconEnhanced: {
+    fontSize: 16,
+  },
+  imagePlacementTextContainer: {
+    flex: 1,
+  },
+  imagePlacementTextEnhanced: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    lineHeight: 16,
+  },
+  imagePlacementTextBold: {
+    color: colors.textPrimary,
+    fontWeight: "600",
+  },
+  placementZonesContainer: {
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.gold + "30",
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  placementZonesTitle: {
+    color: colors.gold,
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+  placementZones: {
+    gap: 10,
+  },
+  placementZone: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.borderGold + "40",
+    borderRadius: 8,
+    padding: 10,
+    gap: 10,
+  },
+  placementZoneIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.gold + "20",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  placementZoneEmoji: {
+    fontSize: 18,
+  },
+  placementZoneInfo: {
+    flex: 1,
+  },
+  placementZoneLabel: {
+    color: colors.textPrimary,
+    fontSize: 12,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  placementZoneDescription: {
+    color: colors.textSecondary,
+    fontSize: 10,
+    lineHeight: 14,
+  },
+  recommendedBadgeSmall: {
+    backgroundColor: colors.gold + "20",
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    opacity: 0,
+  },
+  recommendedBadgeVisible: {
+    opacity: 1,
+  },
+  recommendedBadgeText: {
+    color: colors.gold,
+    fontSize: 9,
+    fontWeight: "600",
   },
   blockPreview: {
     backgroundColor: colors.background,
